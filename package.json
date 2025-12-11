@@ -1,0 +1,54 @@
+{
+  "name": "human-rail",
+  "version": "0.1.0",
+  "description": "Unified human identity and confidential payment fabric on Solana",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build:programs": "anchor build",
+    "build:sdk": "yarn workspace @human-rail/sdk build",
+    "build:actions": "yarn workspace @human-rail/actions-server build",
+    "build:web": "yarn workspace @human-rail/web-demo build",
+    "build": "yarn build:programs && yarn build:sdk && yarn build:actions && yarn build:web",
+    "test:programs": "anchor test",
+    "test:sdk": "yarn workspace @human-rail/sdk test",
+    "test": "yarn test:programs && yarn test:sdk",
+    "dev:actions": "yarn workspace @human-rail/actions-server dev",
+    "dev:web": "yarn workspace @human-rail/web-demo dev",
+    "lint": "eslint . --ext .ts,.tsx",
+    "clean": "rm -rf target/ node_modules/ packages/*/node_modules services/*/node_modules apps/*/node_modules"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/web3.js": "^1.95.3",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.5",
+    "chai": "^4.4.1",
+    "eslint": "^8.56.0",
+    "mocha": "^10.2.0",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/human-rail.git"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "solana",
+    "identity",
+    "privacy",
+    "rlhf",
+    "blinks",
+    "token2022"
+  ]
+}

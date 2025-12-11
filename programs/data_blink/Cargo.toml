@@ -1,0 +1,21 @@
+[package]
+name = "data-blink"
+version = "0.1.0"
+description = "RLHF micro-task and human work rail for HumanRail"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "data_blink"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { version = "0.30.1", features = ["init-if-needed"] }
+anchor-spl = "0.30.1"
+human-registry = { path = "../human_registry", features = ["cpi"] }
