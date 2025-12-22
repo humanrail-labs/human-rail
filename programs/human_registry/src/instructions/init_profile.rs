@@ -1,36 +1,40 @@
 use anchor_lang::prelude::*;
-use crate::state::{HumanProfile, MAX_ATTESTATIONS, AttestationRef};
+
+use crate::error::HumanRegistryError;
+use crate::state::{HumanProfile, MAX_ATTESTATIONS};
+
+/// Initialize a new HumanProfile PDA for the calling authority.
+pub fn handle(ctx: Context<InitProfile>) -> Result<()> {
+    let profile = &mut ctx.accounts.profile;
+
+    profile.wallet = ctx.accounts.authority.key();
+    profile.human_score = 0;
+    profile.is_unique = false;
+    profile.attestations = Vec::with_capacity(MAX_ATTESTATIONS);
+    profile.bump = *ctx
+        .bumps
+        .get("profile")
+        .ok_or(HumanRegistryError::MissingProfileBump)?;
+
+    Ok(())
+}
 
 #[derive(Accounts)]
 pub struct InitProfile<'info> {
+    /// The wallet for which we are creating a profile.
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    /// PDA storing the HumanProfile for this authority.
     #[account(
         init,
-        payer = wallet,
-        space = HumanProfile::LEN,
-        seeds = [b"human_profile", wallet.key().as_ref()],
+        payer = authority,
+        space = 8 + HumanProfile::LEN,
+        seeds = [b"profile", authority.key().as_ref()],
         bump
     )]
     pub profile: Account<'info, HumanProfile>,
 
-    #[account(mut)]
-    pub wallet: Signer<'info>,
-
+    /// System program for account creation.
     pub system_program: Program<'info, System>,
-}
-
-pub fn handler(ctx: Context<InitProfile>) -> Result<()> {
-    let profile = &mut ctx.accounts.profile;
-    let clock = Clock::get()?;
-
-    profile.wallet = ctx.accounts.wallet.key();
-    profile.human_score = 0;
-    profile.is_unique = false;
-    profile.attestation_count = 0;
-    profile.attestations = [AttestationRef::default(); MAX_ATTESTATIONS];
-    profile.last_updated = clock.unix_timestamp;
-    profile.bump = ctx.bumps.profile;
-
-    msg!("Initialized human profile for wallet: {}", profile.wallet);
-    
-    Ok(())
 }
