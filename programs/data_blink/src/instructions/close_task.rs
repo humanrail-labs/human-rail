@@ -1,12 +1,8 @@
+use crate::{error::DataBlinkError, state::Task, utils::remaining_budget};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     token_2022::Token2022,
-    token_interface::{Mint, TokenAccount, TransferChecked, transfer_checked},
-};
-use crate::{
-    error::DataBlinkError,
-    state::Task,
-    utils::remaining_budget,
+    token_interface::{transfer_checked, Mint, TokenAccount, TransferChecked},
 };
 
 #[derive(Accounts)]
@@ -49,7 +45,7 @@ pub fn handler(ctx: Context<CloseTask>) -> Result<()> {
         // Build signer seeds for vault authority (task PDA)
         let creator_key = task.creator;
         let created_at_bytes = task.created_at.to_le_bytes();
-        
+
         let seeds = &[
             b"task".as_ref(),
             creator_key.as_ref(),

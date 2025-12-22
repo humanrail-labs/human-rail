@@ -1,10 +1,10 @@
-use anchor_lang::prelude::*;
-use human_registry::{program::HumanRegistry, state::HumanProfile};
 use crate::{
     error::DataBlinkError,
     state::{Task, TaskResponse},
     utils::can_accept_response,
 };
+use anchor_lang::prelude::*;
+use human_registry::{program::HumanRegistry, state::HumanProfile};
 
 #[derive(Accounts)]
 pub struct SubmitResponse<'info> {
@@ -66,8 +66,12 @@ pub fn handler(ctx: Context<SubmitResponse>, choice: u8, response_data: [u8; 32]
     response.bump = ctx.bumps.response;
 
     // Update task state
-    task.response_count = task.response_count.checked_add(1).ok_or(DataBlinkError::ArithmeticOverflow)?;
-    task.consumed_budget = task.consumed_budget
+    task.response_count = task
+        .response_count
+        .checked_add(1)
+        .ok_or(DataBlinkError::ArithmeticOverflow)?;
+    task.consumed_budget = task
+        .consumed_budget
         .checked_add(task.reward_per_response)
         .ok_or(DataBlinkError::ArithmeticOverflow)?;
 

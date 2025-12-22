@@ -1,6 +1,6 @@
+use crate::state::Task;
 use anchor_lang::prelude::*;
 use anchor_spl::token_2022::{self, TransferChecked};
-use crate::state::Task;
 
 /// Execute a Token 2022 transfer for reward payouts.
 pub fn execute_reward_transfer<'info>(

@@ -23,8 +23,7 @@ pub struct HumanProfile {
 
 impl HumanProfile {
     /// Account size without the 8-byte Anchor discriminator.
-    pub const LEN: usize =
-        32  // wallet
+    pub const LEN: usize = 32  // wallet
         + 2 // human_score
         + 1 // is_unique
         + 4 // Vec length prefix
@@ -56,5 +55,5 @@ pub struct AttestationRef {
 impl AttestationRef {
     pub const LEN: usize = 32  // source
         + 32                   // payload_hash
-        + 2;                   // weight
+        + 2; // weight
 }

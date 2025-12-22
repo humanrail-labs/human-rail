@@ -1,6 +1,5 @@
 use anchor_lang::prelude::*;
 
-use crate::error::HumanRegistryError;
 use crate::state::{HumanProfile, MAX_ATTESTATIONS};
 
 /// Initialize a new HumanProfile PDA for the calling authority.
@@ -11,10 +10,10 @@ pub fn handle(ctx: Context<InitProfile>) -> Result<()> {
     profile.human_score = 0;
     profile.is_unique = false;
     profile.attestations = Vec::with_capacity(MAX_ATTESTATIONS);
-    profile.bump = *ctx
-        .bumps
-        .get("profile")
-        .ok_or(HumanRegistryError::MissingProfileBump)?;
+
+    // In Anchor 0.30.x, `ctx.bumps` is a generated struct, not a map.
+    // So we read the bump directly from the `profile` field.
+    profile.bump = ctx.bumps.profile;
 
     Ok(())
 }

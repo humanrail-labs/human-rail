@@ -1,12 +1,12 @@
+use crate::{
+    error::DataBlinkError,
+    state::{Task, MAX_URI_LENGTH},
+    CreateTaskParams,
+};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     token_2022::Token2022,
-    token_interface::{Mint, TokenAccount, TransferChecked, transfer_checked},
-};
-use crate::{
-    CreateTaskParams,
-    error::DataBlinkError,
-    state::{Task, MAX_URI_LENGTH},
+    token_interface::{transfer_checked, Mint, TokenAccount, TransferChecked},
 };
 
 #[derive(Accounts)]
@@ -76,7 +76,11 @@ pub fn handler(ctx: Context<CreateTask>, params: CreateTaskParams) -> Result<()>
         authority: ctx.accounts.creator.to_account_info(),
     };
     let cpi_ctx = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-    transfer_checked(cpi_ctx, params.total_budget, ctx.accounts.reward_mint.decimals)?;
+    transfer_checked(
+        cpi_ctx,
+        params.total_budget,
+        ctx.accounts.reward_mint.decimals,
+    )?;
 
     // Initialize task
     task.creator = ctx.accounts.creator.key();

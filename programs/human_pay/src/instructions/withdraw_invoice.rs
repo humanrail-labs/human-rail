@@ -1,12 +1,12 @@
-use anchor_lang::prelude::*;
-use anchor_spl::{
-    token_2022::Token2022,
-    token_interface::{Mint, TokenAccount},
-};
 use crate::{
     error::HumanPayError,
     state::{ConfidentialInvoice, InvoiceStatus},
     utils::execute_transfer,
+};
+use anchor_lang::prelude::*;
+use anchor_spl::{
+    token_2022::Token2022,
+    token_interface::{Mint, TokenAccount},
 };
 
 #[derive(Accounts)]
@@ -39,21 +39,24 @@ pub struct WithdrawInvoice<'info> {
 }
 
 pub fn handler(ctx: Context<WithdrawInvoice>) -> Result<()> {
-    let invoice = &mut ctx.accounts.invoice;
+    // Take only the scalar data we need from the invoice and mint.
+    // This avoids holding a &mut borrow across the CPI.
+    let merchant_key = ctx.accounts.invoice.merchant;
+    let mint_key = ctx.accounts.invoice.mint;
+    let created_at_bytes = ctx.accounts.invoice.created_at.to_le_bytes();
+    let bump = ctx.accounts.invoice.bump;
+    let amount = ctx.accounts.invoice.amount;
+    let decimals = ctx.accounts.mint.decimals;
 
     // Build signer seeds for vault authority (invoice PDA)
-    let merchant_key = invoice.merchant;
-    let mint_key = invoice.mint;
-    let created_at_bytes = invoice.created_at.to_le_bytes();
-    
-    let seeds = &[
+    let seeds: [&[u8]; 5] = [
         b"invoice".as_ref(),
         merchant_key.as_ref(),
         mint_key.as_ref(),
         created_at_bytes.as_ref(),
-        &[invoice.bump],
+        &[bump],
     ];
-    let signer_seeds = &[&seeds[..]];
+    let signer_seeds: &[&[&[u8]]] = &[&seeds];
 
     // Transfer from vault to merchant
     execute_transfer(
@@ -62,18 +65,19 @@ pub fn handler(ctx: Context<WithdrawInvoice>) -> Result<()> {
         ctx.accounts.mint.to_account_info(),
         ctx.accounts.invoice.to_account_info(),
         ctx.accounts.token_program.to_account_info(),
-        invoice.amount,
-        ctx.accounts.mint.decimals,
+        amount,
+        decimals,
         Some(signer_seeds),
     )?;
 
-    // Update invoice state
+    // Now we can safely take a mutable borrow and update state
+    let invoice = &mut ctx.accounts.invoice;
     invoice.status = InvoiceStatus::Withdrawn;
 
     msg!(
         "Merchant {} withdrew {} from invoice",
         ctx.accounts.merchant.key(),
-        invoice.amount
+        amount
     );
 
     Ok(())

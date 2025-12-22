@@ -1,8 +1,8 @@
-use anchor_lang::prelude::*;
 use crate::{
     error::HumanPayError,
     state::{ConfidentialInvoice, InvoiceStatus},
 };
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct CancelInvoice<'info> {
@@ -21,7 +21,10 @@ pub fn handler(ctx: Context<CancelInvoice>) -> Result<()> {
 
     invoice.status = InvoiceStatus::Cancelled;
 
-    msg!("Invoice cancelled by merchant: {}", ctx.accounts.merchant.key());
+    msg!(
+        "Invoice cancelled by merchant: {}",
+        ctx.accounts.merchant.key()
+    );
 
     Ok(())
 }

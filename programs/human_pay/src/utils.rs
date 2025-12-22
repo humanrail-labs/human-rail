@@ -3,12 +3,12 @@ use anchor_spl::token_2022::{self, TransferChecked};
 
 /// Execute a Token 2022 transfer.
 /// This is structured to be swapped with confidential transfer once integrated.
-/// 
+///
 /// In production, this would use the Confidential Transfer extension:
 /// - Encrypt amounts using ElGamal
 /// - Generate zero-knowledge proofs
 /// - Execute confidential transfer instruction
-/// 
+///
 /// Current implementation uses standard TransferChecked for development.
 pub fn execute_transfer<'info>(
     from: AccountInfo<'info>,
@@ -40,7 +40,7 @@ pub fn execute_transfer<'info>(
 
 /// Placeholder for confidential transfer execution.
 /// This would integrate with Token 2022 Confidential Transfer extension.
-/// 
+///
 /// The confidential transfer flow would be:
 /// 1. Encrypt the transfer amount for both sender and recipient
 /// 2. Generate range proofs to prove amount is valid
@@ -57,14 +57,14 @@ pub fn execute_confidential_transfer<'info>(
     _signer_seeds: Option<&[&[&[u8]]]>,
 ) -> Result<()> {
     // TODO: Implement when Confidential Transfer extension is integrated
-    // 
+    //
     // Steps required:
     // 1. Get ElGamal public keys for both accounts
     // 2. Encrypt amount using recipient's public key
     // 3. Generate range proof for amount
     // 4. Generate ciphertext validity proof
     // 5. Call ConfidentialTransfer::Transfer instruction
-    
+
     msg!("Confidential transfer not yet implemented - using standard transfer");
     Err(crate::error::HumanPayError::ConfidentialTransferNotEnabled.into())
 }
@@ -75,12 +75,7 @@ pub fn get_invoice_seeds<'a>(
     mint: &'a Pubkey,
     created_at: &'a [u8; 8],
 ) -> [&'a [u8]; 4] {
-    [
-        b"invoice",
-        merchant.as_ref(),
-        mint.as_ref(),
-        created_at,
-    ]
+    [b"invoice", merchant.as_ref(), mint.as_ref(), created_at]
 }
 
 /// Generate vault PDA seeds
