@@ -13,9 +13,9 @@ describe('HumanRail Integration Tests', () => {
   const wallet = provider.wallet as anchor.Wallet;
 
   // Program IDs - update these after first build
-  const HUMAN_REGISTRY_PROGRAM_ID = new PublicKey('HReg1111111111111111111111111111111111111111');
-  const HUMAN_PAY_PROGRAM_ID = new PublicKey('HPay1111111111111111111111111111111111111111');
-  const DATA_BLINK_PROGRAM_ID = new PublicKey('DBnk1111111111111111111111111111111111111111');
+  const HUMAN_REGISTRY_PROGRAM_ID = new PublicKey('6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2');
+  const HUMAN_PAY_PROGRAM_ID = new PublicKey('6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe');
+  const DATA_BLINK_PROGRAM_ID = new PublicKey('3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj');
 
   describe('human_registry', () => {
     it('should derive human profile PDA correctly', () => {

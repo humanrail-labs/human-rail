@@ -44,7 +44,7 @@ export const config: Config = {
       getEnvOrDefault('HUMAN_REGISTRY_PROGRAM_ID', '6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2')
     ),
     humanPay: new PublicKey(
-      getEnvOrDefault('HUMAN_PAY_PROGRAM_ID', 'FwyBmMZK28QYhPJmryNWw5BLc32ZBAbtncPo569MfJ3F')
+      getEnvOrDefault('HUMAN_PAY_PROGRAM_ID', '6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe')
     ),
     dataBlink: new PublicKey(
       getEnvOrDefault('DATA_BLINK_PROGRAM_ID', '3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj')

@@ -6,7 +6,7 @@ export const HUMAN_REGISTRY_PROGRAM_ID = new PublicKey(
 );
 
 export const HUMAN_PAY_PROGRAM_ID = new PublicKey(
-  'FwyBmMZK28QYhPJmryNWw5BLc32ZBAbtncPo569MfJ3F'
+  '6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe'
 );
 
 export const DATA_BLINK_PROGRAM_ID = new PublicKey(

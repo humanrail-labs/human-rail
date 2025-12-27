@@ -7,13 +7,13 @@ skip-lint = false
 
 [programs.devnet]
 data_blink = "3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj"
-human_pay = "FwyBmMZK28QYhPJmryNWw5BLc32ZBAbtncPo569MfJ3F"
+human_pay = "6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe"
 human_registry = "6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2"
 
 [programs.localnet]
-data_blink = "3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj"
-human_pay = "FwyBmMZK28QYhPJmryNWw5BLc32ZBAbtncPo569MfJ3F"
-human_registry = "6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2"
+data_blink = "BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5"
+human_pay = "6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe"
+human_registry = "Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR"
 
 [registry]
 url = "https://api.apr.dev"

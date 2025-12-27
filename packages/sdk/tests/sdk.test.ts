@@ -111,7 +111,7 @@ describe('HumanRail SDK', () => {
         '6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2'
       );
       expect(client.payProgramId.toBase58()).to.equal(
-        'FwyBmMZK28QYhPJmryNWw5BLc32ZBAbtncPo569MfJ3F'
+        '6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe'
       );
       expect(client.blinkProgramId.toBase58()).to.equal(
         '3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj'
