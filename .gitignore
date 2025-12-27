@@ -1,1 +1,6 @@
 target/
+node_modules
+
+# Solana test validator artifacts
+.anchor/test-ledger/
+test-ledger/
