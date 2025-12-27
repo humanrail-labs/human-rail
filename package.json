@@ -1,54 +1,26 @@
 {
   "name": "human-rail",
   "version": "0.1.0",
-  "description": "Unified human identity and confidential payment fabric on Solana",
-  "private": true,
-  "workspaces": [
-    "packages/*",
-    "services/*",
-    "apps/*"
-  ],
+  "type": "module",
   "scripts": {
-    "build:programs": "anchor build",
-    "build:sdk": "yarn workspace @human-rail/sdk build",
-    "build:actions": "yarn workspace @human-rail/actions-server build",
-    "build:web": "yarn workspace @human-rail/web-demo build",
-    "build": "yarn build:programs && yarn build:sdk && yarn build:actions && yarn build:web",
-    "test:programs": "anchor test",
-    "test:sdk": "yarn workspace @human-rail/sdk test",
-    "test": "yarn test:programs && yarn test:sdk",
-    "dev:actions": "yarn workspace @human-rail/actions-server dev",
-    "dev:web": "yarn workspace @human-rail/web-demo dev",
-    "lint": "eslint . --ext .ts,.tsx",
-    "clean": "rm -rf target/ node_modules/ packages/*/node_modules services/*/node_modules apps/*/node_modules"
+    "demo": "ts-node --esm scripts/demo.ts",
+    "test": "anchor test --skip-local-validator"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@solana/spl-token": "^0.4.9",
+    "@solana/web3.js": "^1.99.0"
   },
   "devDependencies": {
-    "@coral-xyz/anchor": "^0.30.1",
-    "@solana/web3.js": "^1.95.3",
-    "@types/chai": "^4.3.11",
-    "@types/mocha": "^10.0.6",
-    "@types/node": "^20.11.5",
-    "chai": "^4.4.1",
-    "eslint": "^8.56.0",
-    "mocha": "^10.2.0",
+    "@types/bn.js": "^5.1.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^22.10.5",
+    "bn.js": "^5.2.1",
+    "chai": "^4.3.4",
+    "mocha": "^9.0.3",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/your-org/human-rail.git"
-  },
-  "license": "Apache-2.0",
-  "keywords": [
-    "solana",
-    "identity",
-    "privacy",
-    "rlhf",
-    "blinks",
-    "token2022"
-  ]
+    "typescript": "^5.7.3"
+  }
 }
