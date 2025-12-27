@@ -19,7 +19,7 @@ pub struct CreateTask<'info> {
         seeds = [
             b"task",
             creator.key().as_ref(),
-            &Clock::get()?.unix_timestamp.to_le_bytes()
+            &params.nonce.to_le_bytes()
         ],
         bump
     )]
@@ -101,9 +101,10 @@ pub fn handler(ctx: Context<CreateTask>, params: CreateTaskParams) -> Result<()>
     task.vault_bump = ctx.bumps.vault;
 
     msg!(
-        "Created task: budget={}, reward_per_response={}, human_req={}",
+        "Created task: budget={}, reward_per_response={}, nonce={}, human_req={}",
         params.total_budget,
         params.reward_per_response,
+        params.nonce,
         params.human_requirements
     );
 

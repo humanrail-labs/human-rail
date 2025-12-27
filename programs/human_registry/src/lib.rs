@@ -7,7 +7,7 @@ pub mod state;
 use instructions::*;
 
 // TODO: replace with real program id after first deployment.
-declare_id!("HumaNRegistry1111111111111111111111111111111");
+declare_id!("6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2");
 
 #[program]
 pub mod human_registry {

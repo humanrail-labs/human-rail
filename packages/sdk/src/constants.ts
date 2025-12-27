@@ -1,16 +1,16 @@
 import { PublicKey } from '@solana/web3.js';
 
-// Program IDs - update these after deployment
+// Program IDs - canonical addresses from keypairs
 export const HUMAN_REGISTRY_PROGRAM_ID = new PublicKey(
-  'HReg1111111111111111111111111111111111111111'
+  '6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2'
 );
 
 export const HUMAN_PAY_PROGRAM_ID = new PublicKey(
-  'HPay1111111111111111111111111111111111111111'
+  'FwyBmMZK28QYhPJmryNWw5BLc32ZBAbtncPo569MfJ3F'
 );
 
 export const DATA_BLINK_PROGRAM_ID = new PublicKey(
-  'DBnk1111111111111111111111111111111111111111'
+  '3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj'
 );
 
 // PDA Seeds

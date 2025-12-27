@@ -20,7 +20,7 @@ pub struct CreateConfidentialInvoice<'info> {
             b"invoice",
             merchant.key().as_ref(),
             mint.key().as_ref(),
-            &Clock::get()?.unix_timestamp.to_le_bytes()
+            &params.nonce.to_le_bytes()
         ],
         bump
     )]
@@ -73,9 +73,10 @@ pub fn handler(ctx: Context<CreateConfidentialInvoice>, params: CreateInvoicePar
     invoice.vault_bump = ctx.bumps.vault;
 
     msg!(
-        "Created invoice: amount={}, mint={}, human_req={}",
+        "Created invoice: amount={}, mint={}, nonce={}, human_req={}",
         params.amount,
         ctx.accounts.mint.key(),
+        params.nonce,
         params.human_requirements
     );
 

@@ -58,6 +58,7 @@ describe('HumanRail SDK', () => {
     it('should derive task PDA correctly', () => {
       const testCreator = Keypair.generate().publicKey;
       const createdAt = new BN(Date.now() / 1000);
+      
       const [pda, bump] = deriveTaskPda(
         testCreator,
         createdAt,
@@ -71,6 +72,7 @@ describe('HumanRail SDK', () => {
     it('should derive response PDA correctly', () => {
       const testTask = Keypair.generate().publicKey;
       const testWorker = Keypair.generate().publicKey;
+      
       const [pda, bump] = deriveResponsePda(
         testTask,
         testWorker,
@@ -106,13 +108,13 @@ describe('HumanRail SDK', () => {
 
     it('should have correct program IDs', () => {
       expect(client.registryProgramId.toBase58()).to.equal(
-        'HReg1111111111111111111111111111111111111111'
+        '6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2'
       );
       expect(client.payProgramId.toBase58()).to.equal(
-        'HPay1111111111111111111111111111111111111111'
+        'FwyBmMZK28QYhPJmryNWw5BLc32ZBAbtncPo569MfJ3F'
       );
       expect(client.blinkProgramId.toBase58()).to.equal(
-        'DBnk1111111111111111111111111111111111111111'
+        '3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj'
       );
     });
   });

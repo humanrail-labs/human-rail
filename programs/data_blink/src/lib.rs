@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("DBnk1111111111111111111111111111111111111111");
+declare_id!("3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj");
 
 pub mod error;
 pub mod instructions;
@@ -56,4 +56,6 @@ pub struct CreateTaskParams {
     pub max_responses: u32,
     /// Whether to allow multiple responses per wallet
     pub allow_multiple_responses: bool,
+    /// Unique nonce for PDA derivation (e.g., timestamp or counter)
+    pub nonce: u64,
 }

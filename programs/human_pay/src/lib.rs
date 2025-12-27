@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("HPay1111111111111111111111111111111111111111");
+declare_id!("FwyBmMZK28QYhPJmryNWw5BLc32ZBAbtncPo569MfJ3F");
 
 pub mod error;
 pub mod instructions;
@@ -50,4 +50,6 @@ pub struct CreateInvoiceParams {
     pub expires_at: i64,
     /// Optional memo/reference for the invoice
     pub memo: [u8; 32],
+    /// Unique nonce for PDA derivation (e.g., timestamp or counter)
+    pub nonce: u64,
 }
