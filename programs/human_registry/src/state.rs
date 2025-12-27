@@ -15,6 +15,12 @@ pub struct HumanProfile {
     pub human_score: u16,
     /// Flag indicating whether this profile is considered "unique".
     pub is_unique: bool,
+    /// Total number of attestations registered (for easy demo).
+    pub attestation_count: u32,
+    /// Timestamp of last attestation (for easy demo).
+    pub last_attestation_at: i64,
+    /// Hash of last attestation payload (for easy demo).
+    pub last_attestation_hash: [u8; 32],
     /// Bounded list of attestations attached to this profile.
     pub attestations: Vec<AttestationRef>,
     /// PDA bump for the profile account.
@@ -26,6 +32,9 @@ impl HumanProfile {
     pub const LEN: usize = 32  // wallet
         + 2 // human_score
         + 1 // is_unique
+        + 4 // attestation_count
+        + 8 // last_attestation_at
+        + 32 // last_attestation_hash
         + 4 // Vec length prefix
         + (MAX_ATTESTATIONS * AttestationRef::LEN)
         + 1; // bump

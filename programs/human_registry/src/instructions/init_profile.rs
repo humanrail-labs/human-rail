@@ -9,11 +9,13 @@ pub fn handle(ctx: Context<InitProfile>) -> Result<()> {
     profile.wallet = ctx.accounts.authority.key();
     profile.human_score = 0;
     profile.is_unique = false;
+    profile.attestation_count = 0;
+    profile.last_attestation_at = 0;
+    profile.last_attestation_hash = [0u8; 32];
     profile.attestations = Vec::with_capacity(MAX_ATTESTATIONS);
-
-    // In Anchor 0.30.x, `ctx.bumps` is a generated struct, not a map.
-    // So we read the bump directly from the `profile` field.
     profile.bump = ctx.bumps.profile;
+
+    msg!("Initialized profile for wallet: {}", profile.wallet);
 
     Ok(())
 }
@@ -29,7 +31,7 @@ pub struct InitProfile<'info> {
         init,
         payer = authority,
         space = 8 + HumanProfile::LEN,
-        seeds = [b"profile", authority.key().as_ref()],
+        seeds = [b"human_profile", authority.key().as_ref()],
         bump
     )]
     pub profile: Account<'info, HumanProfile>,
