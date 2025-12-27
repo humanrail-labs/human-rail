@@ -1,6 +1,7 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import { PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
+import BN from 'bn.js';
 import { expect } from 'chai';
 
 describe('HumanRail Integration Tests', () => {
@@ -32,7 +33,6 @@ describe('HumanRail Integration Tests', () => {
 
       const profile = await humanRegistry.account.humanProfile.fetch(profilePda);
 
-      // Verify initial state
       expect(profile.wallet.equals(wallet.publicKey)).to.be.true;
       expect(profile.humanScore).to.equal(0);
       expect(profile.isUnique).to.be.false;
@@ -53,7 +53,6 @@ describe('HumanRail Integration Tests', () => {
         humanRegistry.programId
       );
 
-      // Fetch BEFORE state
       const profileBefore = await humanRegistry.account.humanProfile.fetch(profilePda);
       console.log('\n📊 BEFORE attestation:', {
         score: profileBefore.humanScore,
@@ -61,7 +60,6 @@ describe('HumanRail Integration Tests', () => {
         unique: profileBefore.isUnique,
       });
 
-      // Register attestation
       const sourceId = Keypair.generate().publicKey;
       const payloadHash = Array.from(Buffer.alloc(32, 1));
       const weight = 50;
@@ -76,7 +74,6 @@ describe('HumanRail Integration Tests', () => {
 
       console.log('Transaction:', tx);
 
-      // Fetch AFTER state
       const profileAfter = await humanRegistry.account.humanProfile.fetch(profilePda);
       console.log('\n📊 AFTER attestation:', {
         score: profileAfter.humanScore,
@@ -85,14 +82,12 @@ describe('HumanRail Integration Tests', () => {
         lastHash: Buffer.from(profileAfter.lastAttestationHash).toString('hex').slice(0, 16) + '...',
       });
 
-      // Verify state mutation
       expect(profileAfter.attestationCount).to.equal(1);
       expect(profileAfter.humanScore).to.equal(weight);
-      expect(profileAfter.isUnique).to.be.false; // 50 < 100 threshold
+      expect(profileAfter.isUnique).to.be.false;
       expect(profileAfter.lastAttestationAt.toNumber()).to.be.greaterThan(0);
       expect(profileAfter.attestations.length).to.equal(1);
 
-      // Verify attestation details
       const att = profileAfter.attestations[0];
       expect(att.source.equals(sourceId)).to.be.true;
       expect(att.weight).to.equal(weight);
@@ -106,7 +101,6 @@ describe('HumanRail Integration Tests', () => {
         humanRegistry.programId
       );
 
-      // Add second attestation
       const source2 = Keypair.generate().publicKey;
       const payload2 = Array.from(Buffer.alloc(32, 2));
       const weight2 = 60;
@@ -127,10 +121,9 @@ describe('HumanRail Integration Tests', () => {
         unique: profile.isUnique,
       });
 
-      // Verify increments
       expect(profile.attestationCount).to.equal(2);
-      expect(profile.humanScore).to.equal(110); // 50 + 60
-      expect(profile.isUnique).to.be.true; // 110 >= 100 threshold
+      expect(profile.humanScore).to.equal(110);
+      expect(profile.isUnique).to.be.true;
       expect(profile.attestations.length).to.equal(2);
 
       console.log('✅ Multiple attestations work!');
@@ -142,7 +135,6 @@ describe('HumanRail Integration Tests', () => {
         humanRegistry.programId
       );
 
-      // Add attestations up to limit (already have 2, max is 8)
       for (let i = 0; i < 6; i++) {
         await humanRegistry.methods
           .registerAttestation(
@@ -161,7 +153,6 @@ describe('HumanRail Integration Tests', () => {
       expect(profile.attestationCount).to.equal(8);
       expect(profile.attestations.length).to.equal(8);
 
-      // Try to add one more - should fail
       try {
         await humanRegistry.methods
           .registerAttestation(
@@ -188,7 +179,7 @@ describe('HumanRail Integration Tests', () => {
     const DATA_BLINK_PROGRAM_ID = new PublicKey('3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj');
 
     it('should derive task PDA correctly', () => {
-      const nonce = new anchor.BN(Date.now());
+      const nonce = new BN(Date.now());
       const [taskPda] = PublicKey.findProgramAddressSync(
         [Buffer.from('task'), wallet.publicKey.toBuffer(), nonce.toArrayLike(Buffer, 'le', 8)],
         DATA_BLINK_PROGRAM_ID
@@ -198,12 +189,12 @@ describe('HumanRail Integration Tests', () => {
 
     it('should derive invoice PDA correctly', () => {
       const mint = Keypair.generate().publicKey;
-      const nonce = new anchor.BN(Date.now());
+      const nonce = new BN(Date.now());
       const [invoicePda] = PublicKey.findProgramAddressSync(
         [Buffer.from('invoice'), wallet.publicKey.toBuffer(), mint.toBuffer(), nonce.toArrayLike(Buffer, 'le', 8)],
         HUMAN_PAY_PROGRAM_ID
       );
-      expect(taskPda).to.be.instanceOf(PublicKey);
+      expect(invoicePda).to.be.instanceOf(PublicKey);
     });
   });
 });
