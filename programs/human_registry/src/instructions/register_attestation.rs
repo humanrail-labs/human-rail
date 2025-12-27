@@ -12,8 +12,13 @@ pub fn handle(
     payload_hash: [u8; 32],
     weight: u16,
 ) -> Result<()> {
-    let profile = &mut ctx.accounts.profile;
     let clock = Clock::get()?;
+    
+    // Get profile_key BEFORE mutable borrow
+    let profile_key = ctx.accounts.profile.key();
+    
+    // Now take mutable borrow
+    let profile = &mut ctx.accounts.profile;
 
     // Check if we've hit the attestation limit
     require!(
@@ -39,24 +44,30 @@ pub fn handle(
     // Recompute score and uniqueness
     profile.recompute_score();
 
+    // Get values for event
+    let wallet = profile.wallet;
+    let new_score = profile.human_score;
+    let is_unique = profile.is_unique;
+    let attestation_count = profile.attestation_count;
+
     // Emit event for easy inspection
     emit!(AttestationRegistered {
-        profile: ctx.accounts.profile.key(),
-        wallet: profile.wallet,
+        profile: profile_key,
+        wallet,
         source,
         payload_hash,
         weight,
-        new_score: profile.human_score,
-        is_unique: profile.is_unique,
-        attestation_count: profile.attestation_count,
+        new_score,
+        is_unique,
+        attestation_count,
         timestamp: clock.unix_timestamp,
     });
 
     msg!(
         "Attestation registered: count={}, score={}, unique={}",
-        profile.attestation_count,
-        profile.human_score,
-        profile.is_unique
+        attestation_count,
+        new_score,
+        is_unique
     );
 
     Ok(())
