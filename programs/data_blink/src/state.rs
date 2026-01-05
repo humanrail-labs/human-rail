@@ -38,6 +38,8 @@ pub struct Task {
     pub bump: u8,
     /// Bump seed for vault PDA
     pub vault_bump: u8,
+    /// Nonce used for PDA derivation (must match creation param)
+    pub nonce: u64,
 }
 
 impl Task {
@@ -57,7 +59,8 @@ impl Task {
         8 + // closed_at
         32 + // vault
         1 + // bump
-        1; // vault_bump
+        1 + // vault_bump
+        8; // nonce
 }
 
 /// Response record tracking a worker's submission

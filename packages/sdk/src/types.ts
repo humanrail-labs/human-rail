@@ -18,24 +18,23 @@ export enum InvoiceStatus {
   Withdrawn = 3,
 }
 
-// Human Profile
+// Human Profile - matches on-chain HumanProfile
 export interface HumanProfile {
   wallet: PublicKey;
   humanScore: number;
   isUnique: boolean;
   attestationCount: number;
+  lastAttestationAt: BN;
+  lastAttestationHash: Uint8Array;
   attestations: AttestationRef[];
-  lastUpdated: BN;
   bump: number;
 }
 
+// Attestation reference - matches on-chain AttestationRef
 export interface AttestationRef {
-  sourceId: PublicKey;
+  source: PublicKey;
   payloadHash: Uint8Array;
-  attestationType: number;
-  scoreWeight: number;
-  registeredAt: BN;
-  isActive: boolean;
+  weight: number;
 }
 
 // Invoice
@@ -53,6 +52,7 @@ export interface ConfidentialInvoice {
   vault: PublicKey;
   bump: number;
   vaultBump: number;
+  nonce: BN;
 }
 
 // Task
@@ -73,6 +73,7 @@ export interface Task {
   vault: PublicKey;
   bump: number;
   vaultBump: number;
+  nonce: BN;
 }
 
 // Task Response
@@ -113,6 +114,7 @@ export interface CreateInvoiceParams {
   humanRequirements: number;
   expiresAt: BN;
   memo: Uint8Array;
+  nonce: BN;
 }
 
 export interface CreateTaskParams {
@@ -122,6 +124,7 @@ export interface CreateTaskParams {
   metadataUri: string;
   maxResponses: number;
   allowMultipleResponses: boolean;
+  nonce: BN;
 }
 
 export interface AttestationInput {

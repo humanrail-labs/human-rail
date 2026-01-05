@@ -11,7 +11,7 @@ import { INVOICE_SEED, INVOICE_VAULT_SEED, HUMAN_PROFILE_SEED } from './constant
 export function deriveInvoicePda(
   merchant: PublicKey,
   mint: PublicKey,
-  createdAt: BN,
+  nonce: BN,
   programId: PublicKey
 ): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
@@ -19,7 +19,7 @@ export function deriveInvoicePda(
       INVOICE_SEED,
       merchant.toBuffer(),
       mint.toBuffer(),
-      createdAt.toArrayLike(Buffer, 'le', 8),
+      nonce.toArrayLike(Buffer, 'le', 8),
     ],
     programId
   );
@@ -46,10 +46,10 @@ export async function getInvoice(
   invoicePubkey: PublicKey
 ): Promise<ConfidentialInvoice | null> {
   try {
-    const account = await client.payProgram.account.confidentialInvoice.fetch(
+    const account = await (client.payProgram.account as any).confidentialInvoice.fetch(
       invoicePubkey
     );
-    return account as unknown as ConfidentialInvoice;
+    return account as ConfidentialInvoice;
   } catch (error) {
     return null;
   }
@@ -62,7 +62,7 @@ export async function getInvoicesByMerchant(
   client: HumanRailClient,
   merchant: PublicKey
 ): Promise<ConfidentialInvoice[]> {
-  const accounts = await client.payProgram.account.confidentialInvoice.all([
+  const accounts = await (client.payProgram.account as any).confidentialInvoice.all([
     {
       memcmp: {
         offset: 8, // After discriminator
@@ -71,7 +71,7 @@ export async function getInvoicesByMerchant(
     },
   ]);
 
-  return accounts.map((a) => a.account as unknown as ConfidentialInvoice);
+  return accounts.map((a: any) => a.account as ConfidentialInvoice);
 }
 
 /**
@@ -81,23 +81,22 @@ export async function createInvoice(
   client: HumanRailClient,
   params: CreateInvoiceParams & { mint: PublicKey }
 ): Promise<{ tx: string; invoice: PublicKey }> {
-  const createdAt = new BN(Math.floor(Date.now() / 1000));
-  
   const [invoicePda] = deriveInvoicePda(
     client.wallet,
     params.mint,
-    createdAt,
+    params.nonce,
     client.payProgramId
   );
 
   const [vaultPda] = deriveInvoiceVaultPda(invoicePda, client.payProgramId);
 
-  const tx = await client.payProgram.methods
+  const tx = await (client.payProgram.methods as any)
     .createConfidentialInvoice({
       amount: params.amount,
       humanRequirements: params.humanRequirements,
       expiresAt: params.expiresAt,
       memo: Array.from(params.memo),
+      nonce: params.nonce,
     })
     .accounts({
       invoice: invoicePda,
@@ -110,6 +109,13 @@ export async function createInvoice(
     .rpc();
 
   return { tx, invoice: invoicePda };
+}
+
+/**
+ * Generate a unique nonce for PDA derivation
+ */
+export function generateNonce(): BN {
+  return new BN(Date.now() * 1000 + Math.floor(Math.random() * 1000));
 }
 
 /**
@@ -140,7 +146,7 @@ export async function payInvoice(
     client.registryProgramId
   );
 
-  const tx = await client.payProgram.methods
+  const tx = await (client.payProgram.methods as any)
     .payConfidentialInvoice()
     .accounts({
       invoice: invoicePubkey,
@@ -164,7 +170,7 @@ export async function cancelInvoice(
   client: HumanRailClient,
   invoicePubkey: PublicKey
 ): Promise<string> {
-  const tx = await client.payProgram.methods
+  const tx = await (client.payProgram.methods as any)
     .cancelInvoice()
     .accounts({
       invoice: invoicePubkey,
@@ -194,7 +200,7 @@ export async function withdrawInvoice(
     TOKEN_2022_PROGRAM_ID
   );
 
-  const tx = await client.payProgram.methods
+  const tx = await (client.payProgram.methods as any)
     .withdrawInvoice()
     .accounts({
       invoice: invoicePubkey,

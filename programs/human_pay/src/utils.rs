@@ -73,9 +73,9 @@ pub fn execute_confidential_transfer<'info>(
 pub fn get_invoice_seeds<'a>(
     merchant: &'a Pubkey,
     mint: &'a Pubkey,
-    created_at: &'a [u8; 8],
+    nonce: &'a [u8; 8],
 ) -> [&'a [u8]; 4] {
-    [b"invoice", merchant.as_ref(), mint.as_ref(), created_at]
+    [b"invoice", merchant.as_ref(), mint.as_ref(), nonce]
 }
 
 /// Generate vault PDA seeds

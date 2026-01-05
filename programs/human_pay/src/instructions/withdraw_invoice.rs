@@ -24,6 +24,9 @@ pub struct WithdrawInvoice<'info> {
     )]
     pub vault: InterfaceAccount<'info, TokenAccount>,
 
+    #[account(
+        constraint = mint.key() == invoice.mint @ HumanPayError::InvalidMint
+    )]
     pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(
@@ -43,7 +46,7 @@ pub fn handler(ctx: Context<WithdrawInvoice>) -> Result<()> {
     // This avoids holding a &mut borrow across the CPI.
     let merchant_key = ctx.accounts.invoice.merchant;
     let mint_key = ctx.accounts.invoice.mint;
-    let created_at_bytes = ctx.accounts.invoice.created_at.to_le_bytes();
+    let nonce_bytes = ctx.accounts.invoice.nonce.to_le_bytes();
     let bump = ctx.accounts.invoice.bump;
     let amount = ctx.accounts.invoice.amount;
     let decimals = ctx.accounts.mint.decimals;
@@ -53,7 +56,7 @@ pub fn handler(ctx: Context<WithdrawInvoice>) -> Result<()> {
         b"invoice".as_ref(),
         merchant_key.as_ref(),
         mint_key.as_ref(),
-        created_at_bytes.as_ref(),
+        nonce_bytes.as_ref(),
         &[bump],
     ];
     let signer_seeds: &[&[&[u8]]] = &[&seeds];

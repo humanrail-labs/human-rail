@@ -16,10 +16,13 @@ pub struct CloseTask<'info> {
 
     #[account(
         mut,
-        constraint = vault.key() == task.vault @ DataBlinkError::InvalidMint
+        constraint = vault.key() == task.vault @ DataBlinkError::InvalidVault
     )]
     pub vault: InterfaceAccount<'info, TokenAccount>,
 
+    #[account(
+        constraint = reward_mint.key() == task.reward_mint @ DataBlinkError::InvalidMint
+    )]
     pub reward_mint: InterfaceAccount<'info, Mint>,
 
     #[account(
@@ -44,11 +47,11 @@ pub fn handler(ctx: Context<CloseTask>) -> Result<()> {
     if remaining > 0 {
         // Build signer seeds for vault authority (task PDA)
         let creator_key = task.creator;
-        let created_at_bytes = task.created_at.to_le_bytes();
+        let nonce_bytes = task.nonce.to_le_bytes();
         let seeds = &[
             b"task".as_ref(),
             creator_key.as_ref(),
-            created_at_bytes.as_ref(),
+            nonce_bytes.as_ref(),
             &[task.bump],
         ];
         let signer_seeds = &[&seeds[..]];

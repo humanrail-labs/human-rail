@@ -40,6 +40,8 @@ pub struct ConfidentialInvoice {
     pub bump: u8,
     /// Vault bump seed
     pub vault_bump: u8,
+    /// Nonce used for PDA derivation (must match creation param)
+    pub nonce: u64,
 }
 
 impl ConfidentialInvoice {
@@ -56,7 +58,8 @@ impl ConfidentialInvoice {
         32 + // memo
         32 + // vault
         1 + // bump
-        1; // vault_bump
+        1 + // vault_bump
+        8; // nonce
 }
 
 /// Payment receipt for tracking completed payments

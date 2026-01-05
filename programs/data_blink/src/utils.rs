@@ -27,8 +27,8 @@ pub fn execute_reward_transfer<'info>(
 }
 
 /// Generate task PDA seeds
-pub fn get_task_seeds<'a>(creator: &'a Pubkey, created_at: &'a [u8; 8]) -> [&'a [u8]; 3] {
-    [b"task", creator.as_ref(), created_at]
+pub fn get_task_seeds<'a>(creator: &'a Pubkey, nonce: &'a [u8; 8]) -> [&'a [u8]; 3] {
+    [b"task", creator.as_ref(), nonce]
 }
 
 /// Generate vault PDA seeds

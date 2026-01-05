@@ -1,8 +1,8 @@
 import { PublicKey } from '@solana/web3.js';
 
-// Program IDs - canonical addresses from keypairs
+// Program IDs - canonical addresses from declare_id! in on-chain programs
 export const HUMAN_REGISTRY_PROGRAM_ID = new PublicKey(
-  '6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2'
+  'Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR'
 );
 
 export const HUMAN_PAY_PROGRAM_ID = new PublicKey(
@@ -10,7 +10,7 @@ export const HUMAN_PAY_PROGRAM_ID = new PublicKey(
 );
 
 export const DATA_BLINK_PROGRAM_ID = new PublicKey(
-  '3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj'
+  'BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5'
 );
 
 // PDA Seeds

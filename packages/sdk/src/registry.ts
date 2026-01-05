@@ -18,7 +18,7 @@ export async function getHumanProfile(
 ) {
   try {
     const [profilePda] = deriveHumanProfilePda(wallet, client.registryProgramId);
-    return await client.registryProgram.account.humanProfile.fetch(profilePda);
+    return await (client.registryProgram.account as any).humanProfile.fetch(profilePda);
   } catch (error) {
     return null;
   }
@@ -27,7 +27,7 @@ export async function getHumanProfile(
 export async function initProfile(client: HumanRailClient): Promise<string> {
   const [profilePda] = deriveHumanProfilePda(client.wallet, client.registryProgramId);
 
-  return await client.registryProgram.methods
+  return await (client.registryProgram.methods as any)
     .initProfile()
     .accounts({
       profile: profilePda,
@@ -49,7 +49,7 @@ export async function registerAttestation(
     ? Array.from(payloadHash) 
     : payloadHash;
 
-  return await client.registryProgram.methods
+  return await (client.registryProgram.methods as any)
     .registerAttestation(source, hashArray, weight)
     .accounts({
       profile: profilePda,

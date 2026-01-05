@@ -6,9 +6,9 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-data_blink = "3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj"
+data_blink = "BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5"
 human_pay = "6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe"
-human_registry = "6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2"
+human_registry = "Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR"
 
 [programs.localnet]
 data_blink = "BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5"
@@ -34,7 +34,6 @@ upgradeable = false
 
 [test.validator]
 bind_address = "0.0.0.0"
-url = "https://api.mainnet-beta.solana.com"
 ledger = ".anchor/test-ledger"
 rpc_port = 8899
 

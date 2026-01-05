@@ -1,14 +1,14 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import { AnchorProvider, Program } from '@coral-xyz/anchor';
+import { AnchorProvider, Program, Idl } from '@coral-xyz/anchor';
 import {
   HUMAN_REGISTRY_PROGRAM_ID,
   HUMAN_PAY_PROGRAM_ID,
   DATA_BLINK_PROGRAM_ID,
 } from './constants';
 
-import { HumanRegistry, IDL as HumanRegistryIDL } from './idl/human_registry';
-import { HumanPay, IDL as HumanPayIDL } from './idl/human_pay';
-import { DataBlink, IDL as DataBlinkIDL } from './idl/data_blink';
+import { IDL as HumanRegistryIDL } from './idl/human_registry';
+import { IDL as HumanPayIDL } from './idl/human_pay';
+import { IDL as DataBlinkIDL } from './idl/data_blink';
 
 export interface HumanRailClientConfig {
   connection: Connection;
@@ -25,9 +25,9 @@ export class HumanRailClient {
   readonly payProgramId: PublicKey;
   readonly blinkProgramId: PublicKey;
 
-  readonly registryProgram: Program<HumanRegistry>;
-  readonly payProgram: Program<HumanPay>;
-  readonly blinkProgram: Program<DataBlink>;
+  readonly registryProgram: Program;
+  readonly payProgram: Program;
+  readonly blinkProgram: Program;
 
   constructor(config: HumanRailClientConfig) {
     this.connection = config.connection;
@@ -41,22 +41,20 @@ export class HumanRailClient {
     this.payProgramId = config.payProgramId ?? HUMAN_PAY_PROGRAM_ID;
     this.blinkProgramId = config.blinkProgramId ?? DATA_BLINK_PROGRAM_ID;
 
-    // Initialize programs with explicit program IDs and IDLs
-    this.registryProgram = new Program<HumanRegistry>(
-      HumanRegistryIDL,
-      this.registryProgramId,
+    // Initialize programs with Anchor 0.30+ style
+    // IDLs contain the program address, so we just pass the provider
+    this.registryProgram = new Program(
+      HumanRegistryIDL as Idl,
       this.provider
     );
 
-    this.payProgram = new Program<HumanPay>(
-      HumanPayIDL,
-      this.payProgramId,
+    this.payProgram = new Program(
+      HumanPayIDL as Idl,
       this.provider
     );
 
-    this.blinkProgram = new Program<DataBlink>(
-      DataBlinkIDL,
-      this.blinkProgramId,
+    this.blinkProgram = new Program(
+      DataBlinkIDL as Idl,
       this.provider
     );
   }

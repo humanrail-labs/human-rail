@@ -41,13 +41,13 @@ export const config: Config = {
   cluster,
   programIds: {
     humanRegistry: new PublicKey(
-      getEnvOrDefault('HUMAN_REGISTRY_PROGRAM_ID', '6BrHosLK9gjJmGWtdxUw8fgEWoew4HBM8QBrkwwokcS2')
+      getEnvOrDefault('HUMAN_REGISTRY_PROGRAM_ID', 'Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR')
     ),
     humanPay: new PublicKey(
       getEnvOrDefault('HUMAN_PAY_PROGRAM_ID', '6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe')
     ),
     dataBlink: new PublicKey(
-      getEnvOrDefault('DATA_BLINK_PROGRAM_ID', '3j1Gfbi9WL2KUMKQavxdpjA2rJNBP8M8AmYgv1rKZKyj')
+      getEnvOrDefault('DATA_BLINK_PROGRAM_ID', 'BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5')
     ),
   },
   baseUrl: getEnvOrDefault('BASE_URL', 'http://localhost:3001'),

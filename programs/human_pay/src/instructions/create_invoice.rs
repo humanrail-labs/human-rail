@@ -71,6 +71,7 @@ pub fn handler(ctx: Context<CreateConfidentialInvoice>, params: CreateInvoicePar
     invoice.vault = ctx.accounts.vault.key();
     invoice.bump = ctx.bumps.invoice;
     invoice.vault_bump = ctx.bumps.vault;
+    invoice.nonce = params.nonce;
 
     msg!(
         "Created invoice: amount={}, mint={}, nonce={}, human_req={}",

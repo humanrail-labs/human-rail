@@ -49,4 +49,10 @@ pub enum DataBlinkError {
 
     #[msg("Invalid choice value")]
     InvalidChoice,
+
+    #[msg("Task and response do not match")]
+    TaskResponseMismatch,
+
+    #[msg("Invalid vault account for this task")]
+    InvalidVault,
 }

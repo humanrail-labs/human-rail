@@ -99,6 +99,7 @@ pub fn handler(ctx: Context<CreateTask>, params: CreateTaskParams) -> Result<()>
     task.vault = ctx.accounts.vault.key();
     task.bump = ctx.bumps.task;
     task.vault_bump = ctx.bumps.vault;
+    task.nonce = params.nonce;
 
     msg!(
         "Created task: budget={}, reward_per_response={}, nonce={}, human_req={}",

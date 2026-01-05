@@ -10,11 +10,11 @@ import { TASK_SEED, TASK_VAULT_SEED, RESPONSE_SEED, HUMAN_PROFILE_SEED } from '.
  */
 export function deriveTaskPda(
   creator: PublicKey,
-  createdAt: BN,
+  nonce: BN,
   programId: PublicKey
 ): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [TASK_SEED, creator.toBuffer(), createdAt.toArrayLike(Buffer, 'le', 8)],
+    [TASK_SEED, creator.toBuffer(), nonce.toArrayLike(Buffer, 'le', 8)],
     programId
   );
 }
@@ -54,8 +54,8 @@ export async function getTask(
   taskPubkey: PublicKey
 ): Promise<Task | null> {
   try {
-    const account = await client.blinkProgram.account.task.fetch(taskPubkey);
-    return account as unknown as Task;
+    const account = await (client.blinkProgram.account as any).task.fetch(taskPubkey);
+    return account as Task;
   } catch (error) {
     return null;
   }
@@ -67,7 +67,7 @@ export async function getTask(
 export async function getOpenTasks(
   client: HumanRailClient
 ): Promise<Array<{ pubkey: PublicKey; task: Task }>> {
-  const accounts = await client.blinkProgram.account.task.all([
+  const accounts = await (client.blinkProgram.account as any).task.all([
     {
       memcmp: {
         // isOpen is at a specific offset - this is a simplified filter
@@ -78,9 +78,9 @@ export async function getOpenTasks(
     },
   ]);
 
-  return accounts.map((a) => ({
+  return accounts.map((a: any) => ({
     pubkey: a.publicKey,
-    task: a.account as unknown as Task,
+    task: a.account as Task,
   }));
 }
 
@@ -91,7 +91,7 @@ export async function getTasksByCreator(
   client: HumanRailClient,
   creator: PublicKey
 ): Promise<Array<{ pubkey: PublicKey; task: Task }>> {
-  const accounts = await client.blinkProgram.account.task.all([
+  const accounts = await (client.blinkProgram.account as any).task.all([
     {
       memcmp: {
         offset: 8, // After discriminator
@@ -100,9 +100,9 @@ export async function getTasksByCreator(
     },
   ]);
 
-  return accounts.map((a) => ({
+  return accounts.map((a: any) => ({
     pubkey: a.publicKey,
-    task: a.account as unknown as Task,
+    task: a.account as Task,
   }));
 }
 
@@ -116,7 +116,7 @@ export async function fetchTaskMetadata(
   if (!response.ok) {
     throw new Error(`Failed to fetch metadata: ${response.statusText}`);
   }
-  return response.json();
+  return response.json() as Promise<TaskMetadata>;
 }
 
 /**
@@ -126,9 +126,7 @@ export async function createTask(
   client: HumanRailClient,
   params: CreateTaskParams & { rewardMint: PublicKey }
 ): Promise<{ tx: string; task: PublicKey }> {
-  const createdAt = new BN(Math.floor(Date.now() / 1000));
-
-  const [taskPda] = deriveTaskPda(client.wallet, createdAt, client.blinkProgramId);
+  const [taskPda] = deriveTaskPda(client.wallet, params.nonce, client.blinkProgramId);
   const [vaultPda] = deriveTaskVaultPda(taskPda, client.blinkProgramId);
 
   const creatorTokenAccount = getAssociatedTokenAddressSync(
@@ -138,7 +136,7 @@ export async function createTask(
     TOKEN_2022_PROGRAM_ID
   );
 
-  const tx = await client.blinkProgram.methods
+  const tx = await (client.blinkProgram.methods as any)
     .createTask({
       rewardPerResponse: params.rewardPerResponse,
       totalBudget: params.totalBudget,
@@ -146,6 +144,7 @@ export async function createTask(
       metadataUri: params.metadataUri,
       maxResponses: params.maxResponses,
       allowMultipleResponses: params.allowMultipleResponses,
+      nonce: params.nonce,
     })
     .accounts({
       task: taskPda,
@@ -160,6 +159,8 @@ export async function createTask(
 
   return { tx, task: taskPda };
 }
+
+// generateNonce is exported from pay.ts to avoid duplicate exports
 
 /**
  * Close a task and retrieve remaining budget
@@ -180,7 +181,7 @@ export async function closeTask(
     TOKEN_2022_PROGRAM_ID
   );
 
-  const tx = await client.blinkProgram.methods
+  const tx = await (client.blinkProgram.methods as any)
     .closeTask()
     .accounts({
       task: taskPubkey,
@@ -215,7 +216,7 @@ export async function submitTaskResponse(
     client.registryProgramId
   );
 
-  const tx = await client.blinkProgram.methods
+  const tx = await (client.blinkProgram.methods as any)
     .submitResponse(choice, Array.from(responseData))
     .accounts({
       task: taskPubkey,
@@ -255,7 +256,7 @@ export async function claimTaskRewards(
     TOKEN_2022_PROGRAM_ID
   );
 
-  const tx = await client.blinkProgram.methods
+  const tx = await (client.blinkProgram.methods as any)
     .claimRewards()
     .accounts({
       task: taskPubkey,
@@ -286,10 +287,10 @@ export async function getTaskResponse(
   );
 
   try {
-    const account = await client.blinkProgram.account.taskResponse.fetch(
+    const account = await (client.blinkProgram.account as any).taskResponse.fetch(
       responsePda
     );
-    return account as unknown as TaskResponse;
+    return account as TaskResponse;
   } catch (error) {
     return null;
   }
