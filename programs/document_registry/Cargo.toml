@@ -1,0 +1,21 @@
+[package]
+name = "document-registry"
+version = "0.1.0"
+description = "Document signing and notarization with verified human and agent signatures - HumanRail"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "document_registry"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+default = []
+
+[dependencies]
+anchor-lang = "0.32.1"
+anchor-spl = "0.32.1"

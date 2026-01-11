@@ -1,0 +1,15 @@
+[package]
+name = "humanrail-common"
+version = "0.1.0"
+description = "Shared types and interfaces for HumanRail programs"
+edition = "2021"
+
+[lib]
+crate-type = ["lib"]
+name = "humanrail_common"
+
+[features]
+default = []
+
+[dependencies]
+anchor-lang = "0.32.1"

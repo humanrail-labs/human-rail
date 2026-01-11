@@ -1,13 +1,8 @@
 [workspace]
 members = [
-    "programs/common",
     "programs/human_registry",
     "programs/human_pay",
-    "programs/data_blink",
-    "programs/agent_registry",
-    "programs/delegation",
-    "programs/receipts",
-    "programs/document_registry"
+    "programs/data_blink"
 ]
 resolver = "2"
 
