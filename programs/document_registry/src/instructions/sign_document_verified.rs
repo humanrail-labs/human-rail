@@ -190,7 +190,7 @@ pub struct SignDocumentVerified<'info> {
 
 /// Known Human Registry program ID
 pub const HUMAN_REGISTRY_PROGRAM_ID: Pubkey = 
-    anchor_lang::solana_program::pubkey!("Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR");
+    "Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR".parse().unwrap();
 
 #[event]
 pub struct VerifiedDocumentSigned {

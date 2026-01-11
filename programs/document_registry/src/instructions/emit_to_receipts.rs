@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{DocumentSigningReceipt, SignatureTier};
+use crate::state::DocumentSigningReceipt;
+use crate::SignatureTier;
 
 /// Emit a document signing action to the unified receipts program.
 /// This bridges document_registry receipts into the global receipt system.

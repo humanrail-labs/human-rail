@@ -1,8 +1,11 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{
-    ed25519_program,
-    sysvar::instructions::{self, load_instruction_at_checked},
-};
+use anchor_lang::solana_program::sysvar::instructions::{self, load_instruction_at_checked};
+
+/// Ed25519 program ID constant
+const ED25519_PROGRAM_ID: Pubkey = Pubkey::new_from_array([
+    6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206, 235, 121, 172,
+    28, 180, 133, 237, 95, 91, 55, 145, 58, 140, 245, 133, 126, 255, 0, 169
+]);
 
 use crate::{
     error::DocumentRegistryError,
@@ -143,7 +146,7 @@ fn verify_ed25519_signature(
     ).map_err(|_| DocumentRegistryError::Ed25519InstructionNotFound)?;
 
     // Verify it's the Ed25519 program
-    if ed25519_ix.program_id != ed25519_program::ID {
+    if ed25519_ix.program_id != ED25519_PROGRAM_ID {
         return Err(DocumentRegistryError::Ed25519InstructionNotFound.into());
     }
 

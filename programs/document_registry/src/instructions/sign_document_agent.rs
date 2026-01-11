@@ -308,10 +308,10 @@ pub struct SignDocumentAgent<'info> {
 
 /// Known program IDs
 pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = 
-    anchor_lang::solana_program::pubkey!("AgntReg1111111111111111111111111111111111111");
+    "299gbw6p9rCpp7SBR9tts7qTgGie591JPY6RMAXoJHE6".parse().unwrap();
 
 pub const DELEGATION_PROGRAM_ID: Pubkey = 
-    anchor_lang::solana_program::pubkey!("De1eg8t1on1111111111111111111111111111111111");
+    "74vfEGbYWUsRq7z8oSgp6gNxx3ENVQEBqXFJqHrB3Xx2".parse().unwrap();
 
 #[event]
 pub struct AgentDocumentSigned {

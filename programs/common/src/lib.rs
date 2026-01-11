@@ -12,15 +12,36 @@ pub use cpi_validation::*;
 // =============================================================================
 
 pub mod program_ids {
-    use anchor_lang::prelude::*;
+    use anchor_lang::prelude::Pubkey;
     
-    pub const HUMAN_REGISTRY: Pubkey = anchor_lang::solana_program::pubkey!("Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR");
-    pub const HUMAN_PAY: Pubkey = anchor_lang::solana_program::pubkey!("6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe");
-    pub const DATA_BLINK: Pubkey = anchor_lang::solana_program::pubkey!("BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5");
-    pub const AGENT_REGISTRY: Pubkey = anchor_lang::solana_program::pubkey!("AgntReg1111111111111111111111111111111111111");
-    pub const DELEGATION: Pubkey = anchor_lang::solana_program::pubkey!("De1eg8t1on1111111111111111111111111111111111");
-    pub const RECEIPTS: Pubkey = anchor_lang::solana_program::pubkey!("Rcpts111111111111111111111111111111111111111");
-    pub const DOCUMENT_REGISTRY: Pubkey = anchor_lang::solana_program::pubkey!("DocReg11111111111111111111111111111111111111");
+    // Use lazy initialization to avoid pubkey! macro issues
+    pub fn human_registry() -> Pubkey {
+        "Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR".parse().unwrap()
+    }
+    
+    pub fn human_pay() -> Pubkey {
+        "6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe".parse().unwrap()
+    }
+    
+    pub fn data_blink() -> Pubkey {
+        "BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5".parse().unwrap()
+    }
+    
+    pub fn agent_registry() -> Pubkey {
+        "299gbw6p9rCpp7SBR9tts7qTgGie591JPY6RMAXoJHE6".parse().unwrap()
+    }
+    
+    pub fn delegation() -> Pubkey {
+        "74vfEGbYWUsRq7z8oSgp6gNxx3ENVQEBqXFJqHrB3Xx2".parse().unwrap()
+    }
+    
+    pub fn receipts() -> Pubkey {
+        "9ZKqiKqi3zXhNvTevEJ8qD6F25YdoymXXSTzsiEviAi".parse().unwrap()
+    }
+    
+    pub fn document_registry() -> Pubkey {
+        "ERdbeXCpPoXsZmgpw5ALa14ujxnUhb7vVSpkmhQ9cY33".parse().unwrap()
+    }
 }
 
 // =============================================================================
