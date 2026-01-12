@@ -8,7 +8,7 @@ use anchor_spl::{
     token_2022::Token2022,
     token_interface::{Mint, TokenAccount},
 };
-use human_registry::{program::HumanRegistry, state::HumanProfile};
+use human_registry::{program::HumanRegistry, state::HumanProfileLegacy};
 
 #[derive(Accounts)]
 pub struct PayConfidentialInvoice<'info> {
@@ -33,7 +33,7 @@ pub struct PayConfidentialInvoice<'info> {
         bump = payer_profile.bump,
         seeds::program = human_registry_program.key()
     )]
-    pub payer_profile: Account<'info, HumanProfile>,
+    pub payer_profile: Account<'info, HumanProfileLegacy>,
 
     #[account(
         mut,

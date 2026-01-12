@@ -11,7 +11,7 @@ pub const MAX_BATCH_SIZE: usize = 10;
 
 /// Batch emit multiple receipts.
 /// Creates a summary with merkle root for efficient verification.
-pub fn handler(ctx: Context<BatchEmit>, receipts: Vec<EmitReceiptParams>) -> Result<()> {
+pub fn handler(ctx: Context<BatchEmit>, receipts: Vec<EmitReceiptParams>, _nonce: u64) -> Result<()> {
     let clock = Clock::get()?;
 
     require!(
@@ -94,7 +94,7 @@ fn compute_merkle_root(hashes: &mut Vec<[u8; 32]>) -> [u8; 32] {
 }
 
 #[derive(Accounts)]
-#[instruction(receipts: Vec<EmitReceiptParams>)]
+#[instruction(receipts: Vec<EmitReceiptParams>, nonce: u64)]
 pub struct BatchEmit<'info> {
     /// Emitter creating the batch
     #[account(mut)]
@@ -108,7 +108,7 @@ pub struct BatchEmit<'info> {
         seeds = [
             b"batch",
             emitter.key().as_ref(),
-            &Clock::get()?.unix_timestamp.to_le_bytes()
+            &nonce.to_le_bytes()
         ],
         bump
     )]

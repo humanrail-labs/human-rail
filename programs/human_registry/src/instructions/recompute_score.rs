@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::{
     error::HumanRegistryError,
-    state::HumanProfile,
+    state::HumanProfileLegacy,
 };
 
 #[derive(Accounts)]
@@ -12,7 +12,7 @@ pub struct RecomputeScore<'info> {
         bump = profile.bump,
         constraint = profile.wallet == wallet.key() @ HumanRegistryError::Unauthorized
     )]
-    pub profile: Account<'info, HumanProfile>,
+    pub profile: Account<'info, HumanProfileLegacy>,
 
     pub wallet: Signer<'info>,
 }

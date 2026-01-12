@@ -45,7 +45,15 @@ pub mod delegation {
         action_value: u64,
         destination: Pubkey,
     ) -> Result<()> {
-        instructions::validate_capability::handler(ctx, action_type, action_value, destination)
+        let params = ValidateCapabilityParams {
+            version: 1,
+            program_scope: action_type as u64,
+            asset_scope: 0,
+            amount: action_value,
+            destination: Some(destination),
+            check_cooldown: true,
+        };
+        instructions::validate_capability::handler(ctx, params)
     }
 
     /// Record capability usage after successful action.
@@ -106,7 +114,7 @@ pub struct IssueCapabilityParams {
 }
 
 /// Dispute resolution options
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug)]
 pub enum DisputeResolution {
     /// Dispute resolved in favor of agent - capability remains active
     Cleared,

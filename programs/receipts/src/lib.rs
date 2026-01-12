@@ -32,8 +32,9 @@ pub mod receipts {
     pub fn batch_emit(
         ctx: Context<BatchEmit>,
         receipts: Vec<EmitReceiptParams>,
+        nonce: u64,
     ) -> Result<()> {
-        instructions::batch_emit::handler(ctx, receipts)
+        instructions::batch_emit::handler(ctx, receipts, nonce)
     }
 }
 

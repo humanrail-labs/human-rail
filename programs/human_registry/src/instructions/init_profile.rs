@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{HumanProfile, MAX_ATTESTATIONS};
+use crate::state::{HumanProfileLegacy, MAX_ATTESTATIONS};
 
 /// Initialize a new HumanProfile PDA for the calling authority.
 pub fn handle(ctx: Context<InitProfile>) -> Result<()> {
@@ -30,11 +30,11 @@ pub struct InitProfile<'info> {
     #[account(
         init,
         payer = authority,
-        space = 8 + HumanProfile::LEN,
+        space = 8 + HumanProfileLegacy::LEN,
         seeds = [b"human_profile", authority.key().as_ref()],
         bump
     )]
-    pub profile: Account<'info, HumanProfile>,
+    pub profile: Account<'info, HumanProfileLegacy>,
 
     /// System program for account creation.
     pub system_program: Program<'info, System>,

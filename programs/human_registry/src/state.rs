@@ -8,7 +8,7 @@ pub const UNIQUE_THRESHOLD: u16 = 100;
 
 /// HumanProfile stores per-wallet identity score and attestations.
 #[account]
-pub struct HumanProfile {
+pub struct HumanProfileLegacy {
     /// The wallet this profile belongs to.
     pub wallet: Pubkey,
     /// Aggregated identity score from all attestations.
@@ -27,7 +27,7 @@ pub struct HumanProfile {
     pub bump: u8,
 }
 
-impl HumanProfile {
+impl HumanProfileLegacy {
     /// Account size without the 8-byte Anchor discriminator.
     pub const LEN: usize = 32  // wallet
         + 2 // human_score

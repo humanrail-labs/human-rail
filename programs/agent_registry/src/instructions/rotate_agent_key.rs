@@ -30,7 +30,7 @@ pub fn handler(ctx: Context<RotateAgentKey>, new_signing_key: Pubkey) -> Result<
     rotation.new_key = new_signing_key;
     rotation.rotated_at = clock.unix_timestamp;
     rotation.old_key_expires_at = clock.unix_timestamp + KEY_ROTATION_GRACE_PERIOD;
-    rotation.sequence = ctx.accounts.agent.action_count as u32; // Use action count as sequence
+    rotation.sequence = agent.action_count as u32; // Use action count as sequence
     rotation.bump = ctx.bumps.key_rotation;
 
     // Update agent with new key

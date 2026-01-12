@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::{
     error::HumanRegistryError,
-    state::{AttestationRef, HumanProfile, MAX_ATTESTATIONS},
+    state::{AttestationRef, HumanProfileLegacy, MAX_ATTESTATIONS},
 };
 
 /// Register a new attestation and update the profile's human score.
@@ -85,7 +85,7 @@ pub struct RegisterAttestation<'info> {
         seeds = [b"human_profile", authority.key().as_ref()],
         bump = profile.bump
     )]
-    pub profile: Account<'info, HumanProfile>,
+    pub profile: Account<'info, HumanProfileLegacy>,
 }
 
 /// Event emitted when an attestation is registered.

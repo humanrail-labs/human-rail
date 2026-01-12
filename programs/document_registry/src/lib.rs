@@ -212,7 +212,7 @@ pub enum HashAlgorithm {
 }
 
 /// Signature tier levels
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Debug)]
 pub enum SignatureTier {
     /// Tier 0: Basic wallet notarization
     #[default]

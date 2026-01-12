@@ -189,8 +189,7 @@ pub struct SignDocumentVerified<'info> {
 }
 
 /// Known Human Registry program ID
-pub const HUMAN_REGISTRY_PROGRAM_ID: Pubkey = 
-    "Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR".parse().unwrap();
+pub const HUMAN_REGISTRY_PROGRAM_ID: Pubkey = Pubkey::new_from_array([163, 107, 199, 192, 77, 25, 218, 134, 105, 231, 138, 11, 174, 237, 41, 95, 143, 127, 34, 229, 123, 141, 100, 199, 144, 162, 99, 255, 28, 236, 148, 166]); // 
 
 #[event]
 pub struct VerifiedDocumentSigned {

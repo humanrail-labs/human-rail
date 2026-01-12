@@ -4,7 +4,7 @@ use crate::{
     utils::can_accept_response,
 };
 use anchor_lang::prelude::*;
-use human_registry::{program::HumanRegistry, state::HumanProfile};
+use human_registry::{program::HumanRegistry, state::HumanProfileLegacy};
 
 #[derive(Accounts)]
 pub struct SubmitResponse<'info> {
@@ -29,7 +29,7 @@ pub struct SubmitResponse<'info> {
         bump = worker_profile.bump,
         seeds::program = human_registry_program.key()
     )]
-    pub worker_profile: Account<'info, HumanProfile>,
+    pub worker_profile: Account<'info, HumanProfileLegacy>,
 
     #[account(mut)]
     pub worker: Signer<'info>,

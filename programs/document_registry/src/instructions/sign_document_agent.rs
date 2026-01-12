@@ -307,11 +307,9 @@ pub struct SignDocumentAgent<'info> {
 }
 
 /// Known program IDs
-pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = 
-    "299gbw6p9rCpp7SBR9tts7qTgGie591JPY6RMAXoJHE6".parse().unwrap();
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = Pubkey::new_from_array([16, 242, 38, 172, 134, 212, 93, 62, 60, 19, 124, 238, 6, 252, 198, 86, 90, 208, 23, 56, 212, 27, 13, 107, 111, 36, 94, 57, 224, 218, 83, 191]); // 
 
-pub const DELEGATION_PROGRAM_ID: Pubkey = 
-    "74vfEGbYWUsRq7z8oSgp6gNxx3ENVQEBqXFJqHrB3Xx2".parse().unwrap();
+pub const DELEGATION_PROGRAM_ID: Pubkey = Pubkey::new_from_array([90, 39, 137, 90, 211, 26, 26, 242, 139, 142, 236, 12, 205, 98, 95, 110, 6, 242, 2, 231, 78, 55, 143, 76, 223, 233, 245, 31, 165, 94, 130, 63]); // 
 
 #[event]
 pub struct AgentDocumentSigned {
