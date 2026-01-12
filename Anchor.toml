@@ -10,13 +10,13 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-agent_registry = "299gbw6p9rCpp7SBR9tts7qTgGie591JPY6RMAXoJHE6"
-data_blink = "BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5"
-delegation = "74vfEGbYWUsRq7z8oSgp6gNxx3ENVQEBqXFJqHrB3Xx2"
-document_registry = "ERdbeXCpPoXsZmgpw5ALa14ujxnUhb7vVSpkmhQ9cY33"
-human_pay = "6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe"
-human_registry = "Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR"
-receipts = "9ZKqiKqi3zXhNvTevEJ8qD6F25YdoymXXSTzsiEviAi"
+agent_registry = "G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5"
+data_blink = "2SQKYWBmqn1XqvkJynbRnCNGhhEyaQy5EF9aJcLVzjQ5"
+delegation = "5LJLTUQR26xPn2mfyM6Y7uMBezKKpATt3CKfKeCnFdtR"
+document_registry = "EUVJE9VqpejLp56fpVZyi2QTRTDb5kSQ8KLy5Coyc78N"
+human_pay = "AZWKLjsKYYCajnN1XSC8KGZocRUMRE8GSWtCSnUgz22r"
+human_registry = "7f9UsctTCcCnQmFCe1rphfuf3SJtkx63qnhwR6hVn5eh"
+receipts = "Fgz7HoBTyjBQ9nmkVrzn1ccCtzWyBUkfMDov2eJdXnGr"
 
 [programs.localnet]
 agent_registry = "G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5"
