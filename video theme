@@ -1,0 +1,56 @@
+# project structure
+cd /workspaces/human-rail
+ls -la programs/
+
+# 8 programs
+echo "=== HumanRail Programs ==="
+echo "1. human_registry - Human identity & attestations"
+echo "2. human_pay - Payment rail"
+echo "3. data_blink - RLHF micro-tasks"
+echo "4. agent_registry - AI agent identity (NEW)"
+echo "5. delegation - Capability permissions (NEW)"
+echo "6. receipts - Audit trail (NEW)"
+echo "7. document_registry - Document signing"
+echo "8. common - Shared types (NEW)"
+
+# program IDs
+echo ""
+echo "=== Program IDs (Devnet) ==="
+grep -A15 "\[programs.devnet\]" Anchor.toml
+
+# all programs compile
+echo ""
+echo "=== Build Check ==="
+cargo check --workspace 2>&1 | tail -5
+
+# agent_registry structure
+echo ""
+echo "=== Agent Registry - New KYA Program ==="
+ls programs/agent_registry/src/instructions/
+
+# delegation capabilities
+echo ""
+echo "=== Delegation - Capability System ==="
+grep -A20 "pub struct Capability" programs/delegation/src/state.rs | head -25
+
+# IDLs generated
+echo ""
+echo "=== Generated IDLs ==="
+ls -la target/idl/
+
+# line count
+echo ""
+echo "=== Code Stats ==="
+find programs -name "*.rs" | xargs wc -l | tail -1
+
+# Project overview
+tree programs -L 2 --dirsfirst 2>/dev/null || ls -la programs/
+
+# Compilation success
+cargo check --workspace 2>&1 | grep -E "Compiling|Finished|warning.*generated"
+
+# key file (agent registration)
+head -50 programs/agent_registry/src/instructions/register_agent.rs
+
+# capability struct
+grep -A30 "pub struct Capability {" programs/delegation/src/state.rs
