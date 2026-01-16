@@ -4,7 +4,6 @@ import { PublicKey } from '@solana/web3.js';
 // PROGRAM IDS
 // =============================================================================
 
-// Core HumanRail programs
 export const HUMAN_REGISTRY_PROGRAM_ID = new PublicKey(
   'Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR'
 );
@@ -17,7 +16,6 @@ export const DATA_BLINK_PROGRAM_ID = new PublicKey(
   'BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5'
 );
 
-// KYA (Know Your Agent) programs
 export const AGENT_REGISTRY_PROGRAM_ID = new PublicKey(
   'AgntReg1111111111111111111111111111111111111'
 );
@@ -38,36 +36,23 @@ export const DOCUMENT_REGISTRY_PROGRAM_ID = new PublicKey(
 // PDA SEEDS
 // =============================================================================
 
-// Human Registry seeds
 export const HUMAN_PROFILE_SEED = 'human_profile';
-
-// Agent Registry seeds
 export const AGENT_SEED = 'agent';
 export const AGENT_STATS_SEED = 'agent_stats';
 export const KEY_ROTATION_SEED = 'key_rotation';
-
-// Delegation seeds
 export const CAPABILITY_SEED = 'capability';
 export const REVOCATION_SEED = 'revocation';
 export const FREEZE_SEED = 'freeze';
 export const USAGE_SEED = 'usage';
-
-// Receipts seeds
 export const RECEIPT_SEED = 'receipt';
 export const RECEIPT_INDEX_SEED = 'receipt_index';
 export const BATCH_SEED = 'batch';
-
-// Document Registry seeds
 export const DOCUMENT_SEED = 'document';
 export const SIGNATURE_SEED = 'signature';
 export const SIGNING_RECEIPT_SEED = 'signing_receipt';
 export const REQUIRED_SIGNER_SEED = 'required_signer';
-
-// Human Pay seeds
 export const INVOICE_SEED = 'invoice';
 export const INVOICE_VAULT_SEED = 'invoice_vault';
-
-// Data Blink seeds
 export const TASK_SEED = 'task';
 export const TASK_VAULT_SEED = 'task_vault';
 export const RESPONSE_SEED = 'response';
@@ -77,23 +62,14 @@ export const WORKER_STATS_SEED = 'worker_stats';
 // THRESHOLDS AND LIMITS
 // =============================================================================
 
-// Human Registry
 export const MAX_ATTESTATIONS = 8;
 export const UNIQUE_THRESHOLD = 100;
 export const MIN_HUMAN_SCORE_FOR_AGENT = 50;
-
-// Agent Registry
 export const MAX_KEY_HISTORY = 3;
-export const KEY_ROTATION_GRACE_PERIOD = 86400; // 24 hours in seconds
-
-// Delegation
+export const KEY_ROTATION_GRACE_PERIOD = 86400;
 export const MAX_DESTINATION_ALLOWLIST = 10;
 export const MAX_BATCH_SIZE = 10;
-
-// Receipts
 export const MAX_OFFCHAIN_REF = 64;
-
-// Document Registry
 export const MAX_URI_LEN = 128;
 export const MAX_IDENTIFIER_LEN = 32;
 export const MAX_SIG_METADATA_LEN = 64;
@@ -149,9 +125,12 @@ export function getCapabilityPDA(
   );
 }
 
-export function getFreezePDA(agent: PublicKey): [PublicKey, number] {
+export function getFreezePDA(
+  principal: PublicKey,
+  agent: PublicKey
+): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from(FREEZE_SEED), agent.toBuffer()],
+    [Buffer.from(FREEZE_SEED), principal.toBuffer(), agent.toBuffer()],
     DELEGATION_PROGRAM_ID
   );
 }
@@ -205,8 +184,6 @@ export function getTaskPDA(
     DATA_BLINK_PROGRAM_ID
   );
 }
-
-// Document Registry PDAs
 
 export function getDocumentPDA(docHash: Uint8Array): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
