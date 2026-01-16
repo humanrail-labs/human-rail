@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::{
     error::DelegationError,
-    state::EmergencyFreezeRecord,
+    state::{Capability, EmergencyFreezeRecord},
 };
 
 pub fn handler(ctx: Context<EmergencyFreeze>) -> Result<()> {
@@ -34,20 +34,29 @@ pub fn handler(ctx: Context<EmergencyFreeze>) -> Result<()> {
 
 #[derive(Accounts)]
 pub struct EmergencyFreeze<'info> {
-    /// Principal initiating the freeze - must sign
+    /// Principal initiating the freeze - must sign and own the capability
     #[account(mut)]
     pub principal: Signer<'info>,
 
-    /// The agent to freeze
-    /// CHECK: We just need the pubkey to create the freeze record
+    /// Capability proving principal→agent relationship
+    /// BOTH constraints required to prevent fake capability attack
+    #[account(
+        constraint = capability.principal == principal.key() @ DelegationError::Unauthorized,
+        constraint = capability.agent == agent.key() @ DelegationError::AgentMismatch,
+    )]
+    pub capability: Account<'info, Capability>,
+
+    /// The agent to freeze - must match capability.agent
+    /// CHECK: Validated via capability.agent constraint above
     pub agent: UncheckedAccount<'info>,
 
-    /// Freeze record PDA
+    /// Freeze record PDA - principal-specific to prevent DoS
+    /// Seeds: [b"freeze", principal, agent] prevents global namespace collision
     #[account(
         init,
         payer = principal,
         space = EmergencyFreezeRecord::LEN,
-        seeds = [b"freeze", agent.key().as_ref()],
+        seeds = [b"freeze", principal.key().as_ref(), agent.key().as_ref()],
         bump
     )]
     pub freeze_record: Account<'info, EmergencyFreezeRecord>,

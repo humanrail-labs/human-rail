@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::{
     error::DelegationError,
-    state::EmergencyFreezeRecord,
+    state::{Capability, EmergencyFreezeRecord},
 };
 
 pub fn handler(ctx: Context<Unfreeze>) -> Result<()> {
@@ -34,20 +34,29 @@ pub fn handler(ctx: Context<Unfreeze>) -> Result<()> {
 
 #[derive(Accounts)]
 pub struct Unfreeze<'info> {
-    /// Principal who initiated the freeze - must sign
+    /// Principal who initiated the freeze - must sign and own the capability
     #[account(mut)]
     pub principal: Signer<'info>,
 
-    /// The agent to unfreeze
-    /// CHECK: Validated via freeze_record constraint
+    /// Capability proving principal→agent relationship
+    #[account(
+        constraint = capability.principal == principal.key() @ DelegationError::Unauthorized,
+        constraint = capability.agent == agent.key() @ DelegationError::AgentMismatch,
+    )]
+    pub capability: Account<'info, Capability>,
+
+    /// The agent to unfreeze - must match capability.agent
+    /// CHECK: Validated via capability.agent constraint above
     pub agent: UncheckedAccount<'info>,
 
-    /// Freeze record to update
+    /// Freeze record to update - principal-specific
+    /// Seeds: [b"freeze", principal, agent]
     #[account(
         mut,
-        seeds = [b"freeze", agent.key().as_ref()],
-        bump = freeze_record.bump,
-        constraint = freeze_record.frozen_by == principal.key() @ DelegationError::Unauthorized
+        seeds = [b"freeze", principal.key().as_ref(), agent.key().as_ref()],
+        bump,
+        constraint = freeze_record.frozen_by == principal.key() @ DelegationError::Unauthorized,
+        close = principal
     )]
     pub freeze_record: Account<'info, EmergencyFreezeRecord>,
 }
