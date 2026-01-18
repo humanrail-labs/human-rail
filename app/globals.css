@@ -123,3 +123,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Neobrutalist Button Styles */
+:root {
+  --border-radius: 5px;
+  --box-shadow-x: 4px;
+  --box-shadow-y: 4px;
+  --reverse-box-shadow-x: -4px;
+  --reverse-box-shadow-y: -4px;
+}
+
+@theme inline {
+  --radius-base: 5px;
+  --shadow-shadow: 4px 4px 0px 0px var(--color-emerald-400);
+  --shadow-shadowRed: 4px 4px 0px 0px var(--color-red-400);
+  --shadow-shadowPurple: 4px 4px 0px 0px var(--color-purple-400);
+  --shadow-shadowBlue: 4px 4px 0px 0px var(--color-blue-400);
+  --shadow-shadowNeutral: 4px 4px 0px 0px var(--color-neutral-600);
+  --translate-boxShadowX: 4px;
+  --translate-boxShadowY: 4px;
+  --translate-reverseBoxShadowX: -4px;
+  --translate-reverseBoxShadowY: -4px;
+  --font-weight-base: 500;
+  --font-weight-heading: 700;
+}

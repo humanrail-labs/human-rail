@@ -4,7 +4,7 @@ import { FC } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { WalletButton } from "@/components/wallet/wallet-button";
 import { useCluster } from "@/lib/solana/cluster-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -94,7 +94,7 @@ export const Navbar: FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <WalletMultiButton />
+          <WalletButton />
         </div>
       </div>
     </nav>

@@ -1,0 +1,626 @@
+"use client";
+
+import { useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { PublicKey } from "@solana/web3.js";
+import { motion } from "framer-motion";
+import { Navbar } from "@/components/layout/navbar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useCluster } from "@/lib/solana/cluster-context";
+import { useHumanProfile } from "@/lib/hooks/use-human-profile";
+import { useDataBlink, Task, CreateTaskParams } from "@/lib/hooks/use-datablink";
+import {
+  Cpu,
+  Plus,
+  RefreshCw,
+  CheckCircle2,
+  Users,
+  Coins,
+  AlertTriangle,
+  List,
+  Target,
+  XCircle,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+
+export default function DataBlinkPage() {
+  const { connected, publicKey } = useWallet();
+  const { cluster } = useCluster();
+  const { hasProfile } = useHumanProfile();
+  const {
+    tasks,
+    myTasks,
+    myResponses,
+    workerStats,
+    loading,
+    error,
+    stats,
+    refetch,
+    createTask,
+    closeTask,
+    claimRewards,
+  } = useDataBlink();
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+
+  // Form state
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [rewardPerResponse, setRewardPerResponse] = useState("1000000000"); // 1 token (9 decimals)
+  const [totalBudget, setTotalBudget] = useState("10000000000"); // 10 tokens
+  const [maxResponses, setMaxResponses] = useState("100");
+  const [humanRequirements, setHumanRequirements] = useState("0");
+  const [allowMultiple, setAllowMultiple] = useState(false);
+  const [rewardMint, setRewardMint] = useState("");
+
+  const handleCreateTask = async () => {
+    if (!rewardMint) {
+      toast.error("Please enter a reward token mint address");
+      return;
+    }
+
+    let mintPubkey: PublicKey;
+    try {
+      mintPubkey = new PublicKey(rewardMint);
+    } catch {
+      toast.error("Invalid mint address");
+      return;
+    }
+
+    if (!taskTitle.trim()) {
+      toast.error("Please enter a task title");
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const metadata = {
+        title: taskTitle,
+        description: taskDescription,
+        createdAt: Date.now(),
+        creator: publicKey?.toBase58(),
+      };
+      const metadataUri = `data:application/json;base64,${Buffer.from(JSON.stringify(metadata)).toString("base64")}`;
+
+      const params: CreateTaskParams = {
+        rewardMint: mintPubkey,
+        rewardPerResponse: parseInt(rewardPerResponse) || 1000000000,
+        totalBudget: parseInt(totalBudget) || 10000000000,
+        humanRequirements: parseInt(humanRequirements) || 0,
+        metadataUri: metadataUri,
+        maxResponses: parseInt(maxResponses) || 0,
+        allowMultipleResponses: allowMultiple,
+      };
+
+      const signature = await createTask(params);
+      toast.success("Task created!", {
+        description: `Transaction: ${signature.slice(0, 8)}...`,
+        action: {
+          label: "View",
+          onClick: () => window.open(`https://explorer.solana.com/tx/${signature}?cluster=${cluster}`, "_blank"),
+        },
+      });
+      setDialogOpen(false);
+      resetForm();
+    } catch (err: any) {
+      console.error("Failed to create task:", err);
+      toast.error("Failed to create task", {
+        description: err.message || "Unknown error",
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleCloseTask = async (task: Task) => {
+    try {
+      const signature = await closeTask(task.pda);
+      toast.success("Task closed!", {
+        description: `Remaining funds returned. TX: ${signature.slice(0, 8)}...`,
+      });
+    } catch (err: any) {
+      toast.error("Failed to close task", { description: err.message });
+    }
+  };
+
+  const handleClaimReward = async (responsePda: PublicKey) => {
+    try {
+      const signature = await claimRewards(responsePda);
+      toast.success("Rewards claimed!", {
+        description: `TX: ${signature.slice(0, 8)}...`,
+      });
+    } catch (err: any) {
+      toast.error("Failed to claim rewards", { description: err.message });
+    }
+  };
+
+  const resetForm = () => {
+    setTaskTitle("");
+    setTaskDescription("");
+    setRewardPerResponse("1000000000");
+    setTotalBudget("10000000000");
+    setMaxResponses("100");
+    setHumanRequirements("0");
+    setAllowMultiple(false);
+    setRewardMint("");
+  };
+
+  const formatTokenAmount = (amount: bigint, decimals: number = 9): string => {
+    const divisor = BigInt(10 ** decimals);
+    const whole = amount / divisor;
+    const fraction = amount % divisor;
+    if (fraction === BigInt(0)) return whole.toString();
+    return `${whole}.${fraction.toString().padStart(decimals, "0").replace(/0+$/, "")}`;
+  };
+
+  const parseMetadataUri = (uri: string): { title?: string; description?: string } => {
+    try {
+      if (uri.startsWith("data:application/json;base64,")) {
+        const base64 = uri.replace("data:application/json;base64,", "");
+        return JSON.parse(Buffer.from(base64, "base64").toString());
+      }
+      return {};
+    } catch {
+      return {};
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-neutral-950 text-white">
+      <Navbar />
+
+      <main className="mx-auto max-w-6xl px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Header */}
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600">
+                  <Cpu className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold">DataBlink</h1>
+                  <p className="text-neutral-400">Micro-tasks for RLHF & data labeling</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={refetch} disabled={loading}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-cyan-600 hover:bg-cyan-700" disabled={!connected || !hasProfile}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Task
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg border-neutral-800 bg-neutral-900">
+                  <DialogHeader>
+                    <DialogTitle>Create Data Task</DialogTitle>
+                    <DialogDescription>Create a micro-task for verified humans to complete</DialogDescription>
+                  </DialogHeader>
+                  <div className="max-h-[60vh] space-y-4 overflow-y-auto py-4">
+                    <div className="space-y-2">
+                      <Label>Task Title *</Label>
+                      <Input
+                        value={taskTitle}
+                        onChange={(e) => setTaskTitle(e.target.value)}
+                        placeholder="Label these images..."
+                        className="border-neutral-700 bg-neutral-800"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Input
+                        value={taskDescription}
+                        onChange={(e) => setTaskDescription(e.target.value)}
+                        placeholder="Detailed instructions for workers..."
+                        className="border-neutral-700 bg-neutral-800"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Reward Token Mint (Token-2022) *</Label>
+                      <Input
+                        value={rewardMint}
+                        onChange={(e) => setRewardMint(e.target.value)}
+                        placeholder="e.g. BDVRmn2yQsgL8Kf27LfR2qNsdqHY5aHrSKyNja5kDdAC"
+                        className="border-neutral-700 bg-neutral-800 font-mono text-sm"
+                      />
+                      <p className="text-xs text-neutral-500">Must be a Token-2022 mint you hold tokens for</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Reward per Response</Label>
+                        <Input
+                          type="number"
+                          value={rewardPerResponse}
+                          onChange={(e) => setRewardPerResponse(e.target.value)}
+                          className="border-neutral-700 bg-neutral-800"
+                        />
+                        <p className="text-xs text-neutral-500">In base units (9 decimals)</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Total Budget</Label>
+                        <Input
+                          type="number"
+                          value={totalBudget}
+                          onChange={(e) => setTotalBudget(e.target.value)}
+                          className="border-neutral-700 bg-neutral-800"
+                        />
+                        <p className="text-xs text-neutral-500">Total tokens to escrow</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Max Responses</Label>
+                        <Input
+                          type="number"
+                          value={maxResponses}
+                          onChange={(e) => setMaxResponses(e.target.value)}
+                          className="border-neutral-700 bg-neutral-800"
+                        />
+                        <p className="text-xs text-neutral-500">0 = unlimited</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Min Human Score</Label>
+                        <Input
+                          type="number"
+                          value={humanRequirements}
+                          onChange={(e) => setHumanRequirements(e.target.value)}
+                          min="0"
+                          max="10000"
+                          className="border-neutral-700 bg-neutral-800"
+                        />
+                        <p className="text-xs text-neutral-500">0-10000 (100 = 1%)</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800 p-3">
+                      <input
+                        type="checkbox"
+                        id="allowMultiple"
+                        checked={allowMultiple}
+                        onChange={(e) => setAllowMultiple(e.target.checked)}
+                        className="h-4 w-4 rounded border-neutral-600 bg-neutral-700"
+                      />
+                      <div>
+                        <Label htmlFor="allowMultiple" className="cursor-pointer">Allow Multiple Responses</Label>
+                        <p className="text-xs text-neutral-500">Same wallet can submit multiple times</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 border-t border-neutral-800 pt-4">
+                    <Button variant="ghost" onClick={() => setDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleCreateTask} className="bg-cyan-600 hover:bg-cyan-700" disabled={creating}>
+                      {creating ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <Cpu className="mr-2 h-4 w-4" />
+                          Create Task
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+
+          {/* Error Display */}
+          {error && (
+            <Card className="mb-6 border-red-900/50 bg-red-950/20">
+              <CardContent className="py-4">
+                <div className="flex gap-3">
+                  <XCircle className="h-5 w-5 shrink-0 text-red-500" />
+                  <div className="text-sm">
+                    <p className="font-medium text-red-500">Error</p>
+                    <p className="mt-1 text-neutral-400">{error}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Not Connected State */}
+          {!connected && (
+            <Card className="border-neutral-800 bg-neutral-900/50">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <Cpu className="mb-4 h-16 w-16 text-neutral-600" />
+                <h2 className="mb-2 text-xl font-semibold">Connect Your Wallet</h2>
+                <p className="mb-6 text-neutral-400">Connect a Solana wallet to use DataBlink</p>
+                <WalletMultiButton />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* No Profile Warning */}
+          {connected && !hasProfile && (
+            <Card className="mb-6 border-yellow-900/50 bg-yellow-950/20">
+              <CardContent className="py-4">
+                <div className="flex gap-3">
+                  <AlertTriangle className="h-5 w-5 shrink-0 text-yellow-500" />
+                  <div className="text-sm">
+                    <p className="font-medium text-yellow-500">Human Profile Required</p>
+                    <p className="mt-1 text-neutral-400">
+                      Create a human profile to participate in data tasks.{" "}
+                      <a href="/human" className="text-yellow-500 underline">
+                        Go to Human Dashboard →
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Main Content */}
+          {connected && hasProfile && (
+            <>
+              {/* Stats Cards */}
+              <div className="mb-8 grid gap-4 md:grid-cols-4">
+                <Card className="border-neutral-800 bg-neutral-900/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-neutral-400">Open Tasks</p>
+                        <p className="text-2xl font-bold">{stats.totalOpenTasks}</p>
+                      </div>
+                      <Target className="h-8 w-8 text-cyan-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-neutral-800 bg-neutral-900/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-neutral-400">My Tasks</p>
+                        <p className="text-2xl font-bold">{stats.myTaskCount}</p>
+                      </div>
+                      <List className="h-8 w-8 text-purple-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-neutral-800 bg-neutral-900/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-neutral-400">My Responses</p>
+                        <p className="text-2xl font-bold">{stats.myResponseCount}</p>
+                      </div>
+                      <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-neutral-800 bg-neutral-900/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-neutral-400">Tasks Completed</p>
+                        <p className="text-2xl font-bold">{stats.tasksCompleted}</p>
+                      </div>
+                      <Coins className="h-8 w-8 text-yellow-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* My Tasks Section */}
+              {myTasks.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="mb-4 text-xl font-semibold">My Created Tasks</h2>
+                  <div className="space-y-4">
+                    {myTasks.map((task) => {
+                      const metadata = parseMetadataUri(task.metadataUri);
+                      return (
+                        <Card key={task.pda.toBase58()} className="border-neutral-800 bg-neutral-900/50">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-semibold">{metadata.title || "Untitled Task"}</h3>
+                                  <Badge variant={task.isOpen ? "default" : "secondary"}>
+                                    {task.isOpen ? "Open" : "Closed"}
+                                  </Badge>
+                                </div>
+                                {metadata.description && (
+                                  <p className="mt-1 text-sm text-neutral-400">{metadata.description}</p>
+                                )}
+                                <div className="mt-3 flex flex-wrap gap-4 text-sm text-neutral-400">
+                                  <span>
+                                    Responses: {task.responseCount}
+                                    {task.maxResponses > 0 && `/${task.maxResponses}`}
+                                  </span>
+                                  <span>Reward: {formatTokenAmount(task.rewardPerResponse)} per response</span>
+                                  <span>
+                                    Budget: {formatTokenAmount(task.consumedBudget)}/{formatTokenAmount(task.totalBudget)}
+                                  </span>
+                                </div>
+                              </div>
+                              {task.isOpen && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleCloseTask(task)}
+                                  className="border-red-800 text-red-400 hover:bg-red-950"
+                                >
+                                  Close Task
+                                </Button>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Available Tasks */}
+              <div className="mb-8">
+                <h2 className="mb-4 text-xl font-semibold">Available Tasks</h2>
+                {loading ? (
+                  <Card className="border-neutral-800 bg-neutral-900/50">
+                    <CardContent className="flex items-center justify-center py-16">
+                      <Loader2 className="h-8 w-8 animate-spin text-cyan-500" />
+                    </CardContent>
+                  </Card>
+                ) : tasks.length === 0 ? (
+                  <Card className="border-neutral-800 bg-neutral-900/50">
+                    <CardContent className="flex flex-col items-center justify-center py-16">
+                      <Cpu className="mb-4 h-16 w-16 text-cyan-500" />
+                      <h2 className="mb-2 text-xl font-semibold">No Tasks Available</h2>
+                      <p className="mb-6 text-neutral-400">Create a task or check back for available work</p>
+                      <Button onClick={() => setDialogOpen(true)} className="bg-cyan-600 hover:bg-cyan-700">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Task
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {tasks.map((task) => {
+                      const metadata = parseMetadataUri(task.metadataUri);
+                      const isMyTask = publicKey && task.creator.equals(publicKey);
+                      return (
+                        <Card key={task.pda.toBase58()} className="border-neutral-800 bg-neutral-900/50">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-semibold">{metadata.title || "Untitled Task"}</h3>
+                                  {isMyTask && (
+                                    <Badge variant="outline" className="border-cyan-800 text-cyan-400">
+                                      Your Task
+                                    </Badge>
+                                  )}
+                                </div>
+                                {metadata.description && (
+                                  <p className="mt-1 text-sm text-neutral-400">{metadata.description}</p>
+                                )}
+                                <div className="mt-3 flex flex-wrap gap-4 text-sm text-neutral-400">
+                                  <span className="flex items-center gap-1">
+                                    <Coins className="h-4 w-4 text-yellow-500" />
+                                    {formatTokenAmount(task.rewardPerResponse)} reward
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Users className="h-4 w-4 text-emerald-500" />
+                                    {task.responseCount}
+                                    {task.maxResponses > 0 && `/${task.maxResponses}`} responses
+                                  </span>
+                                  {task.humanRequirements > 0 && (
+                                    <span className="flex items-center gap-1">
+                                      <Target className="h-4 w-4 text-purple-500" />
+                                      Min score: {task.humanRequirements / 100}%
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="mt-2 font-mono text-xs text-neutral-500">
+                                  Creator: {task.creator.toBase58().slice(0, 8)}...
+                                </p>
+                              </div>
+                              {!isMyTask && (
+                                <Button className="bg-cyan-600 hover:bg-cyan-700" disabled>
+                                  Respond (Coming Soon)
+                                </Button>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* My Responses */}
+              {myResponses.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="mb-4 text-xl font-semibold">My Responses</h2>
+                  <div className="space-y-4">
+                    {myResponses.map((response) => (
+                      <Card key={response.pda.toBase58()} className="border-neutral-800 bg-neutral-900/50">
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-mono text-sm text-neutral-400">
+                                Task: {response.task.toBase58().slice(0, 8)}...
+                              </p>
+                              <div className="mt-2 flex gap-4 text-sm">
+                                <span>Choice: {response.choice}</span>
+                                <span>Reward: {formatTokenAmount(response.rewardAmount)}</span>
+                                <Badge variant={response.isClaimed ? "secondary" : "default"}>
+                                  {response.isClaimed ? "Claimed" : "Unclaimed"}
+                                </Badge>
+                              </div>
+                            </div>
+                            {!response.isClaimed && (
+                              <Button
+                                onClick={() => handleClaimReward(response.pda)}
+                                className="bg-yellow-600 hover:bg-yellow-700"
+                              >
+                                <Coins className="mr-2 h-4 w-4" />
+                                Claim Reward
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Info Card */}
+          <Card className="mt-8 border-cyan-900/50 bg-cyan-950/20">
+            <CardContent className="py-4">
+              <div className="flex gap-3">
+                <Cpu className="h-5 w-5 shrink-0 text-cyan-400" />
+                <div className="text-sm">
+                  <p className="font-medium text-cyan-400">DataBlink Rail</p>
+                  <p className="mt-1 text-neutral-400">
+                    A micro-task platform for RLHF data labeling, content moderation, and other human-in-the-loop tasks
+                    - powered by verified human identities for Sybil-resistant, high-quality data collection.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </main>
+    </div>
+  );
+}

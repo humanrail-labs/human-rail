@@ -1,4 +1,4 @@
-entrypoint = "index.js"
+entrypoint = "app/layout.tsx"
 modules = ["nodejs-22"]
 hidden = [".config", "package-lock.json"]
 
@@ -7,9 +7,10 @@ requiredFiles = [".replit", "replit.nix", "package.json", "package-lock.json"]
 
 [nix]
 channel = "stable-24_11"
+packages = ["zip", "unzip", "tree", "solana-cli"]
 
 [deployment]
-run = ["node", "index.js"]
+run = ["sh", "-c", "npm run build && npm run start -- -p 5000"]
 deploymentTarget = "autoscale"
 ignorePorts = false
 

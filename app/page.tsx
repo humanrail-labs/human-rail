@@ -332,23 +332,22 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-neutral-800 py-8">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <Image src="/logo.png" alt="HumanRail" width={24} height={24} />
-              <span className="text-sm text-neutral-500">
-                HumanRail Protocol © {new Date().getFullYear()}
-              </span>
-            </div>
-            <div className="flex gap-6 text-sm text-neutral-500">
-              <a href="#" className="hover:text-white">Documentation</a>
-              <a href="#" className="hover:text-white">GitHub</a>
-              <a href="#" className="hover:text-white">Twitter</a>
-            </div>
+            <footer className="border-t border-neutral-800 py-8">
+              <div className="mx-auto max-w-7xl px-4">
+                <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                  <div className="flex items-center gap-2">
+                    <Image src="/logo.png" alt="HumanRail" width={24} height={24} />
+                    <span className="text-sm text-neutral-500">
+                      HumanRail Protocol © {new Date().getFullYear()}
+                    </span>
+                  </div>
+                  <div className="flex gap-6 text-sm text-neutral-500">
+                    <a href="https://github.com/humanrail-labs/human-rail" target="_blank" rel="noopener noreferrer" className="hover:text-white">GitHub</a>
+                    <a href="https://x.com/HumanRail" target="_blank" rel="noopener noreferrer" className="hover:text-white">Twitter</a>
+                  </div>
+                </div>
+              </div>
+            </footer>
           </div>
-        </div>
-      </footer>
-    </div>
-  );
-}
+        );
+      }
