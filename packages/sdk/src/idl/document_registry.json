@@ -1,0 +1,4255 @@
+{
+  "address": "FZwCZWpLsn8kL1JAPPNtgrGBw5kaaHsbLyrJ7znVbwVE",
+  "metadata": {
+    "name": "document_registry",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Document signing and notarization with verified human and agent signatures - HumanRail"
+  },
+  "instructions": [
+    {
+      "name": "add_required_signer",
+      "docs": [
+        "Add a co-signer requirement to a document.",
+        "Specifies required roles/signers for the document to be fully executed."
+      ],
+      "discriminator": [
+        225,
+        110,
+        183,
+        253,
+        214,
+        198,
+        70,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "docs": [
+            "Document creator"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document to add requirement to"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        },
+        {
+          "name": "required_signer",
+          "docs": [
+            "The required signer specification PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  113,
+                  117,
+                  105,
+                  114,
+                  101,
+                  100,
+                  95,
+                  115,
+                  105,
+                  103,
+                  110,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "RequiredSignerParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "anchor_offchain_signature",
+      "docs": [
+        "Anchor an offchain-signed message onchain (Mode B).",
+        "Verifies Ed25519 signature via instruction introspection.",
+        "Use for portable signatures across systems."
+      ],
+      "discriminator": [
+        190,
+        29,
+        93,
+        87,
+        248,
+        193,
+        142,
+        216
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "docs": [
+            "The signer anchoring their offchain signature"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document being signed"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signature_record",
+          "docs": [
+            "The signature record PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  97,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signing_receipt",
+          "docs": [
+            "Receipt for audit trail"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "instructions_sysvar",
+          "docs": [
+            "Instructions sysvar for Ed25519 verification"
+          ],
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "AnchorOffchainParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "finalize_document",
+      "docs": [
+        "Finalize a document - locks it from further modifications.",
+        "Only the creator can finalize. Once final, signatures are binding."
+      ],
+      "discriminator": [
+        128,
+        34,
+        139,
+        201,
+        4,
+        191,
+        192,
+        226
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "docs": [
+            "Creator of the document"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document to finalize"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "register_document",
+      "docs": [
+        "Register a new document for signing.",
+        "Creates a document record with hash, schema, and optional URI."
+      ],
+      "discriminator": [
+        108,
+        34,
+        153,
+        39,
+        82,
+        41,
+        133,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "docs": [
+            "Creator of the document record"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document PDA - keyed by doc_hash"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "params.doc_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "RegisterDocumentParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "revoke_signature",
+      "docs": [
+        "Revoke a signature. Only the original signer can revoke.",
+        "Revoked signatures remain on-chain but are marked invalid."
+      ],
+      "discriminator": [
+        15,
+        8,
+        51,
+        247,
+        178,
+        101,
+        114,
+        177
+      ],
+      "accounts": [
+        {
+          "name": "revoker",
+          "docs": [
+            "The entity revoking the signature (signer or principal for agent sigs)"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document (for verification)"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signature_record",
+          "docs": [
+            "The signature record to revoke"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  97,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "signature_record.signer_pubkey",
+                "account": "SignatureRecord"
+              },
+              {
+                "kind": "account",
+                "path": "signature_record.role",
+                "account": "SignatureRecord"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "sign_document_agent",
+      "docs": [
+        "Sign a document as an agent on behalf of a principal (Tier 2).",
+        "Requires valid agent registration and capability delegation."
+      ],
+      "discriminator": [
+        189,
+        200,
+        127,
+        132,
+        67,
+        58,
+        193,
+        21
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "docs": [
+            "The principal who authorized the agent - must sign to prove authorization"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "agent_profile",
+          "docs": [
+            "The agent profile (from agent_registry)",
+            "Box to avoid stack overflow (large struct)"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "account",
+                "path": "agent_profile.nonce",
+                "account": "AgentProfile"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "agent_registry_program"
+            }
+          }
+        },
+        {
+          "name": "capability",
+          "docs": [
+            "The capability credential (from delegation)",
+            "Box to avoid stack overflow (large struct with [Pubkey; 10])"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  112,
+                  97,
+                  98,
+                  105,
+                  108,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "account",
+                "path": "agent_profile"
+              },
+              {
+                "kind": "arg",
+                "path": "params.capability_nonce"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document being signed"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signature_record",
+          "docs": [
+            "The signature record PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  97,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "agent_profile"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signing_receipt",
+          "docs": [
+            "Receipt for audit trail (KYA accountability)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "agent_profile"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "agent_registry_program",
+          "docs": [
+            "Agent Registry program"
+          ],
+          "address": "299gbw6p9rCpp7SBR9tts7qTgGie591JPY6RMAXoJHE6"
+        },
+        {
+          "name": "delegation_program",
+          "docs": [
+            "Delegation program"
+          ],
+          "address": "74vfEGbYWUsRq7z8oSgp6gNxx3ENVQEBqXFJqHrB3Xx2"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "SignDocumentAgentParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "sign_document_agent_autonomous",
+      "docs": [
+        "Sign a document autonomously as an agent (Tier 2 Autonomous).",
+        "The AGENT signs the transaction (not the principal).",
+        "True autonomous execution within delegated constraints."
+      ],
+      "discriminator": [
+        92,
+        74,
+        231,
+        67,
+        112,
+        98,
+        141,
+        120
+      ],
+      "accounts": [
+        {
+          "name": "agent_signer",
+          "docs": [
+            "The agent's signing key - AGENT SIGNS (true autonomy)"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "agent_profile",
+          "docs": [
+            "The agent profile"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agent_profile.owner_principal",
+                "account": "AgentProfileRef"
+              },
+              {
+                "kind": "account",
+                "path": "agent_profile.nonce",
+                "account": "AgentProfileRef"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                16,
+                242,
+                38,
+                172,
+                134,
+                212,
+                93,
+                62,
+                60,
+                19,
+                124,
+                238,
+                6,
+                252,
+                198,
+                86,
+                90,
+                208,
+                23,
+                56,
+                212,
+                27,
+                13,
+                107,
+                111,
+                36,
+                94,
+                57,
+                224,
+                218,
+                83,
+                191
+              ]
+            }
+          }
+        },
+        {
+          "name": "capability",
+          "docs": [
+            "The capability credential"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  112,
+                  97,
+                  98,
+                  105,
+                  108,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "capability.principal",
+                "account": "CapabilityRef"
+              },
+              {
+                "kind": "account",
+                "path": "agent_profile"
+              },
+              {
+                "kind": "arg",
+                "path": "params.capability_nonce"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                90,
+                39,
+                137,
+                90,
+                211,
+                26,
+                26,
+                242,
+                139,
+                142,
+                236,
+                12,
+                205,
+                98,
+                95,
+                110,
+                6,
+                242,
+                2,
+                231,
+                78,
+                55,
+                143,
+                76,
+                223,
+                233,
+                245,
+                31,
+                165,
+                94,
+                130,
+                63
+              ]
+            }
+          }
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document being signed"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signature_record",
+          "docs": [
+            "The signature record PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  97,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "agent_profile"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signing_receipt",
+          "docs": [
+            "Receipt for audit trail"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "agent_profile"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "SignDocumentAgentParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "sign_document_tx",
+      "docs": [
+        "Sign a document via transaction attestation (Mode A).",
+        "The signer's wallet signature on the transaction proves intent.",
+        "This is the simplest and most common signing mode."
+      ],
+      "discriminator": [
+        215,
+        18,
+        24,
+        33,
+        147,
+        69,
+        109,
+        113
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "docs": [
+            "The signer - their tx signature proves intent"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document being signed"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signature_record",
+          "docs": [
+            "The signature record PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  97,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signing_receipt",
+          "docs": [
+            "Receipt for audit trail"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "SignDocumentTxParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "sign_document_verified",
+      "docs": [
+        "Sign a document as a verified human (Tier 1).",
+        "Requires a valid HumanProfile attestation."
+      ],
+      "discriminator": [
+        206,
+        24,
+        10,
+        213,
+        161,
+        57,
+        46,
+        23
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "docs": [
+            "The signer - their tx signature proves intent"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "human_profile",
+          "docs": [
+            "The signer's human profile (from human_registry)",
+            "Validates they are a verified human"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  117,
+                  109,
+                  97,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "human_registry_program"
+            }
+          }
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document being signed"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signature_record",
+          "docs": [
+            "The signature record PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  97,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signing_receipt",
+          "docs": [
+            "Receipt for audit trail"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              },
+              {
+                "kind": "arg",
+                "path": "params.role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "human_registry_program",
+          "docs": [
+            "Human Registry program for CPI verification"
+          ],
+          "address": "Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "SignDocumentTxParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "verify_document_complete",
+      "docs": [
+        "Verify a document has all required signatures.",
+        "Returns error if any required signature is missing or revoked."
+      ],
+      "discriminator": [
+        233,
+        77,
+        105,
+        62,
+        138,
+        251,
+        87,
+        224
+      ],
+      "accounts": [
+        {
+          "name": "document",
+          "docs": [
+            "The document to verify"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        },
+        {
+          "name": "required_signer",
+          "docs": [
+            "The required signer specification"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  113,
+                  117,
+                  105,
+                  114,
+                  101,
+                  100,
+                  95,
+                  115,
+                  105,
+                  103,
+                  110,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "required_signer.role",
+                "account": "RequiredSigner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "signature_record",
+          "docs": [
+            "The signature that should satisfy the requirement"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  105,
+                  103,
+                  110,
+                  97,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document"
+              },
+              {
+                "kind": "account",
+                "path": "signature_record.signer_pubkey",
+                "account": "SignatureRecord"
+              },
+              {
+                "kind": "account",
+                "path": "signature_record.role",
+                "account": "SignatureRecord"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "void_document",
+      "docs": [
+        "Void a document - marks it as cancelled/invalid.",
+        "Only creator can void. Voided documents cannot be signed."
+      ],
+      "discriminator": [
+        152,
+        97,
+        163,
+        223,
+        4,
+        177,
+        92,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "docs": [
+            "Creator of the document"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "document",
+          "docs": [
+            "The document to void"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  111,
+                  99,
+                  117,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "document.doc_hash",
+                "account": "Document"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AgentProfile",
+      "discriminator": [
+        60,
+        227,
+        42,
+        24,
+        0,
+        87,
+        86,
+        205
+      ]
+    },
+    {
+      "name": "AgentProfileRef",
+      "discriminator": [
+        15,
+        224,
+        245,
+        240,
+        122,
+        21,
+        84,
+        213
+      ]
+    },
+    {
+      "name": "Capability",
+      "discriminator": [
+        192,
+        140,
+        41,
+        92,
+        236,
+        64,
+        181,
+        99
+      ]
+    },
+    {
+      "name": "CapabilityRef",
+      "discriminator": [
+        23,
+        236,
+        212,
+        21,
+        44,
+        19,
+        57,
+        208
+      ]
+    },
+    {
+      "name": "Document",
+      "discriminator": [
+        226,
+        212,
+        133,
+        177,
+        48,
+        5,
+        171,
+        243
+      ]
+    },
+    {
+      "name": "DocumentSigningReceipt",
+      "discriminator": [
+        170,
+        129,
+        103,
+        232,
+        247,
+        241,
+        153,
+        224
+      ]
+    },
+    {
+      "name": "HumanProfile",
+      "discriminator": [
+        32,
+        133,
+        87,
+        162,
+        100,
+        194,
+        215,
+        212
+      ]
+    },
+    {
+      "name": "RequiredSigner",
+      "discriminator": [
+        51,
+        54,
+        70,
+        37,
+        218,
+        244,
+        204,
+        173
+      ]
+    },
+    {
+      "name": "SignatureRecord",
+      "discriminator": [
+        131,
+        228,
+        158,
+        203,
+        39,
+        52,
+        166,
+        51
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AgentAutonomousDocumentSigned",
+      "discriminator": [
+        209,
+        204,
+        160,
+        16,
+        185,
+        91,
+        39,
+        55
+      ]
+    },
+    {
+      "name": "AgentDocumentSigned",
+      "discriminator": [
+        21,
+        58,
+        15,
+        28,
+        178,
+        19,
+        207,
+        243
+      ]
+    },
+    {
+      "name": "DocumentFinalized",
+      "discriminator": [
+        252,
+        57,
+        204,
+        159,
+        174,
+        86,
+        91,
+        2
+      ]
+    },
+    {
+      "name": "DocumentRegistered",
+      "discriminator": [
+        39,
+        98,
+        72,
+        173,
+        200,
+        16,
+        169,
+        166
+      ]
+    },
+    {
+      "name": "DocumentSigned",
+      "discriminator": [
+        159,
+        171,
+        79,
+        75,
+        22,
+        3,
+        177,
+        43
+      ]
+    },
+    {
+      "name": "DocumentVerified",
+      "discriminator": [
+        211,
+        247,
+        112,
+        35,
+        189,
+        202,
+        131,
+        204
+      ]
+    },
+    {
+      "name": "DocumentVoided",
+      "discriminator": [
+        69,
+        131,
+        133,
+        106,
+        109,
+        195,
+        137,
+        18
+      ]
+    },
+    {
+      "name": "OffchainSignatureAnchored",
+      "discriminator": [
+        172,
+        31,
+        110,
+        23,
+        174,
+        138,
+        29,
+        50
+      ]
+    },
+    {
+      "name": "RequiredSignerAdded",
+      "discriminator": [
+        132,
+        135,
+        10,
+        201,
+        187,
+        180,
+        237,
+        11
+      ]
+    },
+    {
+      "name": "SignatureRevoked",
+      "discriminator": [
+        77,
+        171,
+        167,
+        91,
+        193,
+        100,
+        178,
+        1
+      ]
+    },
+    {
+      "name": "UnifiedReceiptEmitted",
+      "discriminator": [
+        38,
+        14,
+        231,
+        186,
+        196,
+        69,
+        75,
+        173
+      ]
+    },
+    {
+      "name": "VerifiedDocumentSigned",
+      "discriminator": [
+        43,
+        175,
+        39,
+        190,
+        134,
+        106,
+        233,
+        231
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "DocumentAlreadyExists",
+      "msg": "Document already exists with this hash"
+    },
+    {
+      "code": 6001,
+      "name": "DocumentNotFound",
+      "msg": "Document not found"
+    },
+    {
+      "code": 6002,
+      "name": "DocumentVoided",
+      "msg": "Document has been voided and cannot be signed"
+    },
+    {
+      "code": 6003,
+      "name": "DocumentNotFinalized",
+      "msg": "Document is not finalized - cannot be signed with binding effect"
+    },
+    {
+      "code": 6004,
+      "name": "DocumentAlreadyFinalized",
+      "msg": "Document is already finalized"
+    },
+    {
+      "code": 6005,
+      "name": "DocumentAlreadyVoided",
+      "msg": "Document is already voided"
+    },
+    {
+      "code": 6006,
+      "name": "NotDocumentCreator",
+      "msg": "Only document creator can perform this action"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidDocumentHash",
+      "msg": "Invalid document hash"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidSchema",
+      "msg": "Invalid document schema"
+    },
+    {
+      "code": 6009,
+      "name": "UriTooLong",
+      "msg": "Document URI too long"
+    },
+    {
+      "code": 6010,
+      "name": "SignatureAlreadyExists",
+      "msg": "Signature already exists for this signer and role"
+    },
+    {
+      "code": 6011,
+      "name": "SignatureNotFound",
+      "msg": "Signature not found"
+    },
+    {
+      "code": 6012,
+      "name": "SignatureAlreadyRevoked",
+      "msg": "Signature has already been revoked"
+    },
+    {
+      "code": 6013,
+      "name": "NotSignatureOwner",
+      "msg": "Only the original signer can revoke this signature"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidRole",
+      "msg": "Invalid signature role"
+    },
+    {
+      "code": 6015,
+      "name": "MetadataTooLong",
+      "msg": "Signature metadata too long"
+    },
+    {
+      "code": 6016,
+      "name": "NoHumanProfile",
+      "msg": "Signer does not have a valid human profile"
+    },
+    {
+      "code": 6017,
+      "name": "InsufficientHumanScore",
+      "msg": "Human score too low for verified signing"
+    },
+    {
+      "code": 6018,
+      "name": "NotVerifiedHuman",
+      "msg": "Signer is not a verified unique human"
+    },
+    {
+      "code": 6019,
+      "name": "InvalidAgent",
+      "msg": "Agent is not registered or not active"
+    },
+    {
+      "code": 6020,
+      "name": "NoSigningCapability",
+      "msg": "Agent does not have signing capability for this document type"
+    },
+    {
+      "code": 6021,
+      "name": "CapabilityExpired",
+      "msg": "Capability has expired"
+    },
+    {
+      "code": 6022,
+      "name": "CapabilityRevoked",
+      "msg": "Capability has been revoked"
+    },
+    {
+      "code": 6023,
+      "name": "CapabilityLimitExceeded",
+      "msg": "Capability daily limit exceeded"
+    },
+    {
+      "code": 6024,
+      "name": "AgentFrozen",
+      "msg": "Agent is frozen - cannot sign"
+    },
+    {
+      "code": 6025,
+      "name": "PrincipalMismatch",
+      "msg": "Principal mismatch - agent not owned by this principal"
+    },
+    {
+      "code": 6026,
+      "name": "CapabilityNotYetValid",
+      "msg": "Capability not yet valid"
+    },
+    {
+      "code": 6027,
+      "name": "CapabilityAgentMismatch",
+      "msg": "Capability agent mismatch"
+    },
+    {
+      "code": 6028,
+      "name": "AgentSignerMismatch",
+      "msg": "Agent signer does not match agent signing key"
+    },
+    {
+      "code": 6029,
+      "name": "InvalidEd25519Signature",
+      "msg": "Invalid Ed25519 signature"
+    },
+    {
+      "code": 6030,
+      "name": "Ed25519InstructionNotFound",
+      "msg": "Ed25519 verification instruction not found"
+    },
+    {
+      "code": 6031,
+      "name": "SignatureExpired",
+      "msg": "Signature message has expired"
+    },
+    {
+      "code": 6032,
+      "name": "InvalidNonce",
+      "msg": "Invalid signature nonce - possible replay attack"
+    },
+    {
+      "code": 6033,
+      "name": "InvalidDomain",
+      "msg": "Invalid domain in signature message"
+    },
+    {
+      "code": 6034,
+      "name": "MessageTooLong",
+      "msg": "Message too long for offchain signing"
+    },
+    {
+      "code": 6035,
+      "name": "SignerMismatch",
+      "msg": "Signer pubkey does not match signature"
+    },
+    {
+      "code": 6036,
+      "name": "TooManyRequiredSigners",
+      "msg": "Maximum required signers exceeded"
+    },
+    {
+      "code": 6037,
+      "name": "RequiredSignerAlreadyExists",
+      "msg": "Required signer already added"
+    },
+    {
+      "code": 6038,
+      "name": "MissingRequiredSignatures",
+      "msg": "Document is missing required signatures"
+    },
+    {
+      "code": 6039,
+      "name": "InsufficientSignatureTier",
+      "msg": "Signature tier too low for requirement"
+    },
+    {
+      "code": 6040,
+      "name": "WrongSigner",
+      "msg": "Specific signer required but different signer attempted"
+    },
+    {
+      "code": 6041,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6042,
+      "name": "InvalidAccountData",
+      "msg": "Invalid account data"
+    },
+    {
+      "code": 6043,
+      "name": "ArithmeticOverflow",
+      "msg": "Arithmetic overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "ActionType",
+      "docs": [
+        "Action types for unified receipt system"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Unknown"
+          },
+          {
+            "name": "Payment"
+          },
+          {
+            "name": "TaskResponse"
+          },
+          {
+            "name": "DocumentSign"
+          },
+          {
+            "name": "TokenTransfer"
+          },
+          {
+            "name": "Swap"
+          },
+          {
+            "name": "Stake"
+          },
+          {
+            "name": "Custom"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentAutonomousDocumentSigned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent_signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "capability",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "capability_expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "signature_count",
+            "type": "u32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentDocumentSigned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "capability",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tier",
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          },
+          {
+            "name": "capability_expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "signature_count",
+            "type": "u32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentProfile",
+      "docs": [
+        "Agent profile (from agent_registry)"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner_principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "signing_key",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "metadata_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tee_measurement",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "has_tee_measurement",
+            "type": "bool"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "document_registry::instructions::sign_document_agent::AgentStatus"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_status_change",
+            "type": "i64"
+          },
+          {
+            "name": "last_metadata_update",
+            "type": "i64"
+          },
+          {
+            "name": "capability_count",
+            "type": "u32"
+          },
+          {
+            "name": "action_count",
+            "type": "u64"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentProfileRef",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner_principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "signing_key",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "metadata_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tee_measurement",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "has_tee_measurement",
+            "type": "bool"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "document_registry::instructions::sign_document_agent_autonomous::AgentStatus"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_status_change",
+            "type": "i64"
+          },
+          {
+            "name": "last_metadata_update",
+            "type": "i64"
+          },
+          {
+            "name": "capability_count",
+            "type": "u32"
+          },
+          {
+            "name": "action_count",
+            "type": "u64"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AnchorOffchainParams",
+      "docs": [
+        "Parameters for anchoring offchain signature"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "message",
+            "docs": [
+              "The signed message bytes"
+            ],
+            "type": "bytes"
+          },
+          {
+            "name": "signature",
+            "docs": [
+              "Ed25519 signature bytes (64 bytes)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "role",
+            "docs": [
+              "Role of the signer"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "domain",
+            "docs": [
+              "Domain for replay protection (e.g., \"humanrail.io\")"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "docs": [
+              "Nonce for replay protection"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "Expiration timestamp"
+            ],
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Capability",
+      "docs": [
+        "Capability (from delegation) - simplified for space"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "allowed_programs",
+            "type": "u64"
+          },
+          {
+            "name": "allowed_assets",
+            "type": "u64"
+          },
+          {
+            "name": "per_tx_limit",
+            "type": "u64"
+          },
+          {
+            "name": "daily_limit",
+            "type": "u64"
+          },
+          {
+            "name": "total_limit",
+            "type": "u64"
+          },
+          {
+            "name": "max_slippage_bps",
+            "type": "u16"
+          },
+          {
+            "name": "max_fee",
+            "type": "u64"
+          },
+          {
+            "name": "valid_from",
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "cooldown_seconds",
+            "type": "u32"
+          },
+          {
+            "name": "risk_tier",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "document_registry::instructions::sign_document_agent::CapabilityStatus"
+              }
+            }
+          },
+          {
+            "name": "issued_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_used_at",
+            "type": "i64"
+          },
+          {
+            "name": "daily_spent",
+            "type": "u64"
+          },
+          {
+            "name": "current_day",
+            "type": "u32"
+          },
+          {
+            "name": "total_spent",
+            "type": "u64"
+          },
+          {
+            "name": "use_count",
+            "type": "u64"
+          },
+          {
+            "name": "enforce_allowlist",
+            "type": "bool"
+          },
+          {
+            "name": "allowlist_count",
+            "type": "u8"
+          },
+          {
+            "name": "destination_allowlist",
+            "type": {
+              "array": [
+                "pubkey",
+                10
+              ]
+            }
+          },
+          {
+            "name": "dispute_reason",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CapabilityRef",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "allowed_programs",
+            "type": "u64"
+          },
+          {
+            "name": "allowed_assets",
+            "type": "u64"
+          },
+          {
+            "name": "per_tx_limit",
+            "type": "u64"
+          },
+          {
+            "name": "daily_limit",
+            "type": "u64"
+          },
+          {
+            "name": "total_limit",
+            "type": "u64"
+          },
+          {
+            "name": "max_slippage_bps",
+            "type": "u16"
+          },
+          {
+            "name": "max_fee",
+            "type": "u64"
+          },
+          {
+            "name": "valid_from",
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "cooldown_seconds",
+            "type": "u32"
+          },
+          {
+            "name": "risk_tier",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "document_registry::instructions::sign_document_agent_autonomous::CapabilityStatus"
+              }
+            }
+          },
+          {
+            "name": "issued_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_used_at",
+            "type": "i64"
+          },
+          {
+            "name": "daily_spent",
+            "type": "u64"
+          },
+          {
+            "name": "current_day",
+            "type": "u32"
+          },
+          {
+            "name": "total_spent",
+            "type": "u64"
+          },
+          {
+            "name": "use_count",
+            "type": "u64"
+          },
+          {
+            "name": "enforce_allowlist",
+            "type": "bool"
+          },
+          {
+            "name": "allowlist_count",
+            "type": "u8"
+          },
+          {
+            "name": "destination_allowlist",
+            "type": {
+              "array": [
+                "pubkey",
+                10
+              ]
+            }
+          },
+          {
+            "name": "dispute_reason",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Document",
+      "docs": [
+        "Document record - represents a hashable document for signing"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "doc_hash",
+            "docs": [
+              "SHA-256 (or other) hash of the document content"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "hash_algorithm",
+            "docs": [
+              "Hash algorithm used"
+            ],
+            "type": {
+              "defined": {
+                "name": "HashAlgorithm"
+              }
+            }
+          },
+          {
+            "name": "schema",
+            "docs": [
+              "Schema identifier (e.g., \"invoice_v1\")"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "URI pointing to document content (IPFS, Arweave, HTTPS)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          },
+          {
+            "name": "has_uri",
+            "docs": [
+              "Whether URI is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "metadata_hash",
+            "docs": [
+              "Optional metadata hash (for structured data)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "has_metadata",
+            "docs": [
+              "Whether metadata is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "creator",
+            "docs": [
+              "Creator of this document record"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Current document status"
+            ],
+            "type": {
+              "defined": {
+                "name": "DocumentStatus"
+              }
+            }
+          },
+          {
+            "name": "created_at_slot",
+            "docs": [
+              "Slot when document was registered"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "created_at_ts",
+            "docs": [
+              "Timestamp when document was registered"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "finalized_at_slot",
+            "docs": [
+              "Slot when document was finalized (0 if not finalized)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "finalized_at_ts",
+            "docs": [
+              "Timestamp when finalized"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "version_of",
+            "docs": [
+              "If this is a new version, reference to previous version"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "is_versioned",
+            "docs": [
+              "Whether version_of is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "version_number",
+            "docs": [
+              "Version number (1 for original, increments for versions)"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "signature_count",
+            "docs": [
+              "Total number of signatures on this document"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "required_signer_count",
+            "docs": [
+              "Number of required signers (if any)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DocumentFinalized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "doc_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_count",
+            "type": "u32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DocumentRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "doc_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "schema",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "version_number",
+            "type": "u32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DocumentSigned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "signer_type",
+            "type": {
+              "defined": {
+                "name": "SignerType"
+              }
+            }
+          },
+          {
+            "name": "role",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tier",
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          },
+          {
+            "name": "signature_mode",
+            "type": {
+              "defined": {
+                "name": "SignatureMode"
+              }
+            }
+          },
+          {
+            "name": "document_status",
+            "type": {
+              "defined": {
+                "name": "DocumentStatus"
+              }
+            }
+          },
+          {
+            "name": "signature_count",
+            "type": "u32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DocumentSigningReceipt",
+      "docs": [
+        "Receipt emitted for every signature - integrates with receipts program"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "docs": [
+              "The document that was signed"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_record",
+            "docs": [
+              "The signature record"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "principal",
+            "docs": [
+              "Principal who authorized (same as signer for human, different for agent)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "docs": [
+              "Agent that signed (if agent signature)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "is_agent_signature",
+            "docs": [
+              "Whether agent is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "capability",
+            "docs": [
+              "Capability used (if agent signature)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "doc_hash",
+            "docs": [
+              "Document hash at time of signing"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "role",
+            "docs": [
+              "Role signed as"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tier",
+            "docs": [
+              "Tier of signature"
+            ],
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          },
+          {
+            "name": "slot",
+            "docs": [
+              "Slot of signing"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "docs": [
+              "Timestamp of signing"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DocumentStatus",
+      "docs": [
+        "Document lifecycle status"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Draft"
+          },
+          {
+            "name": "Final"
+          },
+          {
+            "name": "Void"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DocumentVerified",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "required_signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tier",
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          },
+          {
+            "name": "min_tier_required",
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "DocumentVoided",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "doc_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "previous_status",
+            "type": {
+              "defined": {
+                "name": "DocumentStatus"
+              }
+            }
+          },
+          {
+            "name": "signature_count",
+            "type": "u32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HashAlgorithm",
+      "docs": [
+        "Hash algorithm enumeration"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Sha256"
+          },
+          {
+            "name": "Sha3_256"
+          },
+          {
+            "name": "Blake3"
+          },
+          {
+            "name": "Keccak256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HumanProfile",
+      "docs": [
+        "HumanProfile account structure (imported from human_registry)",
+        "This is a local definition to avoid circular dependencies"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "human_score",
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "type": "bool"
+          },
+          {
+            "name": "attestation_count",
+            "type": "u32"
+          },
+          {
+            "name": "last_attestation_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_attestation_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OffchainSignatureAnchored",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "message_len",
+            "type": "u32"
+          },
+          {
+            "name": "domain",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "signature_count",
+            "type": "u32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterDocumentParams",
+      "docs": [
+        "Parameters for registering a new document"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "doc_hash",
+            "docs": [
+              "SHA-256 hash of document content (32 bytes)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "hash_algorithm",
+            "docs": [
+              "Hash algorithm used (for future-proofing)"
+            ],
+            "type": {
+              "defined": {
+                "name": "HashAlgorithm"
+              }
+            }
+          },
+          {
+            "name": "schema",
+            "docs": [
+              "Document schema identifier (e.g., \"invoice_v1\", \"contract_v2\")"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "Optional URI pointing to document (IPFS, Arweave, HTTPS)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          },
+          {
+            "name": "has_uri",
+            "docs": [
+              "Whether URI is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "metadata_hash",
+            "docs": [
+              "Optional metadata hash (for structured data alongside doc)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "has_metadata",
+            "docs": [
+              "Whether metadata hash is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "version_of",
+            "docs": [
+              "Optional: this document is a new version of another"
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RequiredSigner",
+      "docs": [
+        "Required signer specification for a document"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "docs": [
+              "The document this requirement belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "docs": [
+              "Role that must sign"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "required_signer",
+            "docs": [
+              "Specific signer required (if any)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "has_required_signer",
+            "docs": [
+              "Whether specific signer is required"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "min_tier",
+            "docs": [
+              "Minimum signature tier required"
+            ],
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          },
+          {
+            "name": "is_satisfied",
+            "docs": [
+              "Whether this requirement has been satisfied"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "satisfying_signature",
+            "docs": [
+              "Signature that satisfied this requirement (if any)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "sequence",
+            "docs": [
+              "Sequence number (for ordering)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RequiredSignerAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "required_signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "min_tier",
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          },
+          {
+            "name": "specific_signer",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "sequence",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RequiredSignerParams",
+      "docs": [
+        "Parameters for adding required signer"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "role",
+            "docs": [
+              "Role that must sign"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "required_signer",
+            "docs": [
+              "Optional: specific signer pubkey required (if None, any signer with role)"
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "min_tier",
+            "docs": [
+              "Minimum signature tier required"
+            ],
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SignDocumentAgentParams",
+      "docs": [
+        "Parameters for agent signing on behalf of principal"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "role",
+            "docs": [
+              "Role of the signer"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "capability_nonce",
+            "docs": [
+              "Capability nonce for PDA derivation"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "signature_metadata",
+            "docs": [
+              "Optional metadata"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "has_metadata",
+            "docs": [
+              "Whether metadata is set"
+            ],
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SignDocumentTxParams",
+      "docs": [
+        "Parameters for transaction-attested signing"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "role",
+            "docs": [
+              "Role of the signer (e.g., \"issuer\", \"buyer\", \"witness\")"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "signature_metadata",
+            "docs": [
+              "Optional metadata about this signature"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "has_metadata",
+            "docs": [
+              "Whether metadata is set"
+            ],
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SignatureMode",
+      "docs": [
+        "How the signature was captured"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "TxApproval"
+          },
+          {
+            "name": "OffchainMessage"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SignatureRecord",
+      "docs": [
+        "Signature record - proves a signer authorized a document"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "docs": [
+              "The document this signature belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "signer_type",
+            "docs": [
+              "Type of signer"
+            ],
+            "type": {
+              "defined": {
+                "name": "SignerType"
+              }
+            }
+          },
+          {
+            "name": "signer_pubkey",
+            "docs": [
+              "Public key of the signer (wallet, agent, or org)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "principal_pubkey",
+            "docs": [
+              "Principal pubkey (required if signer is AGENT)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "has_principal",
+            "docs": [
+              "Whether principal is set (true for agent signatures)"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "capability_id",
+            "docs": [
+              "Capability ID used (required if signer is AGENT)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "has_capability",
+            "docs": [
+              "Whether capability is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "attestation_id",
+            "docs": [
+              "Human profile attestation ID (for verified signers)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "has_attestation",
+            "docs": [
+              "Whether attestation is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "signature_mode",
+            "docs": [
+              "How signature was captured"
+            ],
+            "type": {
+              "defined": {
+                "name": "SignatureMode"
+              }
+            }
+          },
+          {
+            "name": "signature_bytes",
+            "docs": [
+              "Offchain signature bytes (only for OffchainMessage mode)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "has_signature_bytes",
+            "docs": [
+              "Whether signature_bytes is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "role",
+            "docs": [
+              "Role of the signer (e.g., \"issuer\", \"buyer\")"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tier",
+            "docs": [
+              "Signature tier achieved"
+            ],
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Current signature status"
+            ],
+            "type": {
+              "defined": {
+                "name": "SignatureStatus"
+              }
+            }
+          },
+          {
+            "name": "signed_at_slot",
+            "docs": [
+              "Slot when signed"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "signed_at_ts",
+            "docs": [
+              "Timestamp when signed"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "revoked_at_slot",
+            "docs": [
+              "Slot when revoked (0 if not revoked)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "revoked_at_ts",
+            "docs": [
+              "Timestamp when revoked"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "metadata",
+            "docs": [
+              "Optional metadata (e.g., \"Approved as Legal Counsel\")"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "has_metadata",
+            "docs": [
+              "Whether metadata is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "human_score_at_signing",
+            "docs": [
+              "Human score at time of signing (if verified)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SignatureRevoked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "revoked_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "signer_type",
+            "type": {
+              "defined": {
+                "name": "SignerType"
+              }
+            }
+          },
+          {
+            "name": "role",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SignatureStatus",
+      "docs": [
+        "Signature validity status"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Revoked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SignatureTier",
+      "docs": [
+        "Signature tier levels"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "WalletNotarization"
+          },
+          {
+            "name": "VerifiedSigner"
+          },
+          {
+            "name": "AgentOnBehalf"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SignerType",
+      "docs": [
+        "Type of entity signing the document"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Human"
+          },
+          {
+            "name": "Agent"
+          },
+          {
+            "name": "Organization"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UnifiedReceiptEmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "local_receipt",
+            "type": "pubkey"
+          },
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "capability",
+            "type": "pubkey"
+          },
+          {
+            "name": "tier",
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          },
+          {
+            "name": "action_type",
+            "type": {
+              "defined": {
+                "name": "ActionType"
+              }
+            }
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifiedDocumentSigned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "document",
+            "type": "pubkey"
+          },
+          {
+            "name": "signature_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "human_profile",
+            "type": "pubkey"
+          },
+          {
+            "name": "human_score",
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "type": "bool"
+          },
+          {
+            "name": "role",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tier",
+            "type": {
+              "defined": {
+                "name": "SignatureTier"
+              }
+            }
+          },
+          {
+            "name": "signature_count",
+            "type": "u32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "document_registry::instructions::sign_document_agent::AgentStatus",
+      "docs": [
+        "Agent status (from agent_registry)"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Suspended"
+          },
+          {
+            "name": "Revoked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "document_registry::instructions::sign_document_agent::CapabilityStatus",
+      "docs": [
+        "Capability status (from delegation)"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Revoked"
+          },
+          {
+            "name": "Expired"
+          },
+          {
+            "name": "Frozen"
+          },
+          {
+            "name": "Disputed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "document_registry::instructions::sign_document_agent_autonomous::AgentStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Suspended"
+          },
+          {
+            "name": "Revoked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "document_registry::instructions::sign_document_agent_autonomous::CapabilityStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Revoked"
+          },
+          {
+            "name": "Expired"
+          },
+          {
+            "name": "Frozen"
+          },
+          {
+            "name": "Disputed"
+          }
+        ]
+      }
+    }
+  ]
+}

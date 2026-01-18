@@ -1,0 +1,1426 @@
+{
+  "address": "Co3EAFUnyPLrc13gXkj5wneUkfJFvm16bqB11MGpWUzX",
+  "metadata": {
+    "name": "agent_registry",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Agent identity registry with lifecycle management for HumanRail KYA"
+  },
+  "instructions": [
+    {
+      "name": "reactivate_agent",
+      "docs": [
+        "Reactivate a suspended agent."
+      ],
+      "discriminator": [
+        231,
+        7,
+        179,
+        97,
+        210,
+        24,
+        209,
+        12
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "docs": [
+            "Principal (owner) of the agent - must sign"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "agent",
+          "docs": [
+            "The agent profile to reactivate"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "account",
+                "path": "agent.nonce",
+                "account": "AgentProfile"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "register_agent",
+      "docs": [
+        "Register a new agent owned by a principal (human or organization).",
+        "The principal must have a valid HumanProfile in human_registry."
+      ],
+      "discriminator": [
+        135,
+        157,
+        66,
+        195,
+        2,
+        113,
+        175,
+        30
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "docs": [
+            "Principal (owner) registering the agent - must sign"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "human_profile",
+          "docs": [
+            "C-06 FIX: Human profile proving principal is verified human"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  117,
+                  109,
+                  97,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "human_registry_program"
+            }
+          }
+        },
+        {
+          "name": "human_registry_program",
+          "docs": [
+            "Human registry program for CPI verification"
+          ],
+          "address": "8A98ekw15Af1k8KW7cdAU7gEHNcE6fn2EznW9N6B62gn"
+        },
+        {
+          "name": "agent",
+          "docs": [
+            "The new agent profile PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "arg",
+                "path": "params.nonce"
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_stats",
+          "docs": [
+            "Operator stats for the new agent"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agent"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "RegisterAgentParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "revoke_agent",
+      "docs": [
+        "Permanently revoke an agent. Cannot be undone."
+      ],
+      "discriminator": [
+        227,
+        60,
+        209,
+        125,
+        240,
+        117,
+        163,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "docs": [
+            "Principal (owner) of the agent - must sign"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "agent",
+          "docs": [
+            "The agent profile to revoke"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "account",
+                "path": "agent.nonce",
+                "account": "AgentProfile"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "rotate_agent_key",
+      "docs": [
+        "Rotate agent signing keys. Old key remains valid until rotation_grace_period expires."
+      ],
+      "discriminator": [
+        85,
+        31,
+        17,
+        212,
+        162,
+        53,
+        153,
+        115
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "docs": [
+            "Principal (owner) of the agent - must sign"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "agent",
+          "docs": [
+            "The agent profile to update"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "account",
+                "path": "agent.nonce",
+                "account": "AgentProfile"
+              }
+            ]
+          }
+        },
+        {
+          "name": "key_rotation",
+          "docs": [
+            "Key rotation record"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  107,
+                  101,
+                  121,
+                  95,
+                  114,
+                  111,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agent"
+              },
+              {
+                "kind": "account",
+                "path": "agent.action_count",
+                "account": "AgentProfile"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "new_signing_key",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "suspend_agent",
+      "docs": [
+        "Suspend an agent temporarily. Can be reactivated by principal."
+      ],
+      "discriminator": [
+        242,
+        28,
+        54,
+        59,
+        247,
+        20,
+        59,
+        110
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "docs": [
+            "Principal (owner) of the agent - must sign"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "agent",
+          "docs": [
+            "The agent profile to suspend"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "account",
+                "path": "agent.nonce",
+                "account": "AgentProfile"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_agent_metadata",
+      "docs": [
+        "Update agent metadata commitment (e.g., new code version, model update)."
+      ],
+      "discriminator": [
+        80,
+        63,
+        141,
+        214,
+        125,
+        25,
+        174,
+        106
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "docs": [
+            "Principal (owner) of the agent - must sign"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "agent",
+          "docs": [
+            "The agent profile to update"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "account",
+                "path": "agent.nonce",
+                "account": "AgentProfile"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_metadata_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "verify_agent",
+      "docs": [
+        "Verify an agent is active and valid. Designed for CPI calls."
+      ],
+      "discriminator": [
+        206,
+        212,
+        108,
+        12,
+        105,
+        61,
+        100,
+        66
+      ],
+      "accounts": [
+        {
+          "name": "agent",
+          "docs": [
+            "The agent profile to verify"
+          ]
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AgentOperatorStats",
+      "discriminator": [
+        156,
+        51,
+        88,
+        35,
+        63,
+        78,
+        254,
+        153
+      ]
+    },
+    {
+      "name": "AgentProfile",
+      "discriminator": [
+        60,
+        227,
+        42,
+        24,
+        0,
+        87,
+        86,
+        205
+      ]
+    },
+    {
+      "name": "HumanProfile",
+      "discriminator": [
+        32,
+        133,
+        87,
+        162,
+        100,
+        194,
+        215,
+        212
+      ]
+    },
+    {
+      "name": "KeyRotation",
+      "discriminator": [
+        98,
+        157,
+        255,
+        187,
+        227,
+        47,
+        81,
+        140
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AgentKeyRotated",
+      "discriminator": [
+        17,
+        30,
+        65,
+        171,
+        28,
+        167,
+        85,
+        120
+      ]
+    },
+    {
+      "name": "AgentMetadataUpdated",
+      "discriminator": [
+        174,
+        150,
+        169,
+        40,
+        10,
+        76,
+        209,
+        59
+      ]
+    },
+    {
+      "name": "AgentReactivated",
+      "discriminator": [
+        23,
+        241,
+        7,
+        252,
+        229,
+        96,
+        117,
+        217
+      ]
+    },
+    {
+      "name": "AgentRegistered",
+      "discriminator": [
+        191,
+        78,
+        217,
+        54,
+        232,
+        100,
+        189,
+        85
+      ]
+    },
+    {
+      "name": "AgentRevoked",
+      "discriminator": [
+        12,
+        251,
+        249,
+        166,
+        122,
+        83,
+        162,
+        116
+      ]
+    },
+    {
+      "name": "AgentSuspended",
+      "discriminator": [
+        219,
+        202,
+        177,
+        3,
+        116,
+        220,
+        164,
+        148
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "AgentNotActive",
+      "msg": "Agent is not active"
+    },
+    {
+      "code": 6001,
+      "name": "AgentAlreadyActive",
+      "msg": "Agent is already active"
+    },
+    {
+      "code": 6002,
+      "name": "AgentRevoked",
+      "msg": "Agent has been permanently revoked"
+    },
+    {
+      "code": 6003,
+      "name": "AgentSuspended",
+      "msg": "Agent is suspended"
+    },
+    {
+      "code": 6004,
+      "name": "Unauthorized",
+      "msg": "Unauthorized: caller is not the agent owner"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidSigningKey",
+      "msg": "Invalid signing key"
+    },
+    {
+      "code": 6006,
+      "name": "KeyRotationInProgress",
+      "msg": "Key rotation still in grace period"
+    },
+    {
+      "code": 6007,
+      "name": "NameTooLong",
+      "msg": "Agent name too long (max 32 bytes)"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidMetadataHash",
+      "msg": "Invalid metadata hash"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidPrincipal",
+      "msg": "Principal does not have a valid human profile"
+    },
+    {
+      "code": 6010,
+      "name": "InsufficientHumanScore",
+      "msg": "Principal human score too low to register agent"
+    },
+    {
+      "code": 6011,
+      "name": "AgentRegistrationNotAllowed",
+      "msg": "Profile not authorized to register agents"
+    },
+    {
+      "code": 6012,
+      "name": "AgentAlreadyExists",
+      "msg": "Agent already exists with this nonce"
+    },
+    {
+      "code": 6013,
+      "name": "HasActiveCapabilities",
+      "msg": "Cannot revoke agent with active capabilities"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidTeeMeasurement",
+      "msg": "Invalid TEE measurement"
+    }
+  ],
+  "types": [
+    {
+      "name": "AgentKeyRotated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner_principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "old_key",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_key",
+            "type": "pubkey"
+          },
+          {
+            "name": "grace_period_expires",
+            "type": "i64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentMetadataUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner_principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "old_metadata_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "new_metadata_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentOperatorStats",
+      "docs": [
+        "Agent operator stats - for tracking agent behavior and risk scoring"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agent",
+            "docs": [
+              "The agent this stats record belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "total_transactions",
+            "docs": [
+              "Total transactions executed"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_value_transacted",
+            "docs": [
+              "Total value transacted (in lamports equivalent)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "failed_transactions",
+            "docs": [
+              "Number of failed transactions"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "revoked_capabilities",
+            "docs": [
+              "Number of revoked capabilities"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "last_activity",
+            "docs": [
+              "Last activity timestamp"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "risk_score",
+            "docs": [
+              "Risk score (0-10000 basis points, higher = riskier)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "anomaly_flags",
+            "docs": [
+              "Number of anomaly flags triggered"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentProfile",
+      "docs": [
+        "Agent profile account - core identity for AI agents"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner_principal",
+            "docs": [
+              "Principal (owner) of this agent - must be a verified human or organization"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "signing_key",
+            "docs": [
+              "Current signing key for the agent"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Human-readable name (32 bytes, null-padded)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "metadata_hash",
+            "docs": [
+              "Hash of agent metadata (code version, model/provider, policies)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tee_measurement",
+            "docs": [
+              "Optional TEE measurement hash for hardware attestation"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "has_tee_measurement",
+            "docs": [
+              "Whether TEE measurement is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Current agent status"
+            ],
+            "type": {
+              "defined": {
+                "name": "AgentStatus"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Timestamp when agent was registered"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_status_change",
+            "docs": [
+              "Timestamp of last status change"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_metadata_update",
+            "docs": [
+              "Timestamp of last metadata update"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "capability_count",
+            "docs": [
+              "Total number of capabilities issued to this agent"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "action_count",
+            "docs": [
+              "Total number of actions performed by this agent"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "nonce",
+            "docs": [
+              "Nonce used for PDA derivation"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentReactivated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner_principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner_principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "signing_key",
+            "type": "pubkey"
+          },
+          {
+            "name": "metadata_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentRevoked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner_principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentStatus",
+      "docs": [
+        "Agent lifecycle status"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Suspended"
+          },
+          {
+            "name": "Revoked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentSuspended",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner_principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationRef",
+      "docs": [
+        "Attestation reference stored in profile (lightweight pointer)"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "attestation",
+            "docs": [
+              "Attestation account pubkey"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer",
+            "docs": [
+              "Issuer who created it"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "attestation_type",
+            "docs": [
+              "Type of attestation"
+            ],
+            "type": {
+              "defined": {
+                "name": "IssuerType"
+              }
+            }
+          },
+          {
+            "name": "weight",
+            "docs": [
+              "Weight at time of registration"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "Expiry time (for quick checks)"
+            ],
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HumanProfile",
+      "docs": [
+        "Human profile account - stores identity score and attestation references"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet",
+            "docs": [
+              "The wallet this profile belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "human_score",
+            "docs": [
+              "Aggregated identity score (computed from valid attestations)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "docs": [
+              "Cached uniqueness flag (recomputed on attestation changes)"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "total_attestation_count",
+            "docs": [
+              "Total number of attestations ever registered"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "active_attestation_count",
+            "docs": [
+              "Number of currently active/valid attestations"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "last_attestation_at",
+            "docs": [
+              "Timestamp of last attestation change"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_score_update",
+            "docs": [
+              "Timestamp of last score recomputation"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "attestations",
+            "docs": [
+              "Bounded list of attestation references"
+            ],
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "AttestationRef"
+                }
+              }
+            }
+          },
+          {
+            "name": "can_register_agents",
+            "docs": [
+              "Whether this profile can register agents"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "agents_registered",
+            "docs": [
+              "Total agents registered by this profile"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Profile creation timestamp"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IssuerType",
+      "docs": [
+        "Issuer type classification"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "KycProvider"
+          },
+          {
+            "name": "ProofOfPersonhood"
+          },
+          {
+            "name": "SocialVerification"
+          },
+          {
+            "name": "DeviceBased"
+          },
+          {
+            "name": "EventBased"
+          },
+          {
+            "name": "Custom"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KeyRotation",
+      "docs": [
+        "Key rotation record - tracks historical signing keys"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agent",
+            "docs": [
+              "The agent this rotation belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "old_key",
+            "docs": [
+              "Previous signing key"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "new_key",
+            "docs": [
+              "New signing key"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "rotated_at",
+            "docs": [
+              "When the rotation was initiated"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "old_key_expires_at",
+            "docs": [
+              "When the old key expires (rotated_at + grace_period)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "sequence",
+            "docs": [
+              "Sequence number for this rotation"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterAgentParams",
+      "docs": [
+        "Parameters for registering a new agent"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "docs": [
+              "Human-readable name for the agent (max 32 bytes)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "metadata_hash",
+            "docs": [
+              "Hash of agent metadata (code version, model/provider, policies)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "signing_key",
+            "docs": [
+              "Agent's signing public key"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "tee_measurement",
+            "docs": [
+              "Optional TEE measurement hash for hardware attestation"
+            ],
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          },
+          {
+            "name": "nonce",
+            "docs": [
+              "Unique nonce for PDA derivation"
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

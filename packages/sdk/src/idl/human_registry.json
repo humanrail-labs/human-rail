@@ -1,0 +1,1880 @@
+{
+  "address": "8A98ekw15Af1k8KW7cdAU7gEHNcE6fn2EznW9N6B62gn",
+  "metadata": {
+    "name": "human_registry",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Human identity and proof of personhood registry for HumanRail"
+  },
+  "instructions": [
+    {
+      "name": "init_profile",
+      "discriminator": [
+        210,
+        162,
+        212,
+        95,
+        95,
+        186,
+        89,
+        119
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The wallet for which we are creating a profile."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "profile",
+          "docs": [
+            "PDA storing the HumanProfile for this authority."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  117,
+                  109,
+                  97,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "docs": [
+            "System program for account creation."
+          ],
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "init_registry",
+      "discriminator": [
+        131,
+        22,
+        4,
+        103,
+        24,
+        94,
+        163,
+        239
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  115,
+                  115,
+                  117,
+                  101,
+                  114,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "issue_attestation",
+      "discriminator": [
+        18,
+        115,
+        85,
+        100,
+        231,
+        31,
+        242,
+        143
+      ],
+      "accounts": [
+        {
+          "name": "issuer_authority",
+          "docs": [
+            "Issuer authority - must sign (proves issuer authorized this)"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "issuer",
+          "docs": [
+            "The issuer account"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  115,
+                  115,
+                  117,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "issuer.authority",
+                "account": "Issuer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "profile",
+          "docs": [
+            "The profile receiving the attestation"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  117,
+                  109,
+                  97,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "profile.wallet",
+                "account": "HumanProfile"
+              }
+            ]
+          }
+        },
+        {
+          "name": "attestation",
+          "docs": [
+            "The new attestation account"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  116,
+                  116,
+                  101,
+                  115,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "profile"
+              },
+              {
+                "kind": "account",
+                "path": "issuer"
+              },
+              {
+                "kind": "arg",
+                "path": "params.nonce"
+              }
+            ]
+          }
+        },
+        {
+          "name": "instructions_sysvar",
+          "docs": [
+            "Instructions sysvar for signature verification"
+          ],
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "IssueAttestationParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "register_attestation",
+      "discriminator": [
+        16,
+        160,
+        132,
+        114,
+        195,
+        169,
+        210,
+        204
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "The wallet that owns the profile and signs the transaction."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "profile",
+          "docs": [
+            "The HumanProfile PDA tied to the authority wallet."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  117,
+                  109,
+                  97,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "source",
+          "type": "pubkey"
+        },
+        {
+          "name": "payload_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "weight",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "register_issuer",
+      "discriminator": [
+        145,
+        117,
+        52,
+        59,
+        189,
+        27,
+        127,
+        18
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "docs": [
+            "Registry admin"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "docs": [
+            "The issuer registry"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  115,
+                  115,
+                  117,
+                  101,
+                  114,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "issuer",
+          "docs": [
+            "The new issuer account"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  115,
+                  115,
+                  117,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "params.authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "RegisterIssuerParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "revoke_attestation_v2",
+      "discriminator": [
+        169,
+        71,
+        73,
+        34,
+        134,
+        13,
+        241,
+        241
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "Authority revoking - either issuer or profile owner"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "attestation",
+          "docs": [
+            "The attestation to revoke"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  116,
+                  116,
+                  101,
+                  115,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "attestation.profile",
+                "account": "SignedAttestation"
+              },
+              {
+                "kind": "account",
+                "path": "attestation.issuer",
+                "account": "SignedAttestation"
+              },
+              {
+                "kind": "account",
+                "path": "attestation.nonce",
+                "account": "SignedAttestation"
+              }
+            ]
+          }
+        },
+        {
+          "name": "profile",
+          "docs": [
+            "The profile that has this attestation"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  117,
+                  109,
+                  97,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "profile.wallet",
+                "account": "HumanProfile"
+              }
+            ]
+          }
+        },
+        {
+          "name": "issuer",
+          "docs": [
+            "The issuer who created the attestation"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  115,
+                  115,
+                  117,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "issuer.authority",
+                "account": "Issuer"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "verify_human",
+      "discriminator": [
+        253,
+        169,
+        52,
+        210,
+        3,
+        111,
+        154,
+        219
+      ],
+      "accounts": [
+        {
+          "name": "profile",
+          "docs": [
+            "The profile to verify"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  117,
+                  109,
+                  97,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "profile.wallet",
+                "account": "HumanProfile"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "VerifyHumanParams"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "HumanProfile",
+      "discriminator": [
+        32,
+        133,
+        87,
+        162,
+        100,
+        194,
+        215,
+        212
+      ]
+    },
+    {
+      "name": "HumanProfileLegacy",
+      "discriminator": [
+        199,
+        236,
+        183,
+        62,
+        109,
+        81,
+        176,
+        52
+      ]
+    },
+    {
+      "name": "Issuer",
+      "discriminator": [
+        216,
+        19,
+        83,
+        230,
+        108,
+        53,
+        80,
+        14
+      ]
+    },
+    {
+      "name": "IssuerRegistry",
+      "discriminator": [
+        252,
+        217,
+        20,
+        87,
+        39,
+        96,
+        228,
+        46
+      ]
+    },
+    {
+      "name": "SignedAttestation",
+      "discriminator": [
+        179,
+        241,
+        189,
+        190,
+        222,
+        186,
+        96,
+        2
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AttestationIssued",
+      "discriminator": [
+        173,
+        237,
+        90,
+        123,
+        155,
+        224,
+        231,
+        242
+      ]
+    },
+    {
+      "name": "AttestationRegistered",
+      "discriminator": [
+        167,
+        94,
+        4,
+        138,
+        121,
+        70,
+        55,
+        158
+      ]
+    },
+    {
+      "name": "AttestationRevoked",
+      "discriminator": [
+        47,
+        106,
+        65,
+        238,
+        200,
+        127,
+        163,
+        50
+      ]
+    },
+    {
+      "name": "HumanVerified",
+      "discriminator": [
+        217,
+        5,
+        237,
+        113,
+        53,
+        239,
+        252,
+        70
+      ]
+    },
+    {
+      "name": "IssuerRegistered",
+      "discriminator": [
+        98,
+        108,
+        156,
+        224,
+        9,
+        0,
+        195,
+        21
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized: must be issuer or profile owner"
+    },
+    {
+      "code": 6001,
+      "name": "AlreadyRevoked",
+      "msg": "Attestation already revoked"
+    },
+    {
+      "code": 6002,
+      "name": "ProfileMismatch",
+      "msg": "Profile does not match attestation"
+    },
+    {
+      "code": 6003,
+      "name": "IssuerMismatch",
+      "msg": "Issuer does not match attestation"
+    }
+  ],
+  "types": [
+    {
+      "name": "AttestationIssued",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "attestation",
+            "type": "pubkey"
+          },
+          {
+            "name": "profile",
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer",
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "attestation_type",
+            "type": {
+              "defined": {
+                "name": "IssuerType"
+              }
+            }
+          },
+          {
+            "name": "payload_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "weight",
+            "type": "u16"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "new_human_score",
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationRegistered",
+      "docs": [
+        "Event emitted when an attestation is registered."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "profile",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "source",
+            "type": "pubkey"
+          },
+          {
+            "name": "payload_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "weight",
+            "type": "u16"
+          },
+          {
+            "name": "new_score",
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "type": "bool"
+          },
+          {
+            "name": "attestation_count",
+            "type": "u32"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationRevoked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "attestation",
+            "type": "pubkey"
+          },
+          {
+            "name": "profile",
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer",
+            "type": "pubkey"
+          },
+          {
+            "name": "revoked_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "was_issuer_revocation",
+            "type": "bool"
+          },
+          {
+            "name": "new_human_score",
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationStatus",
+      "docs": [
+        "Attestation status"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Expired"
+          },
+          {
+            "name": "Revoked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HumanProfile",
+      "docs": [
+        "Human profile account - stores identity score and attestation references"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet",
+            "docs": [
+              "The wallet this profile belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "human_score",
+            "docs": [
+              "Aggregated identity score (computed from valid attestations)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "docs": [
+              "Cached uniqueness flag (recomputed on attestation changes)"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "total_attestation_count",
+            "docs": [
+              "Total number of attestations ever registered"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "active_attestation_count",
+            "docs": [
+              "Number of currently active/valid attestations"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "last_attestation_at",
+            "docs": [
+              "Timestamp of last attestation change"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_score_update",
+            "docs": [
+              "Timestamp of last score recomputation"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "attestations",
+            "docs": [
+              "Bounded list of attestation references"
+            ],
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "human_registry::state_v2::AttestationRef"
+                }
+              }
+            }
+          },
+          {
+            "name": "can_register_agents",
+            "docs": [
+              "Whether this profile can register agents"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "agents_registered",
+            "docs": [
+              "Total agents registered by this profile"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Profile creation timestamp"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HumanProfileLegacy",
+      "docs": [
+        "HumanProfile stores per-wallet identity score and attestations."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet",
+            "docs": [
+              "The wallet this profile belongs to."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "human_score",
+            "docs": [
+              "Aggregated identity score from all attestations."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "docs": [
+              "Flag indicating whether this profile is considered \"unique\"."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "attestation_count",
+            "docs": [
+              "Total number of attestations registered (for easy demo)."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "last_attestation_at",
+            "docs": [
+              "Timestamp of last attestation (for easy demo)."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_attestation_hash",
+            "docs": [
+              "Hash of last attestation payload (for easy demo)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "attestations",
+            "docs": [
+              "Bounded list of attestations attached to this profile."
+            ],
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "human_registry::state::AttestationRef"
+                }
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump for the profile account."
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HumanVerified",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "profile",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "effective_score",
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "type": "bool"
+          },
+          {
+            "name": "can_register_agents",
+            "type": "bool"
+          },
+          {
+            "name": "active_attestations",
+            "type": "u32"
+          },
+          {
+            "name": "validation_passed",
+            "type": "bool"
+          },
+          {
+            "name": "error_code",
+            "type": "u8"
+          },
+          {
+            "name": "verified_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IssueAttestationParams",
+      "docs": [
+        "Parameters for issuing an attestation.",
+        "NOTE: verify_signature field was removed - verification is ALWAYS required."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "payload_hash",
+            "docs": [
+              "Hash of attestation payload (off-chain data)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "weight",
+            "docs": [
+              "Weight to assign (must be > 0 and <= issuer.max_weight)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "signature",
+            "docs": [
+              "Ed25519 signature over canonical attestation data",
+              "REQUIRED: Transaction must include Ed25519 verify instruction"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "docs": [
+              "Unique nonce (prevents replay attacks)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "Optional expiry time (None = use issuer default)"
+            ],
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "external_id",
+            "docs": [
+              "Optional external reference ID"
+            ],
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Issuer",
+      "docs": [
+        "Issuer account - represents a trusted attestation provider"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Issuer's authority pubkey (signs attestations)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Human-readable name (32 bytes, null-padded)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "issuer_type",
+            "docs": [
+              "Issuer type classification"
+            ],
+            "type": {
+              "defined": {
+                "name": "IssuerType"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Current status"
+            ],
+            "type": {
+              "defined": {
+                "name": "IssuerStatus"
+              }
+            }
+          },
+          {
+            "name": "max_weight",
+            "docs": [
+              "Maximum weight this issuer can assign per attestation"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "contributes_to_uniqueness",
+            "docs": [
+              "Whether attestations from this issuer count toward uniqueness"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "default_validity",
+            "docs": [
+              "Default validity period for attestations (seconds)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "attestations_issued",
+            "docs": [
+              "Total attestations issued"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "attestations_revoked",
+            "docs": [
+              "Total attestations revoked"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "registered_at",
+            "docs": [
+              "When issuer was registered"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "registered_by",
+            "docs": [
+              "Who registered this issuer (admin authority)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "metadata_uri",
+            "docs": [
+              "Optional metadata URI (IPFS, HTTPS)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "has_metadata_uri",
+            "docs": [
+              "Whether metadata URI is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IssuerRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "issuer_type",
+            "type": {
+              "defined": {
+                "name": "IssuerType"
+              }
+            }
+          },
+          {
+            "name": "max_weight",
+            "type": "u16"
+          },
+          {
+            "name": "contributes_to_uniqueness",
+            "type": "bool"
+          },
+          {
+            "name": "registered_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IssuerRegistry",
+      "docs": [
+        "Global issuer registry configuration"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "docs": [
+              "Admin authority who can add/remove issuers"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer_count",
+            "docs": [
+              "Total number of registered issuers"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "registration_paused",
+            "docs": [
+              "Whether new issuer registration is paused"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "min_attestation_weight",
+            "docs": [
+              "Minimum attestation weight"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "max_attestation_weight",
+            "docs": [
+              "Maximum attestation weight"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IssuerStatus",
+      "docs": [
+        "Issuer status in the registry"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Suspended"
+          },
+          {
+            "name": "Revoked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IssuerType",
+      "docs": [
+        "Issuer type classification"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "KycProvider"
+          },
+          {
+            "name": "ProofOfPersonhood"
+          },
+          {
+            "name": "SocialVerification"
+          },
+          {
+            "name": "DeviceBased"
+          },
+          {
+            "name": "EventBased"
+          },
+          {
+            "name": "Custom"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterIssuerParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Issuer's signing authority"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Human-readable name (32 bytes)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "issuer_type",
+            "docs": [
+              "Type of attestations this issuer provides"
+            ],
+            "type": {
+              "defined": {
+                "name": "IssuerType"
+              }
+            }
+          },
+          {
+            "name": "max_weight",
+            "docs": [
+              "Maximum weight per attestation"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "contributes_to_uniqueness",
+            "docs": [
+              "Whether attestations count toward uniqueness"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "default_validity",
+            "docs": [
+              "Default validity period (None = use registry default)"
+            ],
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "metadata_uri",
+            "docs": [
+              "Optional metadata URI"
+            ],
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  64
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SignedAttestation",
+      "docs": [
+        "Signed attestation account - proves a claim about a human"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "profile",
+            "docs": [
+              "The HumanProfile this attestation belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer",
+            "docs": [
+              "Issuer who created this attestation"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer_authority",
+            "docs": [
+              "Issuer's authority that signed"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "attestation_type",
+            "docs": [
+              "Type of attestation (matches issuer type)"
+            ],
+            "type": {
+              "defined": {
+                "name": "IssuerType"
+              }
+            }
+          },
+          {
+            "name": "payload_hash",
+            "docs": [
+              "Hash of the attestation payload (off-chain details)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "weight",
+            "docs": [
+              "Weight contributed to human_score"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Current status"
+            ],
+            "type": {
+              "defined": {
+                "name": "AttestationStatus"
+              }
+            }
+          },
+          {
+            "name": "issued_at",
+            "docs": [
+              "When attestation was issued"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "When attestation expires (0 = never)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "revoked_at",
+            "docs": [
+              "When attestation was revoked (0 = not revoked)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "signature",
+            "docs": [
+              "Ed25519 signature over canonical attestation data"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "docs": [
+              "Nonce to prevent replay"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "external_id",
+            "docs": [
+              "Optional external reference ID"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "has_external_id",
+            "docs": [
+              "Whether external_id is set"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifyHumanParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "docs": [
+              "Interface version (for backwards compatibility)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "min_score",
+            "docs": [
+              "Minimum human score required (None = no minimum)"
+            ],
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "require_unique",
+            "docs": [
+              "Whether uniqueness is required"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "min_attestations",
+            "docs": [
+              "Minimum number of active attestations (None = no minimum)"
+            ],
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "require_can_register_agents",
+            "docs": [
+              "Whether to check agent registration eligibility"
+            ],
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "human_registry::state::AttestationRef",
+      "docs": [
+        "Lightweight reference to an external attestation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "source",
+            "docs": [
+              "Identity / KYC / PoP provider or other attestation source."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "payload_hash",
+            "docs": [
+              "Hash of the attestation payload (off-chain details)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "weight",
+            "docs": [
+              "Weight contributed by this attestation to the human_score."
+            ],
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "human_registry::state_v2::AttestationRef",
+      "docs": [
+        "Attestation reference stored in profile (lightweight pointer)"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "attestation",
+            "docs": [
+              "Attestation account pubkey"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer",
+            "docs": [
+              "Issuer who created it"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "attestation_type",
+            "docs": [
+              "Type of attestation"
+            ],
+            "type": {
+              "defined": {
+                "name": "IssuerType"
+              }
+            }
+          },
+          {
+            "name": "weight",
+            "docs": [
+              "Weight at time of registration"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "Expiry time (for quick checks)"
+            ],
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}

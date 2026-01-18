@@ -1,0 +1,1741 @@
+{
+  "address": "CVrBeGHMNqEYv1wGB2JPh7pYQGAeNR3jey3h9Z4vmHj1",
+  "metadata": {
+    "name": "data_blink",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "RLHF micro-task and human work rail for HumanRail"
+  },
+  "instructions": [
+    {
+      "name": "agent_submit_response",
+      "docs": [
+        "Claim accumulated rewards for completed task responses.",
+        "Agent autonomously submits a task response on behalf of principal."
+      ],
+      "discriminator": [
+        222,
+        146,
+        207,
+        110,
+        148,
+        102,
+        254,
+        194
+      ],
+      "accounts": [
+        {
+          "name": "agent_signer",
+          "docs": [
+            "The agent executing the response - AGENT SIGNS (true autonomy)"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "agent_profile",
+          "docs": [
+            "The agent profile"
+          ]
+        },
+        {
+          "name": "principal",
+          "docs": [
+            "The principal who delegated to this agent"
+          ]
+        },
+        {
+          "name": "capability",
+          "docs": [
+            "The capability credential"
+          ]
+        },
+        {
+          "name": "task",
+          "docs": [
+            "The task being responded to"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  97,
+                  115,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "task.creator",
+                "account": "Task"
+              },
+              {
+                "kind": "account",
+                "path": "task.nonce",
+                "account": "Task"
+              }
+            ]
+          }
+        },
+        {
+          "name": "task_response",
+          "docs": [
+            "Task response record"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  115,
+                  112,
+                  111,
+                  110,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "task"
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "arg",
+                "path": "response_nonce"
+              }
+            ]
+          }
+        },
+        {
+          "name": "principal_profile",
+          "docs": [
+            "Principal human profile for human score verification"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  117,
+                  109,
+                  97,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                106,
+                89,
+                59,
+                5,
+                86,
+                87,
+                216,
+                82,
+                113,
+                169,
+                104,
+                191,
+                217,
+                182,
+                111,
+                156,
+                103,
+                11,
+                249,
+                171,
+                105,
+                217,
+                159,
+                217,
+                47,
+                239,
+                109,
+                76,
+                19,
+                19,
+                169,
+                239
+              ]
+            }
+          }
+        },
+        {
+          "name": "worker_stats",
+          "docs": [
+            "Worker stats for the principal"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  111,
+                  114,
+                  107,
+                  101,
+                  114,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "choice",
+          "type": "u8"
+        },
+        {
+          "name": "response_data",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "response_nonce",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "claim_rewards",
+      "discriminator": [
+        4,
+        144,
+        132,
+        71,
+        116,
+        23,
+        151,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "task"
+        },
+        {
+          "name": "response",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "reward_mint"
+        },
+        {
+          "name": "worker_token_account",
+          "writable": true
+        },
+        {
+          "name": "worker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_task",
+      "docs": [
+        "Close an existing task (creator only).",
+        "Returns remaining budget to creator."
+      ],
+      "discriminator": [
+        55,
+        234,
+        77,
+        69,
+        245,
+        208,
+        54,
+        167
+      ],
+      "accounts": [
+        {
+          "name": "task",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "reward_mint"
+        },
+        {
+          "name": "creator_token_account",
+          "writable": true
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_task",
+      "docs": [
+        "Create a new task for human workers.",
+        "Creator funds an escrow vault with the total reward budget."
+      ],
+      "discriminator": [
+        194,
+        80,
+        6,
+        180,
+        232,
+        127,
+        48,
+        171
+      ],
+      "accounts": [
+        {
+          "name": "task",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  97,
+                  115,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "arg",
+                "path": "params.nonce"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  97,
+                  115,
+                  107,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "task"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reward_mint"
+        },
+        {
+          "name": "creator_token_account",
+          "writable": true
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "CreateTaskParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "submit_response",
+      "docs": [
+        "Submit a response to a task.",
+        "Validates human requirements and prevents double responses."
+      ],
+      "discriminator": [
+        85,
+        190,
+        208,
+        119,
+        243,
+        52,
+        133,
+        90
+      ],
+      "accounts": [
+        {
+          "name": "task",
+          "writable": true
+        },
+        {
+          "name": "response",
+          "docs": [
+            "H-11 FIX: Include response_nonce in seeds to support multiple responses"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  115,
+                  112,
+                  111,
+                  110,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "task"
+              },
+              {
+                "kind": "account",
+                "path": "worker"
+              },
+              {
+                "kind": "arg",
+                "path": "response_nonce"
+              }
+            ]
+          }
+        },
+        {
+          "name": "worker_profile",
+          "docs": [
+            "Worker's human profile for verification"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  117,
+                  109,
+                  97,
+                  110,
+                  95,
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "worker"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "human_registry_program"
+            }
+          }
+        },
+        {
+          "name": "worker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "human_registry_program",
+          "address": "8A98ekw15Af1k8KW7cdAU7gEHNcE6fn2EznW9N6B62gn"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "choice",
+          "type": "u8"
+        },
+        {
+          "name": "response_data",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "response_nonce",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AgentProfile",
+      "discriminator": [
+        60,
+        227,
+        42,
+        24,
+        0,
+        87,
+        86,
+        205
+      ]
+    },
+    {
+      "name": "Capability",
+      "discriminator": [
+        192,
+        140,
+        41,
+        92,
+        236,
+        64,
+        181,
+        99
+      ]
+    },
+    {
+      "name": "HumanProfile",
+      "discriminator": [
+        32,
+        133,
+        87,
+        162,
+        100,
+        194,
+        215,
+        212
+      ]
+    },
+    {
+      "name": "HumanProfileLegacy",
+      "discriminator": [
+        199,
+        236,
+        183,
+        62,
+        109,
+        81,
+        176,
+        52
+      ]
+    },
+    {
+      "name": "Task",
+      "discriminator": [
+        79,
+        34,
+        229,
+        55,
+        88,
+        90,
+        55,
+        84
+      ]
+    },
+    {
+      "name": "TaskResponse",
+      "discriminator": [
+        15,
+        27,
+        78,
+        96,
+        131,
+        56,
+        101,
+        227
+      ]
+    },
+    {
+      "name": "WorkerStats",
+      "discriminator": [
+        168,
+        235,
+        115,
+        241,
+        230,
+        13,
+        222,
+        22
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AgentTaskResponseSubmitted",
+      "discriminator": [
+        87,
+        251,
+        158,
+        54,
+        165,
+        203,
+        106,
+        57
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "TaskNotOpen",
+      "msg": "Task is not open for responses"
+    },
+    {
+      "code": 6001,
+      "name": "TaskClosed",
+      "msg": "Task has been closed"
+    },
+    {
+      "code": 6002,
+      "name": "MaxResponsesReached",
+      "msg": "Task has reached maximum responses"
+    },
+    {
+      "code": 6003,
+      "name": "InsufficientHumanScore",
+      "msg": "Worker does not meet minimum human score requirement"
+    },
+    {
+      "code": 6004,
+      "name": "AlreadyResponded",
+      "msg": "Worker has already responded to this task"
+    },
+    {
+      "code": 6005,
+      "name": "BudgetExhausted",
+      "msg": "Task budget is exhausted"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidMint",
+      "msg": "Invalid reward mint for this task"
+    },
+    {
+      "code": 6007,
+      "name": "UnauthorizedCreator",
+      "msg": "Only the task creator can perform this operation"
+    },
+    {
+      "code": 6008,
+      "name": "UnauthorizedWorker",
+      "msg": "Only the response worker can perform this operation"
+    },
+    {
+      "code": 6009,
+      "name": "RewardAlreadyClaimed",
+      "msg": "Reward already claimed"
+    },
+    {
+      "code": 6010,
+      "name": "NoRewardAvailable",
+      "msg": "No reward available to claim"
+    },
+    {
+      "code": 6011,
+      "name": "MetadataUriTooLong",
+      "msg": "Metadata URI too long"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidTaskParams",
+      "msg": "Invalid task parameters"
+    },
+    {
+      "code": 6013,
+      "name": "ArithmeticOverflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6014,
+      "name": "HumanProfileNotFound",
+      "msg": "Human profile not found for worker"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidChoice",
+      "msg": "Invalid choice value"
+    },
+    {
+      "code": 6016,
+      "name": "TaskResponseMismatch",
+      "msg": "Task and response do not match"
+    },
+    {
+      "code": 6017,
+      "name": "InvalidVault",
+      "msg": "Invalid vault account for this task"
+    },
+    {
+      "code": 6018,
+      "name": "AgentNotActive",
+      "msg": "Agent is not active"
+    },
+    {
+      "code": 6019,
+      "name": "CapabilityNotActive",
+      "msg": "Capability is not active"
+    },
+    {
+      "code": 6020,
+      "name": "CapabilityAgentMismatch",
+      "msg": "Capability agent mismatch"
+    },
+    {
+      "code": 6021,
+      "name": "PrincipalMismatch",
+      "msg": "Principal mismatch"
+    },
+    {
+      "code": 6022,
+      "name": "CapabilityNotYetValid",
+      "msg": "Capability not yet valid"
+    },
+    {
+      "code": 6023,
+      "name": "CapabilityExpired",
+      "msg": "Capability expired"
+    },
+    {
+      "code": 6024,
+      "name": "ProgramNotAllowed",
+      "msg": "Program not allowed by capability"
+    },
+    {
+      "code": 6025,
+      "name": "AgentSignerMismatch",
+      "msg": "Agent signer mismatch"
+    },
+    {
+      "code": 6026,
+      "name": "InvalidProgram",
+      "msg": "Invalid program"
+    },
+    {
+      "code": 6027,
+      "name": "MultipleResponsesNotAllowed",
+      "msg": "Multiple responses not allowed for this task"
+    }
+  ],
+  "types": [
+    {
+      "name": "AgentProfile",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner_principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "signing_key",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "metadata_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tee_measurement",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "has_tee_measurement",
+            "type": "bool"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "AgentStatus"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_status_change",
+            "type": "i64"
+          },
+          {
+            "name": "last_metadata_update",
+            "type": "i64"
+          },
+          {
+            "name": "capability_count",
+            "type": "u32"
+          },
+          {
+            "name": "action_count",
+            "type": "u64"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Suspended"
+          },
+          {
+            "name": "Revoked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentTaskResponseSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "task",
+            "type": "pubkey"
+          },
+          {
+            "name": "task_response",
+            "type": "pubkey"
+          },
+          {
+            "name": "principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "capability",
+            "type": "pubkey"
+          },
+          {
+            "name": "choice",
+            "type": "u8"
+          },
+          {
+            "name": "reward_amount",
+            "type": "u64"
+          },
+          {
+            "name": "task_response_count",
+            "type": "u32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Capability",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "allowed_programs",
+            "type": "u64"
+          },
+          {
+            "name": "allowed_assets",
+            "type": "u64"
+          },
+          {
+            "name": "per_tx_limit",
+            "type": "u64"
+          },
+          {
+            "name": "daily_limit",
+            "type": "u64"
+          },
+          {
+            "name": "total_limit",
+            "type": "u64"
+          },
+          {
+            "name": "max_slippage_bps",
+            "type": "u16"
+          },
+          {
+            "name": "max_fee",
+            "type": "u64"
+          },
+          {
+            "name": "valid_from",
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "cooldown_seconds",
+            "type": "u32"
+          },
+          {
+            "name": "risk_tier",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "CapabilityStatus"
+              }
+            }
+          },
+          {
+            "name": "issued_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_used_at",
+            "type": "i64"
+          },
+          {
+            "name": "daily_spent",
+            "type": "u64"
+          },
+          {
+            "name": "current_day",
+            "type": "u32"
+          },
+          {
+            "name": "total_spent",
+            "type": "u64"
+          },
+          {
+            "name": "use_count",
+            "type": "u64"
+          },
+          {
+            "name": "enforce_allowlist",
+            "type": "bool"
+          },
+          {
+            "name": "allowlist_count",
+            "type": "u8"
+          },
+          {
+            "name": "destination_allowlist",
+            "type": {
+              "array": [
+                "pubkey",
+                10
+              ]
+            }
+          },
+          {
+            "name": "dispute_reason",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CapabilityStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Revoked"
+          },
+          {
+            "name": "Expired"
+          },
+          {
+            "name": "Frozen"
+          },
+          {
+            "name": "Disputed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateTaskParams",
+      "docs": [
+        "Parameters for creating a new task"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reward_per_response",
+            "docs": [
+              "Reward per valid response in token base units"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_budget",
+            "docs": [
+              "Total budget for this task"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "human_requirements",
+            "docs": [
+              "Minimum human score required (0-10000)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "metadata_uri",
+            "docs": [
+              "URI pointing to task metadata JSON"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "max_responses",
+            "docs": [
+              "Maximum responses allowed (0 for unlimited)"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "allow_multiple_responses",
+            "docs": [
+              "Whether to allow multiple responses per wallet"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "nonce",
+            "docs": [
+              "Unique nonce for PDA derivation (e.g., timestamp or counter)"
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HumanProfile",
+      "docs": [
+        "Human profile account - stores identity score and attestation references"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet",
+            "docs": [
+              "The wallet this profile belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "human_score",
+            "docs": [
+              "Aggregated identity score (computed from valid attestations)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "docs": [
+              "Cached uniqueness flag (recomputed on attestation changes)"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "total_attestation_count",
+            "docs": [
+              "Total number of attestations ever registered"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "active_attestation_count",
+            "docs": [
+              "Number of currently active/valid attestations"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "last_attestation_at",
+            "docs": [
+              "Timestamp of last attestation change"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_score_update",
+            "docs": [
+              "Timestamp of last score recomputation"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "attestations",
+            "docs": [
+              "Bounded list of attestation references"
+            ],
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "human_registry::state_v2::AttestationRef"
+                }
+              }
+            }
+          },
+          {
+            "name": "can_register_agents",
+            "docs": [
+              "Whether this profile can register agents"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "agents_registered",
+            "docs": [
+              "Total agents registered by this profile"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Profile creation timestamp"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HumanProfileLegacy",
+      "docs": [
+        "HumanProfile stores per-wallet identity score and attestations."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet",
+            "docs": [
+              "The wallet this profile belongs to."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "human_score",
+            "docs": [
+              "Aggregated identity score from all attestations."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "is_unique",
+            "docs": [
+              "Flag indicating whether this profile is considered \"unique\"."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "attestation_count",
+            "docs": [
+              "Total number of attestations registered (for easy demo)."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "last_attestation_at",
+            "docs": [
+              "Timestamp of last attestation (for easy demo)."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_attestation_hash",
+            "docs": [
+              "Hash of last attestation payload (for easy demo)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "attestations",
+            "docs": [
+              "Bounded list of attestations attached to this profile."
+            ],
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "human_registry::state::AttestationRef"
+                }
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump for the profile account."
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IssuerType",
+      "docs": [
+        "Issuer type classification"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "KycProvider"
+          },
+          {
+            "name": "ProofOfPersonhood"
+          },
+          {
+            "name": "SocialVerification"
+          },
+          {
+            "name": "DeviceBased"
+          },
+          {
+            "name": "EventBased"
+          },
+          {
+            "name": "Custom"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Task",
+      "docs": [
+        "Task account for human work distribution"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator",
+            "docs": [
+              "Creator who funded and manages the task"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_mint",
+            "docs": [
+              "Token mint for rewards"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_per_response",
+            "docs": [
+              "Reward per valid response in token base units"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_budget",
+            "docs": [
+              "Total budget allocated for this task"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "consumed_budget",
+            "docs": [
+              "Budget consumed by responses"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "human_requirements",
+            "docs": [
+              "Minimum human score required (0-10000)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "metadata_uri",
+            "docs": [
+              "URI pointing to task metadata JSON"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "is_open",
+            "docs": [
+              "Whether the task is open for responses"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "response_count",
+            "docs": [
+              "Total number of responses submitted"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "max_responses",
+            "docs": [
+              "Maximum responses allowed (0 for unlimited)"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "allow_multiple_responses",
+            "docs": [
+              "Whether multiple responses per wallet are allowed"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Timestamp when task was created"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "closed_at",
+            "docs": [
+              "Timestamp when task was closed (0 if open)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "vault",
+            "docs": [
+              "Escrow vault holding reward funds"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed for task PDA"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "vault_bump",
+            "docs": [
+              "Bump seed for vault PDA"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "docs": [
+              "Nonce used for PDA derivation (must match creation param)"
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TaskResponse",
+      "docs": [
+        "Response record tracking a worker's submission"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "task",
+            "docs": [
+              "The task this response belongs to"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "worker",
+            "docs": [
+              "Worker who submitted the response"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "choice",
+            "docs": [
+              "Choice made (task-specific encoding)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "response_data",
+            "docs": [
+              "Additional response data (hash or encoded value)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "human_score_at_submission",
+            "docs": [
+              "Human score of worker at time of submission"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "reward_amount",
+            "docs": [
+              "Reward amount earned"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "is_claimed",
+            "docs": [
+              "Whether reward has been claimed"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "submitted_at",
+            "docs": [
+              "Timestamp of submission"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "claimed_at",
+            "docs": [
+              "Timestamp of claim (0 if unclaimed)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WorkerStats",
+      "docs": [
+        "Worker stats for tracking participation"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "worker",
+            "docs": [
+              "Worker wallet"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "tasks_completed",
+            "docs": [
+              "Total tasks participated in"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "total_rewards_earned",
+            "docs": [
+              "Total rewards earned (across all mints)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quality_score",
+            "docs": [
+              "Average response quality score (if implemented)"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "first_participation",
+            "docs": [
+              "Timestamp of first participation"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_activity",
+            "docs": [
+              "Timestamp of last activity"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "human_registry::state::AttestationRef",
+      "docs": [
+        "Lightweight reference to an external attestation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "source",
+            "docs": [
+              "Identity / KYC / PoP provider or other attestation source."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "payload_hash",
+            "docs": [
+              "Hash of the attestation payload (off-chain details)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "weight",
+            "docs": [
+              "Weight contributed by this attestation to the human_score."
+            ],
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "human_registry::state_v2::AttestationRef",
+      "docs": [
+        "Attestation reference stored in profile (lightweight pointer)"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "attestation",
+            "docs": [
+              "Attestation account pubkey"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "issuer",
+            "docs": [
+              "Issuer who created it"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "attestation_type",
+            "docs": [
+              "Type of attestation"
+            ],
+            "type": {
+              "defined": {
+                "name": "IssuerType"
+              }
+            }
+          },
+          {
+            "name": "weight",
+            "docs": [
+              "Weight at time of registration"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "Expiry time (for quick checks)"
+            ],
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}
