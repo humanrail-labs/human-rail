@@ -7,6 +7,7 @@ use anchor_lang::prelude::*;
 use human_registry::{program::HumanRegistry, state::HumanProfileLegacy};
 
 #[derive(Accounts)]
+#[instruction(choice: u8, response_data: [u8; 32], response_nonce: u64)]
 pub struct SubmitResponse<'info> {
     #[account(
         mut,
@@ -14,11 +15,17 @@ pub struct SubmitResponse<'info> {
     )]
     pub task: Account<'info, Task>,
 
+    /// H-11 FIX: Include response_nonce in seeds to support multiple responses
     #[account(
         init,
         payer = worker,
         space = TaskResponse::LEN,
-        seeds = [b"response", task.key().as_ref(), worker.key().as_ref()],
+        seeds = [
+            b"response",
+            task.key().as_ref(),
+            worker.key().as_ref(),
+            &response_nonce.to_le_bytes()
+        ],
         bump
     )]
     pub response: Account<'info, TaskResponse>,
@@ -38,7 +45,12 @@ pub struct SubmitResponse<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<SubmitResponse>, choice: u8, response_data: [u8; 32]) -> Result<()> {
+pub fn handler(
+    ctx: Context<SubmitResponse>,
+    choice: u8,
+    response_data: [u8; 32],
+    response_nonce: u64,
+) -> Result<()> {
     let task = &mut ctx.accounts.task;
     let response = &mut ctx.accounts.response;
     let worker_profile = &ctx.accounts.worker_profile;
@@ -46,6 +58,14 @@ pub fn handler(ctx: Context<SubmitResponse>, choice: u8, response_data: [u8; 32]
 
     // Verify task can accept responses
     require!(can_accept_response(task), DataBlinkError::BudgetExhausted);
+
+    // H-11 FIX: Enforce single response when allow_multiple_responses is false
+    if !task.allow_multiple_responses {
+        require!(
+            response_nonce == 0,
+            DataBlinkError::MultipleResponsesNotAllowed
+        );
+    }
 
     // Verify worker meets human requirements
     require!(
@@ -70,15 +90,17 @@ pub fn handler(ctx: Context<SubmitResponse>, choice: u8, response_data: [u8; 32]
         .response_count
         .checked_add(1)
         .ok_or(DataBlinkError::ArithmeticOverflow)?;
+
     task.consumed_budget = task
         .consumed_budget
         .checked_add(task.reward_per_response)
         .ok_or(DataBlinkError::ArithmeticOverflow)?;
 
     msg!(
-        "Response submitted: worker={}, choice={}, reward={}",
+        "Response submitted: worker={}, choice={}, nonce={}, reward={}",
         ctx.accounts.worker.key(),
         choice,
+        response_nonce,
         task.reward_per_response
     );
 

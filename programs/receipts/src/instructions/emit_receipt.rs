@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use agent_registry::state::AgentProfile;
 
 use crate::{
     error::ReceiptsError,
@@ -8,6 +9,17 @@ use crate::{
 
 pub fn handler(ctx: Context<EmitReceipt>, params: EmitReceiptParams) -> Result<()> {
     let clock = Clock::get()?;
+
+    // === C-07 FIX: Verify emitter is the agent's signing key ===
+    let agent_profile = &ctx.accounts.agent_profile;
+    require!(
+        agent_profile.signing_key == ctx.accounts.emitter.key(),
+        ReceiptsError::UnauthorizedEmitter
+    );
+    require!(
+        agent_profile.key() == params.agent_id,
+        ReceiptsError::AgentMismatch
+    );
 
     let receipt = &mut ctx.accounts.receipt;
     receipt.principal_id = params.principal_id;
@@ -70,6 +82,15 @@ pub struct EmitReceipt<'info> {
     /// Emitter - typically the agent or a program on behalf of agent
     #[account(mut)]
     pub emitter: Signer<'info>,
+
+    /// C-07 FIX: Agent profile to verify emitter is authorized
+    #[account(
+        seeds = [b"agent", agent_profile.owner_principal.as_ref(), &agent_profile.nonce.to_le_bytes()],
+        bump = agent_profile.bump,
+        seeds::program = agent_registry::ID,
+        constraint = agent_profile.signing_key == emitter.key() @ ReceiptsError::UnauthorizedEmitter
+    )]
+    pub agent_profile: Account<'info, AgentProfile>,
 
     /// The receipt account
     #[account(

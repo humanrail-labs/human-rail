@@ -94,3 +94,48 @@ impl PaymentReceipt {
         32 + // tx_signature
         1; // bump
 }
+
+/// Agent escrow - PDA-controlled token account for autonomous agent payments
+/// Seeds: [b"agent_escrow", principal, agent, mint]
+#[account]
+pub struct AgentEscrow {
+    /// Principal who funded this escrow
+    pub principal: Pubkey,
+    /// Agent authorized to spend from this escrow
+    pub agent: Pubkey,
+    /// Token mint for this escrow
+    pub mint: Pubkey,
+    /// Associated token account (PDA-controlled)
+    pub token_account: Pubkey,
+    /// Total amount deposited
+    pub total_deposited: u64,
+    /// Total amount spent
+    pub total_spent: u64,
+    /// Timestamp when created
+    pub created_at: i64,
+    /// Timestamp of last usage
+    pub last_used_at: i64,
+    /// PDA bump
+    pub bump: u8,
+    /// Token account bump
+    pub token_account_bump: u8,
+}
+
+impl AgentEscrow {
+    pub const LEN: usize = 8 + // discriminator
+        32 + // principal
+        32 + // agent
+        32 + // mint
+        32 + // token_account
+        8 +  // total_deposited
+        8 +  // total_spent
+        8 +  // created_at
+        8 +  // last_used_at
+        1 +  // bump
+        1;   // token_account_bump
+
+    /// Available balance
+    pub fn available(&self) -> u64 {
+        self.total_deposited.saturating_sub(self.total_spent)
+    }
+}

@@ -44,6 +44,8 @@ pub enum HumanPayError {
     AgentSignerMismatch,
     #[msg("Insufficient balance")]
     InsufficientBalance,
+    #[msg("Insufficient escrow balance")]
+    InsufficientEscrowBalance,
     #[msg("Unauthorized merchant")]
     UnauthorizedMerchant,
     #[msg("Invalid invoice state")]
@@ -54,4 +56,8 @@ pub enum HumanPayError {
     InvalidExpiration,
     #[msg("Insufficient human score")]
     InsufficientHumanScore,
+    #[msg("Invalid program")]
+    InvalidProgram,
+    #[msg("CPI call to delegation failed")]
+    DelegationCpiFailed,
 }

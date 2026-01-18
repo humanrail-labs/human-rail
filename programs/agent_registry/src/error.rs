@@ -34,6 +34,8 @@ pub enum AgentRegistryError {
 
     #[msg("Principal human score too low to register agent")]
     InsufficientHumanScore,
+    #[msg("Profile not authorized to register agents")]
+    AgentRegistrationNotAllowed,
 
     #[msg("Agent already exists with this nonce")]
     AgentAlreadyExists,

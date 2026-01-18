@@ -37,6 +37,18 @@ pub mod human_pay {
     pub fn withdraw_invoice(ctx: Context<WithdrawInvoice>) -> Result<()> {
         instructions::withdraw_invoice::handler(ctx)
     }
+
+    /// Fund an agent escrow for autonomous payments.
+    /// Principal deposits tokens that the agent can spend within capability limits.
+    pub fn fund_agent_escrow(ctx: Context<FundAgentEscrow>, amount: u64) -> Result<()> {
+        instructions::fund_agent_escrow::handler(ctx, amount)
+    }
+
+    /// Agent autonomously pays an invoice using escrow funds.
+    /// Validates capability limits and transfers from PDA-controlled escrow.
+    pub fn agent_pay_invoice(ctx: Context<AgentPayInvoice>) -> Result<()> {
+        instructions::agent_pay_invoice::handler(ctx)
+    }
 }
 
 /// Parameters for creating a new invoice

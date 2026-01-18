@@ -19,3 +19,4 @@ default = []
 [dependencies]
 anchor-lang = "0.32.1"
 anchor-spl = "0.32.1"
+human-registry = { path = "../human_registry", features = ["cpi"] }

@@ -6,6 +6,7 @@ pub mod validate_capability;
 pub mod record_usage;
 pub mod flag_dispute;
 pub mod resolve_dispute;
+pub mod record_usage_cpi;
 
 pub use issue_capability::*;
 pub use revoke_capability::*;
@@ -15,3 +16,4 @@ pub use validate_capability::*;
 pub use record_usage::*;
 pub use flag_dispute::*;
 pub use resolve_dispute::*;
+pub use record_usage_cpi::*;

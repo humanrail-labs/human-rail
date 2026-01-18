@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use human_registry::{program::HumanRegistry, state_v2::HumanProfile};
 
 use crate::{
     error::AgentRegistryError,
@@ -11,9 +12,16 @@ pub const MIN_HUMAN_SCORE_FOR_AGENT: u16 = 50;
 
 pub fn handler(ctx: Context<RegisterAgent>, params: RegisterAgentParams) -> Result<()> {
     let clock = Clock::get()?;
-
-    // Validate principal has sufficient human score
-    // In production, this would CPI to human_registry to verify
+    // === C-06 FIX: Verify principal has sufficient human score ===
+    let human_profile = &ctx.accounts.human_profile;
+    require!(
+        human_profile.human_score >= MIN_HUMAN_SCORE_FOR_AGENT,
+        AgentRegistryError::InsufficientHumanScore
+    );
+    require!(
+        human_profile.can_register_agents,
+        AgentRegistryError::AgentRegistrationNotAllowed
+    );
     // For now, we trust the human_profile account constraint
 
     let agent = &mut ctx.accounts.agent;
@@ -75,6 +83,17 @@ pub struct RegisterAgent<'info> {
     /// Principal (owner) registering the agent - must sign
     #[account(mut)]
     pub principal: Signer<'info>,
+
+    /// C-06 FIX: Human profile proving principal is verified human
+    #[account(
+        seeds = [b"human_profile", principal.key().as_ref()],
+        bump = human_profile.bump,
+        seeds::program = human_registry_program.key()
+    )]
+    pub human_profile: Account<'info, HumanProfile>,
+
+    /// Human registry program for CPI verification
+    pub human_registry_program: Program<'info, HumanRegistry>,
 
     /// The new agent profile PDA
     #[account(

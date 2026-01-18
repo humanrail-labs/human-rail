@@ -94,6 +94,11 @@ pub fn handler(
     );
     
     set_return_data(&result.to_bytes());
+
+    // H-06 FIX: Optionally fail on invalid capability
+    if params.fail_on_invalid && !result.is_valid {
+        return Err(error!(DelegationError::CapabilityNotActive));
+    }
     
     emit!(CapabilityValidated {
         capability: capability.key(),
@@ -182,13 +187,19 @@ fn validate_capability_internal(
     
     if capability.enforce_allowlist {
         flags |= FLAG_ALLOWLIST_ENFORCED;
-        if let Some(destination) = params.destination {
-            if !capability.is_destination_allowed(&destination) {
+        // C-08 FIX: Require destination when allowlist is enforced
+        match params.destination {
+            Some(destination) => {
+                if !capability.is_destination_allowed(&destination) {
+                    return ValidationResult::err(ERR_DESTINATION_NOT_ALLOWED);
+                }
+            }
+            None => {
+                // Allowlist enforced but no destination provided - reject
                 return ValidationResult::err(ERR_DESTINATION_NOT_ALLOWED);
             }
         }
     }
-    
     let remaining_daily = capability.daily_limit.saturating_sub(new_daily_spent);
     let remaining_total = capability.total_limit.saturating_sub(new_total_spent);
     
@@ -235,6 +246,8 @@ pub struct ValidateCapabilityParams {
     pub amount: u64,
     pub destination: Option<Pubkey>,
     pub check_cooldown: bool,
+    /// H-06 FIX: If true, return error on validation failure instead of Ok
+    pub fail_on_invalid: bool,
 }
 
 impl Default for ValidateCapabilityParams {
@@ -246,6 +259,7 @@ impl Default for ValidateCapabilityParams {
             amount: 0,
             destination: None,
             check_cooldown: true,
+            fail_on_invalid: false,
         }
     }
 }

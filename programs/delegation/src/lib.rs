@@ -52,6 +52,7 @@ pub mod delegation {
             amount: action_value,
             destination: Some(destination),
             check_cooldown: true,
+            fail_on_invalid: true,
         };
         instructions::validate_capability::handler(ctx, params)
     }
@@ -63,6 +64,15 @@ pub mod delegation {
         amount_used: u64,
     ) -> Result<()> {
         instructions::record_usage::handler(ctx, amount_used)
+    }
+
+    /// Record capability usage via CPI from authorized programs.
+    /// Validates agent_signer matches agent_profile.signing_key.
+    pub fn record_usage_cpi(
+        ctx: Context<RecordUsageCpi>,
+        amount_used: u64,
+    ) -> Result<()> {
+        instructions::record_usage_cpi::handler(ctx, amount_used)
     }
 
     /// Flag a capability for dispute review.

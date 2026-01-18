@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state_v2::{AttestationStatus, IssuerType};
+use crate::state_v2::{AttestationStatus, HumanProfile, IssuerType};
 
 // =============================================================================
 // ATTESTATION INDEX - Pagination-Ready Design
@@ -257,10 +257,12 @@ pub fn recompute_aggregated_score(ctx: Context<RecomputeScore>) -> Result<()> {
 pub struct InitializeAttestationIndex<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-
-    /// CHECK: Profile account (verified by constraint in production)
-    pub profile: UncheckedAccount<'info>,
-
+    /// C-09 FIX: Profile must be valid HumanProfile PDA
+    #[account(
+        seeds = [b"human_profile", profile.wallet.as_ref()],
+        bump = profile.bump
+    )]
+    pub profile: Account<'info, HumanProfile>,
     #[account(
         init,
         payer = payer,
@@ -286,9 +288,12 @@ pub struct InitializeAttestationIndex<'info> {
 pub struct AllocateIndexPage<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-
-    /// CHECK: Profile account
-    pub profile: UncheckedAccount<'info>,
+    /// C-09 FIX: Profile must be valid HumanProfile PDA
+    #[account(
+        seeds = [b"human_profile", profile.wallet.as_ref()],
+        bump = profile.bump
+    )]
+    pub profile: Account<'info, HumanProfile>,
 
     #[account(
         mut,
@@ -311,8 +316,12 @@ pub struct AllocateIndexPage<'info> {
 
 #[derive(Accounts)]
 pub struct RecomputeScore<'info> {
-    /// CHECK: Profile account
-    pub profile: UncheckedAccount<'info>,
+    /// C-09 FIX: Profile must be valid HumanProfile PDA
+    #[account(
+        seeds = [b"human_profile", profile.wallet.as_ref()],
+        bump = profile.bump
+    )]
+    pub profile: Account<'info, HumanProfile>,
 
     #[account(
         mut,

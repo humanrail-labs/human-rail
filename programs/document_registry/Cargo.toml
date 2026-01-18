@@ -19,3 +19,5 @@ default = []
 [dependencies]
 anchor-lang = "0.32.1"
 anchor-spl = "0.32.1"
+delegation = { path = "../delegation", features = ["cpi"] }
+agent-registry = { path = "../agent_registry", features = ["cpi"] }

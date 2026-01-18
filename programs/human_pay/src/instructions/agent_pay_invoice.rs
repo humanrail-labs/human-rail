@@ -1,24 +1,29 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Token, TokenAccount, Transfer};
+use anchor_spl::token::{self, Token, TokenAccount, Mint, Transfer};
 
-use crate::state::{ConfidentialInvoice, InvoiceStatus, PaymentReceipt};
+use crate::state::{AgentEscrow, ConfidentialInvoice, InvoiceStatus, PaymentReceipt};
 use crate::error::HumanPayError;
 
 // Import from common types
 pub const PROGRAM_SCOPE_HUMAN_PAY: u64 = 1 << 0;
 pub const ASSET_SCOPE_ANY_SPL_TOKEN: u64 = 1 << 3;
 
+// Program IDs for CPI validation
+use anchor_lang::pubkey;
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5");
+
 /// Agent autonomously pays an invoice on behalf of principal.
 /// Key differences from regular pay_invoice:
 /// - Agent signs (not principal)
 /// - Capability is validated for limits and scope
+/// - Funds come from PDA-controlled escrow (not principal's wallet)
 /// - Receipt is emitted for accountability
-/// - Capability usage is recorded
 pub fn handler(ctx: Context<AgentPayInvoice>) -> Result<()> {
     let clock = Clock::get()?;
     let invoice = &mut ctx.accounts.invoice;
     let capability = &ctx.accounts.capability;
     let agent = &ctx.accounts.agent_profile;
+    let escrow = &ctx.accounts.escrow;
 
     // Validate invoice is open
     require!(
@@ -115,18 +120,46 @@ pub fn handler(ctx: Context<AgentPayInvoice>) -> Result<()> {
         require!(merchant_allowed, HumanPayError::DestinationNotAllowed);
     }
 
-    // === EXECUTE PAYMENT ===
+    // === VALIDATE ESCROW ===
 
-    // Transfer tokens from principal's token account to invoice vault
-    let transfer_ctx = CpiContext::new(
+    // Check escrow has sufficient balance
+    require!(
+        escrow.available() >= invoice.amount,
+        HumanPayError::InsufficientEscrowBalance
+    );
+
+    // === EXECUTE PAYMENT FROM ESCROW ===
+
+    // Build escrow PDA signer seeds
+    let principal_key = ctx.accounts.principal.key();
+    let agent_profile_key = ctx.accounts.agent_profile.key();
+    let mint_key = ctx.accounts.mint.key();
+    let escrow_bump = escrow.bump;
+    let escrow_seeds: &[&[u8]] = &[
+        b"agent_escrow",
+        principal_key.as_ref(),
+        agent_profile_key.as_ref(),
+        mint_key.as_ref(),
+        &[escrow_bump],
+    ];
+    let signer_seeds: &[&[&[u8]]] = &[escrow_seeds];
+
+    // Transfer tokens from escrow to invoice vault
+    let transfer_ctx = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         Transfer {
-            from: ctx.accounts.principal_token_account.to_account_info(),
+            from: ctx.accounts.escrow_token_account.to_account_info(),
             to: ctx.accounts.invoice_vault.to_account_info(),
-            authority: ctx.accounts.principal.to_account_info(),
+            authority: ctx.accounts.escrow.to_account_info(),
         },
+        signer_seeds,
     );
     token::transfer(transfer_ctx, invoice.amount)?;
+
+    // Update escrow tracking
+    let escrow = &mut ctx.accounts.escrow;
+    escrow.total_spent = escrow.total_spent.saturating_add(invoice.amount);
+    escrow.last_used_at = clock.unix_timestamp;
 
     // Update invoice
     invoice.status = InvoiceStatus::Paid;
@@ -144,6 +177,24 @@ pub fn handler(ctx: Context<AgentPayInvoice>) -> Result<()> {
     receipt.tx_signature = [0u8; 32]; // Would be filled by client
     receipt.bump = ctx.bumps.payment_receipt;
 
+
+    // === H-02 FIX: Record capability usage via CPI ===
+    let cpi_accounts = delegation::cpi::accounts::RecordUsageCpi {
+        capability: ctx.accounts.capability.to_account_info(),
+        agent_signer: ctx.accounts.agent_signer.to_account_info(),
+        agent_profile: ctx.accounts.agent_profile.to_account_info(),
+        freeze_record: ctx.accounts.freeze_record.as_ref().map(|f| f.to_account_info()),
+        usage_record: ctx.accounts.usage_record.to_account_info(),
+        payer: ctx.accounts.agent_signer.to_account_info(),
+        agent_registry_program: ctx.accounts.agent_registry_program.to_account_info(),
+        system_program: ctx.accounts.system_program.to_account_info(),
+    };
+    let cpi_ctx = CpiContext::new(
+        ctx.accounts.delegation_program.to_account_info(),
+        cpi_accounts,
+    );
+    delegation::cpi::record_usage_cpi(cpi_ctx, invoice.amount)?;
+
     // === EMIT RECEIPT FOR ACCOUNTABILITY ===
 
     emit!(AgentPaymentExecuted {
@@ -153,6 +204,8 @@ pub fn handler(ctx: Context<AgentPayInvoice>) -> Result<()> {
         capability: capability.key(),
         merchant: invoice.merchant,
         amount: invoice.amount,
+        escrow: escrow.key(),
+        escrow_remaining: escrow.available(),
         capability_daily_spent: effective_daily_spent.saturating_add(invoice.amount),
         capability_total_spent: capability.total_spent.saturating_add(invoice.amount),
         slot: clock.slot,
@@ -160,10 +213,11 @@ pub fn handler(ctx: Context<AgentPayInvoice>) -> Result<()> {
     });
 
     msg!(
-        "Agent payment executed: agent={}, amount={}, merchant={}",
+        "Agent payment executed: agent={}, amount={}, merchant={}, escrow_remaining={}",
         agent.key(),
         invoice.amount,
-        invoice.merchant
+        invoice.merchant,
+        escrow.available()
     );
 
     Ok(())
@@ -244,29 +298,43 @@ pub struct AgentPayInvoice<'info> {
 
     /// The agent profile (verifies agent_signer matches signing_key)
     #[account(
+        owner = AGENT_REGISTRY_PROGRAM_ID @ HumanPayError::InvalidProgram,
         constraint = agent_profile.signing_key == agent_signer.key() @ HumanPayError::AgentSignerMismatch,
         constraint = agent_profile.status == AgentStatus::Active @ HumanPayError::AgentNotActive
     )]
-    pub agent_profile: Account<'info, AgentProfile>,
+    pub agent_profile: Box<Account<'info, AgentProfile>>,
 
     /// The principal who delegated to this agent
-    /// CHECK: Validated via capability.principal
+    /// CHECK: Validated via capability.principal and escrow.principal
     pub principal: UncheckedAccount<'info>,
 
     /// The capability credential (validates delegation)
     #[account(
+        mut,
+        owner = delegation::ID @ HumanPayError::InvalidProgram,
         constraint = capability.agent == agent_profile.key() @ HumanPayError::CapabilityAgentMismatch,
         constraint = capability.principal == principal.key() @ HumanPayError::PrincipalMismatch
     )]
-    pub capability: Account<'info, Capability>,
+    pub capability: Box<Account<'info, Capability>>,
 
-    /// The invoice to pay
+    /// Token mint for the payment
+    #[account(
+        constraint = mint.key() == invoice.mint @ HumanPayError::InvalidMint
+    )]
+    pub mint: Account<'info, Mint>,
+
+    /// The invoice to pay (C-03 FIX: seeds now include mint)
     #[account(
         mut,
-        seeds = [b"invoice", invoice.merchant.as_ref(), &invoice.nonce.to_le_bytes()],
+        seeds = [
+            b"invoice",
+            invoice.merchant.as_ref(),
+            invoice.mint.as_ref(),
+            &invoice.nonce.to_le_bytes()
+        ],
         bump = invoice.bump
     )]
-    pub invoice: Account<'info, ConfidentialInvoice>,
+    pub invoice: Box<Account<'info, ConfidentialInvoice>>,
 
     /// Invoice vault to receive payment
     #[account(
@@ -275,12 +343,30 @@ pub struct AgentPayInvoice<'info> {
     )]
     pub invoice_vault: Account<'info, TokenAccount>,
 
-    /// Principal's token account (source of funds)
+    /// Agent escrow account (C-02 FIX: PDA-controlled funds)
     #[account(
         mut,
-        constraint = principal_token_account.owner == principal.key() @ HumanPayError::InvalidTokenAccount
+        seeds = [
+            b"agent_escrow",
+            principal.key().as_ref(),
+            agent_profile.key().as_ref(),
+            mint.key().as_ref()
+        ],
+        bump = escrow.bump,
+        constraint = escrow.principal == principal.key() @ HumanPayError::PrincipalMismatch,
+        constraint = escrow.agent == agent_profile.key() @ HumanPayError::CapabilityAgentMismatch,
+        constraint = escrow.mint == mint.key() @ HumanPayError::InvalidMint
     )]
-    pub principal_token_account: Account<'info, TokenAccount>,
+    pub escrow: Box<Account<'info, AgentEscrow>>,
+
+    /// Escrow token account (source of funds - PDA controlled)
+    #[account(
+        mut,
+        seeds = [b"escrow_vault", escrow.key().as_ref()],
+        bump = escrow.token_account_bump,
+        constraint = escrow_token_account.key() == escrow.token_account @ HumanPayError::InvalidTokenAccount
+    )]
+    pub escrow_token_account: Account<'info, TokenAccount>,
 
     /// Payment receipt
     #[account(
@@ -293,6 +379,30 @@ pub struct AgentPayInvoice<'info> {
     pub payment_receipt: Account<'info, PaymentReceipt>,
 
     pub token_program: Program<'info, Token>,
+
+    /// Delegation program for recording usage via CPI
+    /// CHECK: Validated by address constraint
+    #[account(
+        constraint = delegation_program.key() == delegation::ID @ HumanPayError::InvalidProgram
+    )]
+    pub delegation_program: UncheckedAccount<'info>,
+
+    /// Usage record to be created by CPI
+    /// CHECK: Created and validated by delegation program
+    #[account(mut)]
+    pub usage_record: UncheckedAccount<'info>,
+
+    /// Freeze record - optional, for checking if agent is frozen
+    /// CHECK: Validated by delegation program
+    pub freeze_record: Option<UncheckedAccount<'info>>,
+
+    /// Agent registry program for CPI validation
+    /// CHECK: Validated by address constraint
+    #[account(
+        constraint = agent_registry_program.key() == AGENT_REGISTRY_PROGRAM_ID @ HumanPayError::InvalidProgram
+    )]
+    pub agent_registry_program: UncheckedAccount<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -304,6 +414,8 @@ pub struct AgentPaymentExecuted {
     pub capability: Pubkey,
     pub merchant: Pubkey,
     pub amount: u64,
+    pub escrow: Pubkey,
+    pub escrow_remaining: u64,
     pub capability_daily_spent: u64,
     pub capability_total_spent: u64,
     pub slot: u64,

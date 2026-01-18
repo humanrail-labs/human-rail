@@ -21,3 +21,5 @@ init-if-needed = ["anchor-lang/init-if-needed"]
 anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
 anchor-spl = "0.32.1"
 human-registry = { path = "../human_registry", features = ["cpi"] }
+delegation = { path = "../delegation", features = ["cpi"] }
+agent-registry = { path = "../agent_registry", features = ["cpi"] }

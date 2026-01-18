@@ -31,11 +31,22 @@ pub mod data_blink {
         ctx: Context<SubmitResponse>,
         choice: u8,
         response_data: [u8; 32],
+        response_nonce: u64,
     ) -> Result<()> {
-        instructions::submit_response::handler(ctx, choice, response_data)
+        instructions::submit_response::handler(ctx, choice, response_data, response_nonce)
     }
 
     /// Claim accumulated rewards for completed task responses.
+    /// Agent autonomously submits a task response on behalf of principal.
+    pub fn agent_submit_response(
+        ctx: Context<AgentSubmitResponse>,
+        choice: u8,
+        response_data: [u8; 32],
+        response_nonce: u64,
+    ) -> Result<()> {
+        instructions::agent_submit_response::handler(ctx, choice, response_data, response_nonce)
+    }
+
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         instructions::claim_rewards::handler(ctx)
     }

@@ -55,4 +55,8 @@ pub enum DataBlinkError {
     ProgramNotAllowed,
     #[msg("Agent signer mismatch")]
     AgentSignerMismatch,
+    #[msg("Invalid program")]
+    InvalidProgram,
+    #[msg("Multiple responses not allowed for this task")]
+    MultipleResponsesNotAllowed,
 }

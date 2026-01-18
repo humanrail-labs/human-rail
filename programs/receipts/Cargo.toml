@@ -20,3 +20,4 @@ init-if-needed = ["anchor-lang/init-if-needed"]
 [dependencies]
 anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
 anchor-spl = "0.32.1"
+agent-registry = { path = "../agent_registry", features = ["cpi"] }

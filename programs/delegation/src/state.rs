@@ -144,12 +144,12 @@ impl Capability {
 
     /// Check if program is allowed
     pub fn is_program_allowed(&self, program_bit: u64) -> bool {
-        self.allowed_programs & program_bit != 0
+        (program_bit & self.allowed_programs) == program_bit
     }
 
     /// Check if asset is allowed
     pub fn is_asset_allowed(&self, asset_bit: u64) -> bool {
-        self.allowed_assets & asset_bit != 0
+        (asset_bit & self.allowed_assets) == asset_bit
     }
 
     /// Check if cooldown has passed

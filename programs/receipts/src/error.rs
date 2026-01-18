@@ -13,6 +13,8 @@ pub enum ReceiptsError {
 
     #[msg("Unauthorized emitter")]
     UnauthorizedEmitter,
+    #[msg("Agent ID does not match agent profile")]
+    AgentMismatch,
 
     #[msg("Invalid action hash")]
     InvalidActionHash,

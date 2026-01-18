@@ -1,10 +1,16 @@
 use anchor_lang::prelude::*;
 
 use crate::state::{Task, TaskResponse, WorkerStats};
+use human_registry::state_v2::HumanProfile;
 use crate::error::DataBlinkError;
 
 // Program scope bit for data_blink
 pub const PROGRAM_SCOPE_DATA_BLINK: u64 = 1 << 1;
+
+// Program IDs for cross-program validation
+use anchor_lang::pubkey;
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5");
+pub const DELEGATION_PROGRAM_ID: Pubkey = pubkey!("5LJLTUQR26xPn2mfyM6Y7uMBezKKpATt3CKfKeCnFdtR");
 
 /// Agent autonomously submits a task response on behalf of principal.
 /// Key features:
@@ -15,6 +21,7 @@ pub fn handler(
     ctx: Context<AgentSubmitResponse>,
     choice: u8,
     response_data: [u8; 32],
+    response_nonce: u64,
 ) -> Result<()> {
     let clock = Clock::get()?;
     let task = &mut ctx.accounts.task;
@@ -32,6 +39,20 @@ pub fn handler(
         );
     }
 
+    // === H-10 FIX: Check budget has remaining funds ===
+    let remaining_budget = task.total_budget.saturating_sub(task.consumed_budget);
+    require!(
+        remaining_budget >= task.reward_per_response,
+        DataBlinkError::BudgetExhausted
+    );
+
+    // === H-11 FIX: Enforce single response when allow_multiple_responses is false ===
+    if !task.allow_multiple_responses {
+        require!(
+            response_nonce == 0,
+            DataBlinkError::MultipleResponsesNotAllowed
+        );
+    }
     // === CAPABILITY VALIDATION (KYA Core) ===
 
     // Validate agent is active
@@ -74,10 +95,14 @@ pub fn handler(
         DataBlinkError::ProgramNotAllowed
     );
 
-    // === NOTE: For task responses, we don't validate human_score ===
-    // Agents act on behalf of principals, so the principal's eligibility
-    // should be pre-verified when the capability was issued.
-    // This enables true autonomous agent execution.
+    // === H-14 FIX: Validate principal's human score ===
+    require!(
+        ctx.accounts.principal_profile.human_score >= task.human_requirements,
+        DataBlinkError::InsufficientHumanScore
+    );
+    
+    
+    
 
     // === EXECUTE RESPONSE ===
 
@@ -87,7 +112,7 @@ pub fn handler(
     response.worker = ctx.accounts.principal.key(); // Credit goes to principal
     response.choice = choice;
     response.response_data = response_data;
-    response.human_score_at_submission = 0; // Agent submission
+    response.human_score_at_submission = ctx.accounts.principal_profile.human_score;
     response.reward_amount = task.reward_per_response;
     response.is_claimed = false;
     response.submitted_at = clock.unix_timestamp;
@@ -202,7 +227,7 @@ pub struct Capability {
 }
 
 #[derive(Accounts)]
-#[instruction(choice: u8, response_data: [u8; 32])]
+#[instruction(choice: u8, response_data: [u8; 32], response_nonce: u64)]
 pub struct AgentSubmitResponse<'info> {
     /// The agent executing the response - AGENT SIGNS (true autonomy)
     #[account(mut)]
@@ -210,6 +235,7 @@ pub struct AgentSubmitResponse<'info> {
 
     /// The agent profile
     #[account(
+        owner = AGENT_REGISTRY_PROGRAM_ID @ DataBlinkError::InvalidProgram,
         constraint = agent_profile.signing_key == agent_signer.key() @ DataBlinkError::AgentSignerMismatch,
         constraint = agent_profile.status == AgentStatus::Active @ DataBlinkError::AgentNotActive
     )]
@@ -221,6 +247,7 @@ pub struct AgentSubmitResponse<'info> {
 
     /// The capability credential
     #[account(
+        owner = DELEGATION_PROGRAM_ID @ DataBlinkError::InvalidProgram,
         constraint = capability.agent == agent_profile.key() @ DataBlinkError::CapabilityAgentMismatch,
         constraint = capability.principal == principal.key() @ DataBlinkError::PrincipalMismatch
     )]
@@ -242,11 +269,20 @@ pub struct AgentSubmitResponse<'info> {
         seeds = [
             b"response",
             task.key().as_ref(),
-            principal.key().as_ref()
+            principal.key().as_ref(),
+            &response_nonce.to_le_bytes()
         ],
         bump
     )]
     pub task_response: Account<'info, TaskResponse>,
+
+    /// Principal human profile for human score verification
+    #[account(
+        seeds = [b"human_profile", principal.key().as_ref()],
+        bump = principal_profile.bump,
+        seeds::program = human_registry::ID
+    )]
+    pub principal_profile: Account<'info, HumanProfile>,
 
     /// Worker stats for the principal
     #[account(

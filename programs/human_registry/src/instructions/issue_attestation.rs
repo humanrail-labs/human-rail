@@ -40,8 +40,8 @@ pub fn handler(ctx: Context<IssueAttestation>, params: IssueAttestationParams) -
         AttestationError::TooManyAttestations
     );
 
-    // Validate nonce is unique (prevents replay)
-    // In production, you'd check against a nonce registry
+    // Validate nonce is > 0 (replay prevention is handled by PDA seeds)
+    // The PDA [attestation, profile, issuer, nonce] ensures uniqueness
     require!(
         params.nonce > 0,
         AttestationError::InvalidNonce
@@ -191,7 +191,7 @@ fn create_signing_bytes(
 fn verify_ed25519_signature(
     instructions_sysvar: &AccountInfo,
     expected_signer: &Pubkey,
-    _message: &[u8],  // Used by Ed25519 program, we just verify it ran
+    expected_message: &[u8],
     _signature: &[u8; 64],
 ) -> Result<()> {
     // Get current instruction index
@@ -215,16 +215,50 @@ fn verify_ed25519_signature(
         AttestationError::Ed25519InstructionNotFound
     );
 
-    // Verify instruction has at least one signature
+    let ix_data = &ed25519_ix.data;
+
+    // Verify instruction has at least one signature and minimum data length
+    // Minimum: 16 bytes header + 64 signature + 32 pubkey = 112 bytes
     require!(
-        !ed25519_ix.data.is_empty() && ed25519_ix.data[0] > 0,
+        ix_data.len() >= 112 && ix_data[0] >= 1,
         AttestationError::InvalidSignature
     );
 
-    // If we reach here, Ed25519 program verified the signature
-    // (it would have failed the transaction otherwise)
-    msg!("Ed25519 signature verified for issuer: {}", expected_signer);
+    // === C-05 FIX: Parse and verify Ed25519 instruction contents ===
 
+    // Parse offsets from header (little-endian u16 values)
+    let pubkey_offset = u16::from_le_bytes([ix_data[6], ix_data[7]]) as usize;
+    let message_offset = u16::from_le_bytes([ix_data[10], ix_data[11]]) as usize;
+    let message_size = u16::from_le_bytes([ix_data[12], ix_data[13]]) as usize;
+
+    // Validate offsets are within bounds
+    require!(
+        pubkey_offset + 32 <= ix_data.len(),
+        AttestationError::InvalidSignature
+    );
+    require!(
+        message_offset + message_size <= ix_data.len(),
+        AttestationError::InvalidSignature
+    );
+
+    // Extract and verify public key matches expected signer
+    let ix_pubkey = &ix_data[pubkey_offset..pubkey_offset + 32];
+    require!(
+        ix_pubkey == expected_signer.as_ref(),
+        AttestationError::SignerMismatch
+    );
+
+    // Extract and verify message matches expected message
+    let ix_message = &ix_data[message_offset..message_offset + message_size];
+    require!(
+        ix_message == expected_message,
+        AttestationError::MessageMismatch
+    );
+
+    // === END C-05 FIX ===
+
+    msg!("Ed25519 signature verified for issuer: {}", expected_signer);
+    
     Ok(())
 }
 
@@ -330,6 +364,10 @@ pub enum AttestationError {
 
     #[msg("Invalid signature")]
     InvalidSignature,
+    #[msg("Ed25519 public key does not match expected signer")]
+    SignerMismatch,
+    #[msg("Ed25519 message does not match expected attestation data")]
+    MessageMismatch,
 
     #[msg("Invalid nonce - must be > 0")]
     InvalidNonce,

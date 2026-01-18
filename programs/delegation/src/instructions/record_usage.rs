@@ -17,8 +17,30 @@ pub fn handler(ctx: Context<RecordUsage>, amount_used: u64) -> Result<()> {
         DelegationError::CapabilityNotActive
     );
 
-    // Reset daily if needed
+    // Reset daily if needed (MUST happen before limit checks)
     capability.maybe_reset_daily(clock.unix_timestamp);
+
+    // === C-04 FIX: ENFORCE LIMITS BEFORE UPDATING ===
+
+    // Check per-transaction limit
+    require!(
+        amount_used <= capability.per_tx_limit,
+        DelegationError::PerTxLimitExceeded
+    );
+
+    // Check daily limit (after daily reset)
+    require!(
+        capability.daily_spent.saturating_add(amount_used) <= capability.daily_limit,
+        DelegationError::DailyLimitExceeded
+    );
+
+    // Check total lifetime limit
+    require!(
+        capability.total_spent.saturating_add(amount_used) <= capability.total_limit,
+        DelegationError::TotalLimitExceeded
+    );
+
+    // === END C-04 FIX ===
 
     // Update tracking
     capability.daily_spent = capability.daily_spent.saturating_add(amount_used);
