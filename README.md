@@ -1,150 +1,149 @@
-# HumanRail Protocol
+# HumanRail
 
-**Know Your Agent (KYA) - Human-First AI Identity Infrastructure on Solana**
+**Identity + accountability rails on Solana** for humans and agents.
 
-## Overview
+HumanRail lets apps require “verified human” participation (payments, tasks, signatures) and lets principals delegate tightly-bounded capabilities to software/AI agents with an on-chain audit trail.
 
-HumanRail is a comprehensive Solana-based protocol that establishes trust, accountability, and transparency for AI agents operating onchain. It answers the fundamental question: *"Who authorized this AI, and what can it do?"*
+## Who it’s for
 
-## Architecture
+- **Merchants / apps**: accept payments only from verified humans, reduce fraud/Sybil abuse.
+- **Task creators**: distribute micro-tasks to verified humans and pay per completion.
+- **Principals (humans/orgs)**: register and authorize agents with limits + emergency controls.
+- **Auditors / compliance**: trace actions back to a verified human principal.
 
-The protocol consists of 8 interconnected programs:
+## What you can build with it
 
-### Core Identity Layer
-| Program | Description | Status |
-|---------|-------------|--------|
-| `human_registry` | Human identity verification with attestations and proof-of-personhood | ✅ Compiles |
-| `agent_registry` | AI agent registration with lifecycle management | ✅ Compiles |
-| `delegation` | Capability-based permission system for agents | ✅ Compiles |
+- Verified checkout / invoicing (human-gated payments)
+- Verified document signing (human + authorized agent signatures)
+- Human-only micro-task marketplaces (data labeling, feedback, RLHF)
+- Accountable agent execution (limits, scopes, receipts, freeze controls)
 
-### Application Rails
-| Program | Description | Status |
-|---------|-------------|--------|
-| `human_pay` | Payment and invoice rail with human verification | ✅ Compiles |
-| `data_blink` | RLHF micro-task platform for human work | ✅ Compiles |
-| `document_registry` | Document signing with verified human/agent signatures | ✅ Compiles |
+---
 
-### Infrastructure
-| Program | Description | Status |
-|---------|-------------|--------|
-| `receipts` | Unified audit trail for all agent actions | ✅ Compiles |
-| `humanrail-common` | Shared types and CPI interfaces | ✅ Compiles |
+## Programs
 
-## Program IDs (Devnet)
+| Program | Purpose |
+|---|---|
+| `human_registry` | Human identity profiles + attestation-based scoring |
+| `agent_registry` | Agent registration, lifecycle, and key rotation |
+| `delegation` | Capabilities: scopes + limits + time bounds + (optional) allowlists |
+| `human_pay` | Payment rail (invoices / escrow flows with verification hooks) |
+| `data_blink` | Human micro-task distribution + rewards |
+| `document_registry` | On-chain document signing (human + agent flows) |
+| `receipts` | Shared audit trail for actions across rails |
+| `common` | Canonical shared types/utilities for cross-program consistency |
 
-```
-human_registry:    Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR
-human_pay:         6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe
-data_blink:        BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5
-agent_registry:    299gbw6p9rCpp7SBR9tts7qTgGie591JPY6RMAXoJHE6
-delegation:        74vfEGbYWUsRq7z8oSgp6gNxx3ENVQEBqXFJqHrB3Xx2
-receipts:          9ZKqiKqi3zXhNvTevEJ8qD6F25YdoymXXSTzsiEviAi
-document_registry: ERdbeXCpPoXsZmgpw5ALa14ujxnUhb7vVSpkmhQ9cY33
-```
+---
 
-## Key Features
+## Core concepts
 
-### 1. Human Identity Registry
-- Aggregated human_score from multiple attestation sources
-- Support for KYC providers, Proof-of-Personhood (WorldID, BrightID), social verification
-- Signed attestations with Ed25519 verification
-- Issuer registry with trust anchors
+### Human profiles and attestations
+A **HumanProfile** accumulates attestations from trusted issuers (KYC, proof-of-personhood, social verifications, etc.).
+Each attestation contributes weight to a **human score**, letting apps enforce a minimum threshold.
 
-### 2. Agent Registry
-- Principal-owned AI agent registration
-- Signing key management with rotation and grace periods
-- TEE measurement support for hardware attestation
-- Agent lifecycle: Active → Suspended → Revoked
+### Agents and accountability
+An **AgentProfile** represents an agent that is owned by a principal. Agents have signing keys (with rotation support) and a lifecycle (active/suspended/revoked). Agent actions are designed to be attributable to a principal.
 
-### 3. Capability Delegation (KYA Core)
-- Fine-grained permission system
-- Program scope bitmasks (which programs agent can call)
-- Asset scope bitmasks (which tokens agent can use)
-- Spending limits: per-tx, daily, total lifetime
-- Time bounds: valid_from, expires_at
-- Destination allowlists
-- Emergency freeze mechanism
+### Capabilities (delegation)
+A **Capability** is a programmable permission slip that can constrain:
+- allowed programs / destinations (scope)
+- asset scope (which mints/tokens)
+- spending limits (per-tx, daily, total)
+- time bounds (valid_from / expires_at)
+- additional risk controls
 
-### 4. Accountability & Receipts
-- Every agent action produces an immutable receipt
-- Merkle roots for batch verification
-- Full audit trail for compliance
+### Receipts (audit)
+Important actions emit events and/or store receipts so a third party can reconstruct “who did what, when, under what permission”.
 
-## How It Works
+### Emergency controls
+Principals can **freeze** agent operation under specific relationships to mitigate compromise and quickly restore safety.
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Human Profile  │────▶│  Agent Profile  │────▶│   Capability    │
-│  (Attestations) │     │  (Signing Key)  │     │  (Permissions)  │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        Application Rails                         │
-│  ┌──────────┐  ┌──────────────┐  ┌─────────────────────────┐   │
-│  │ HumanPay │  │  DataBlink   │  │  Document Registry      │   │
-│  │ Payments │  │  RLHF Tasks  │  │  Verified Signatures    │   │
-│  └──────────┘  └──────────────┘  └─────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-                    ┌─────────────────┐
-                    │    Receipts     │
-                    │  (Audit Trail)  │
-                    └─────────────────┘
-```
+---
 
-## Installation
+## Demo flows (what to show an investor)
+
+### Flow A — Verified Human
+1. Create a human profile
+2. Register an issuer (admin)
+3. Issue / register attestations
+4. Show score and “verified” status changing on-chain
+
+### Flow B — Accountable Agent
+1. Register agent under a principal
+2. Rotate agent key (show grace period / safety)
+3. Issue capability with strict limits
+4. Show action receipts tying behavior back to principal
+
+### Flow C — Human-gated payments
+1. Merchant creates invoice (vault/escrow)
+2. Payer must be verified (score threshold)
+3. Payment executes and receipt is recorded
+
+### Flow D — Human micro-tasks
+1. Create task with reward budget
+2. Verified humans submit responses
+3. Rewards distributed with receipts
+
+---
+
+## Quick start (localnet)
 
 ```bash
-# Install dependencies
 yarn install
-
-# Build all programs
 anchor build
-
-# Run tests
 anchor test
-```
+To run a fresh local validator and deploy programs:
 
-## SDK Usage
+bash
+Copy code
+pkill -f solana-test-validator || true
+solana-test-validator --reset --quiet &
+sleep 5
+anchor deploy --provider.cluster localnet
+anchor test --skip-local-validator --skip-deploy
+Program IDs
+Localnet
+Localnet program IDs change per reset. After a deploy, list them with:
 
-```typescript
-import { HumanRailSDK } from './sdk';
+bash
+Copy code
+anchor keys list
+Devnet
+Devnet IDs should only be added after deploying to devnet and verifying the cluster:
 
-// Initialize SDK
-const sdk = new HumanRailSDK(connection, wallet);
+bash
+Copy code
+solana config set --url https://api.devnet.solana.com
+solana config get
+anchor deploy --provider.cluster devnet
+anchor keys list
+Repository structure
+text
+Copy code
+programs/
+  human_registry/
+  agent_registry/
+  delegation/
+  human_pay/
+  data_blink/
+  document_registry/
+  receipts/
+  common/
 
-// Register a human profile
-await sdk.humanRegistry.initProfile();
+packages/
+  sdk/
 
-// Register an AI agent
-await sdk.agentRegistry.registerAgent({
-  name: "My Trading Bot",
-  signingKey: agentKeypair.publicKey,
-  metadataHash: [...],
-});
+tests/
+  humanrail.ts
+  freeze-security.test.ts
+Toolchain
+Solana CLI (matching your environment)
 
-// Issue capability to agent
-await sdk.delegation.issueCapability({
-  agent: agentPubkey,
-  allowedPrograms: PROGRAM_SCOPE.HUMAN_PAY | PROGRAM_SCOPE.SWAP,
-  perTxLimit: 100_000_000, // 0.1 SOL
-  dailyLimit: 1_000_000_000, // 1 SOL
-  expiresAt: Date.now() / 1000 + 86400 * 30, // 30 days
-});
-```
+Anchor 0.32+
 
-## Security Considerations
+Rust stable
 
-- All agent actions require valid capability credentials
-- Capabilities are verified onchain before execution
-- Emergency freeze allows instant suspension of compromised agents
-- Receipts provide immutable accountability records
-- Ed25519 signatures for issuer attestations
+Node 18+
 
-## License
-
+License
 MIT
-
