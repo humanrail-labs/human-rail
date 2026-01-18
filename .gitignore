@@ -4,3 +4,6 @@ node_modules
 # Solana test validator artifacts
 .anchor/test-ledger/
 test-ledger/
+
+# localnet runtime program ids
+.anchor/program-ids.localnet.json
