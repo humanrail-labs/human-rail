@@ -9,12 +9,17 @@ crate-type = ["cdylib", "lib"]
 name = "human_registry"
 
 [features]
+default = []
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
-default = []
+# Silence Rust check-cfg warnings
+anchor-debug = []
+custom-heap = []
+custom-panic = []
+test-skip-sig-verify = []
 
 [dependencies]
 anchor-lang = "0.32.1"

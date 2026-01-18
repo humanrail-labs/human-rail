@@ -14,33 +14,33 @@ pub use cpi_validation::*;
 pub mod program_ids {
     use anchor_lang::prelude::Pubkey;
     
-    // Use lazy initialization to avoid pubkey! macro issues
+    // H-07 FIX: Canonical program IDs matching declare_id! in each program
     pub fn human_registry() -> Pubkey {
-        "Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR".parse().unwrap()
+        "7f9UsctTCcCnQmFCe1rphfuf3SJtkx63qnhwR6hVn5eh".parse().unwrap()
     }
     
     pub fn human_pay() -> Pubkey {
-        "6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe".parse().unwrap()
+        "AZWKLjsKYYCajnN1XSC8KGZocRUMRE8GSWtCSnUgz22r".parse().unwrap()
     }
     
     pub fn data_blink() -> Pubkey {
-        "BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5".parse().unwrap()
+        "2SQKYWBmqn1XqvkJynbRnCNGhhEyaQy5EF9aJcLVzjQ5".parse().unwrap()
     }
     
     pub fn agent_registry() -> Pubkey {
-        "299gbw6p9rCpp7SBR9tts7qTgGie591JPY6RMAXoJHE6".parse().unwrap()
+        "G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5".parse().unwrap()
     }
     
     pub fn delegation() -> Pubkey {
-        "74vfEGbYWUsRq7z8oSgp6gNxx3ENVQEBqXFJqHrB3Xx2".parse().unwrap()
+        "5LJLTUQR26xPn2mfyM6Y7uMBezKKpATt3CKfKeCnFdtR".parse().unwrap()
     }
     
     pub fn receipts() -> Pubkey {
-        "9ZKqiKqi3zXhNvTevEJ8qD6F25YdoymXXSTzsiEviAi".parse().unwrap()
+        "Fgz7HoBTyjBQ9nmkVrzn1ccCtzWyBUkfMDov2eJdXnGr".parse().unwrap()
     }
     
     pub fn document_registry() -> Pubkey {
-        "ERdbeXCpPoXsZmgpw5ALa14ujxnUhb7vVSpkmhQ9cY33".parse().unwrap()
+        "EUVJE9VqpejLp56fpVZyi2QTRTDb5kSQ8KLy5Coyc78N".parse().unwrap()
     }
 }
 

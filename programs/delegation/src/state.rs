@@ -1,40 +1,10 @@
 use anchor_lang::prelude::*;
 
-/// Maximum number of destinations in allowlist
-pub const MAX_DESTINATION_ALLOWLIST: usize = 10;
-
-/// Program scope bitmask values
-pub mod program_scope {
-    pub const HUMAN_PAY: u64 = 1 << 0;
-    pub const DATA_BLINK: u64 = 1 << 1;
-    pub const TOKEN_TRANSFER: u64 = 1 << 2;
-    pub const NFT_TRANSFER: u64 = 1 << 3;
-    pub const SWAP: u64 = 1 << 4;
-    pub const STAKE: u64 = 1 << 5;
-    pub const GOVERNANCE: u64 = 1 << 6;
-    // Reserved for future use: bits 7-63
-}
-
-/// Asset type bitmask values
-pub mod asset_scope {
-    pub const SOL: u64 = 1 << 0;
-    pub const USDC: u64 = 1 << 1;
-    pub const USDT: u64 = 1 << 2;
-    pub const ANY_SPL_TOKEN: u64 = 1 << 3;
-    pub const ANY_NFT: u64 = 1 << 4;
-    // Reserved for future use: bits 5-63
-}
-
-/// Capability status
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Default, Debug)]
-pub enum CapabilityStatus {
-    #[default]
-    Active,
-    Revoked,
-    Expired,
-    Frozen,
-    Disputed,
-}
+// H-03 FIX: Import shared types from common crate to avoid drift
+pub use humanrail_common::CapabilityStatus;
+pub use humanrail_common::program_scope;
+pub use humanrail_common::asset_scope;
+pub use humanrail_common::constants::MAX_DESTINATION_ALLOWLIST;
 
 /// Capability credential - the core KYA primitive
 #[account]

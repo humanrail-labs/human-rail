@@ -16,4 +16,6 @@ pub enum HumanRegistryError {
     InvalidAttestation,
     #[msg("Insufficient human score")]
     InsufficientHumanScore,
+    #[msg("Legacy attestation path disabled - use issue_attestation with verified issuer")]
+    LegacyPathDisabled,
 }

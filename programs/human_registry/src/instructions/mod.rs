@@ -1,4 +1,5 @@
 pub mod init_profile;
+pub mod init_registry;
 pub mod register_attestation;
 pub mod assert_unique;
 pub mod recompute_score;
@@ -10,6 +11,7 @@ pub mod revoke_attestation_v2;
 pub mod verify_human;
 
 pub use init_profile::*;
+pub use init_registry::*;
 pub use register_attestation::*;
 pub use assert_unique::*;
 pub use recompute_score::*;

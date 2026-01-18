@@ -11,11 +11,15 @@ pub mod attestation_index;
 
 use instructions::*;
 
-declare_id!("7f9UsctTCcCnQmFCe1rphfuf3SJtkx63qnhwR6hVn5eh");
+declare_id!("8A98ekw15Af1k8KW7cdAU7gEHNcE6fn2EznW9N6B62gn");
 
 #[program]
 pub mod human_registry {
     use super::*;
+
+    pub fn init_registry(ctx: Context<InitRegistry>) -> Result<()> {
+        instructions::init_registry::handler(ctx)
+    }
 
     pub fn init_profile(ctx: Context<InitProfile>) -> Result<()> {
         instructions::init_profile::handle(ctx)

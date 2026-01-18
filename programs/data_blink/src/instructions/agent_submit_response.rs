@@ -9,8 +9,8 @@ pub const PROGRAM_SCOPE_DATA_BLINK: u64 = 1 << 1;
 
 // Program IDs for cross-program validation
 use anchor_lang::pubkey;
-pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5");
-pub const DELEGATION_PROGRAM_ID: Pubkey = pubkey!("5LJLTUQR26xPn2mfyM6Y7uMBezKKpATt3CKfKeCnFdtR");
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("Co3EAFUnyPLrc13gXkj5wneUkfJFvm16bqB11MGpWUzX");
+pub const DELEGATION_PROGRAM_ID: Pubkey = pubkey!("3m16nfFpUtcCgjFWon3qTuttpTpNu6bnYde5yeXbC1ZF");
 
 /// Agent autonomously submits a task response on behalf of principal.
 /// Key features:
@@ -159,7 +159,11 @@ pub fn handler(
     Ok(())
 }
 
-// Local type definitions
+// =============================================================================
+// H-03 WARNING: CPI Deserialization Mirrors
+// These enums MUST match `humanrail-common` exactly. Do not modify without
+// updating common crate + regenerating. See scripts/check-enum-drift.sh
+// =============================================================================
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Default)]
 pub enum AgentStatus {
     #[default]
@@ -239,7 +243,7 @@ pub struct AgentSubmitResponse<'info> {
         constraint = agent_profile.signing_key == agent_signer.key() @ DataBlinkError::AgentSignerMismatch,
         constraint = agent_profile.status == AgentStatus::Active @ DataBlinkError::AgentNotActive
     )]
-    pub agent_profile: Account<'info, AgentProfile>,
+    pub agent_profile: Box<Account<'info, AgentProfile>>,
 
     /// The principal who delegated to this agent
     /// CHECK: Validated via capability.principal
@@ -251,7 +255,7 @@ pub struct AgentSubmitResponse<'info> {
         constraint = capability.agent == agent_profile.key() @ DataBlinkError::CapabilityAgentMismatch,
         constraint = capability.principal == principal.key() @ DataBlinkError::PrincipalMismatch
     )]
-    pub capability: Account<'info, Capability>,
+    pub capability: Box<Account<'info, Capability>>,
 
     /// The task being responded to
     #[account(

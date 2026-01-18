@@ -1,35 +1,36 @@
 import { PublicKey } from '@solana/web3.js';
 
 // =============================================================================
-// PROGRAM IDS
+// PROGRAM IDS (Canonical source - matches declare_id! in on-chain programs)
+// H-07 FIX: Single source of truth for all program IDs
 // =============================================================================
 
 export const HUMAN_REGISTRY_PROGRAM_ID = new PublicKey(
-  'Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR'
+  '7f9UsctTCcCnQmFCe1rphfuf3SJtkx63qnhwR6hVn5eh'
 );
 
 export const HUMAN_PAY_PROGRAM_ID = new PublicKey(
-  '6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe'
+  'AZWKLjsKYYCajnN1XSC8KGZocRUMRE8GSWtCSnUgz22r'
 );
 
 export const DATA_BLINK_PROGRAM_ID = new PublicKey(
-  'BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5'
+  '2SQKYWBmqn1XqvkJynbRnCNGhhEyaQy5EF9aJcLVzjQ5'
 );
 
 export const AGENT_REGISTRY_PROGRAM_ID = new PublicKey(
-  'AgntReg1111111111111111111111111111111111111'
+  'G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5'
 );
 
 export const DELEGATION_PROGRAM_ID = new PublicKey(
-  'De1eg8t1on1111111111111111111111111111111111'
+  '5LJLTUQR26xPn2mfyM6Y7uMBezKKpATt3CKfKeCnFdtR'
 );
 
 export const RECEIPTS_PROGRAM_ID = new PublicKey(
-  'Rcpts111111111111111111111111111111111111111'
+  'Fgz7HoBTyjBQ9nmkVrzn1ccCtzWyBUkfMDov2eJdXnGr'
 );
 
 export const DOCUMENT_REGISTRY_PROGRAM_ID = new PublicKey(
-  'DocReg11111111111111111111111111111111111111'
+  'EUVJE9VqpejLp56fpVZyi2QTRTDb5kSQ8KLy5Coyc78N'
 );
 
 // =============================================================================

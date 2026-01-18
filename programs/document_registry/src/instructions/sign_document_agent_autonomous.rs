@@ -167,7 +167,11 @@ pub fn handler(
     Ok(())
 }
 
-// Local type definitions (matching agent_registry and delegation)
+// =============================================================================
+// H-03 WARNING: CPI Deserialization Mirrors
+// These enums/structs MUST match `humanrail-common` exactly. Do not modify
+// without updating common crate + regenerating. See scripts/check-enum-drift.sh
+// =============================================================================
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Default)]
 pub enum AgentStatus {
     #[default]
@@ -255,7 +259,7 @@ pub struct SignDocumentAgentAutonomous<'info> {
         bump = agent_profile.bump,
         seeds::program = AGENT_REGISTRY_PROGRAM_ID
     )]
-    pub agent_profile: Account<'info, AgentProfileRef>,
+    pub agent_profile: Box<Account<'info, AgentProfileRef>>,
 
     /// The capability credential
     #[account(
@@ -268,7 +272,7 @@ pub struct SignDocumentAgentAutonomous<'info> {
         bump = capability.bump,
         seeds::program = DELEGATION_PROGRAM_ID
     )]
-    pub capability: Account<'info, CapabilityRef>,
+    pub capability: Box<Account<'info, CapabilityRef>>,
 
     /// The document being signed
     #[account(

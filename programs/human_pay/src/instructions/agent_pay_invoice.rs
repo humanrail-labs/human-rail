@@ -223,7 +223,11 @@ pub fn handler(ctx: Context<AgentPayInvoice>) -> Result<()> {
     Ok(())
 }
 
-// Local type definitions (matching agent_registry and delegation)
+// =============================================================================
+// H-03 WARNING: CPI Deserialization Mirrors
+// These enums/structs MUST match `humanrail-common` exactly. Do not modify
+// without updating common crate + regenerating. See scripts/check-enum-drift.sh
+// =============================================================================
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Default)]
 pub enum AgentStatus {
     #[default]

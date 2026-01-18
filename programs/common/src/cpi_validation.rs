@@ -173,7 +173,7 @@ pub mod discriminators {
 
 /// Read validation result from return data after CPI call
 pub fn read_validation_result() -> Option<ValidationResult> {
-    let (program_id, data) = anchor_lang::solana_program::program::get_return_data()?;
+    let (_program_id, data) = anchor_lang::solana_program::program::get_return_data()?;
     // Verify it's from a known HumanRail program (optional, for extra safety)
     ValidationResult::from_bytes(&data)
 }
