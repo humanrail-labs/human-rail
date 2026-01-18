@@ -7,7 +7,7 @@ pub mod state;
 use instructions::*;
 use state::*;
 
-declare_id!("FZwCZWpLsn8kL1JAPPNtgrGBw5kaaHsbLyrJ7znVbwVE");
+declare_id!("8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28");
 
 #[program]
 pub mod document_registry {

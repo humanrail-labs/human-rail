@@ -15,13 +15,13 @@ human_registry = "2QtqddEyVhJWV7ysU1b8mpvQrQpWr84yxiHyqUqRcDzL"
 receipts = "62tKD1n3nJkiXtGSDAQbARxrMggfSBK6oq5YVrXzUjXe"
 
 [programs.localnet]
-agent_registry = "Co3EAFUnyPLrc13gXkj5wneUkfJFvm16bqB11MGpWUzX"
+agent_registry = "GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ"
 data_blink = "GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX"
-delegation = "3m16nfFpUtcCgjFWon3qTuttpTpNu6bnYde5yeXbC1ZF"
-document_registry = "FZwCZWpLsn8kL1JAPPNtgrGBw5kaaHsbLyrJ7znVbwVE"
-human_pay = "J5GJygKKx6thzLmZ23oEzGmtaDWXji2zHpSDWQdDDH7S"
-human_registry = "8A98ekw15Af1k8KW7cdAU7gEHNcE6fn2EznW9N6B62gn"
-receipts = "9CWJYBXCAiK7ygWTh8DAhLg8PycWonB7fRGSxWEPYAMp"
+delegation = "HRmukQDzeju62kb1frapSX37GvH1qwwrjC2XdezWfS5Z"
+document_registry = "8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28"
+human_pay = "CFxYX4vxNef9VwtkNHNd4m3mH3LpwoS3gSvEBGB4jeUV"
+human_registry = "GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo"
+receipts = "7Q8tdMyTKvtomuSYiHPCB2inV29wr6P2SB7Cmo4kof6z"
 
 [registry]
 url = "https://api.apr.dev"

@@ -6,7 +6,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("9CWJYBXCAiK7ygWTh8DAhLg8PycWonB7fRGSxWEPYAMp");
+declare_id!("7Q8tdMyTKvtomuSYiHPCB2inV29wr6P2SB7Cmo4kof6z");
 
 #[program]
 pub mod receipts {

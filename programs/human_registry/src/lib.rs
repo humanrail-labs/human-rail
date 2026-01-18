@@ -11,7 +11,7 @@ pub mod attestation_index;
 
 use instructions::*;
 
-declare_id!("8A98ekw15Af1k8KW7cdAU7gEHNcE6fn2EznW9N6B62gn");
+declare_id!("GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo");
 
 #[program]
 pub mod human_registry {

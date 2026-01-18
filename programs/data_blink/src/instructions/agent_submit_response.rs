@@ -9,8 +9,8 @@ pub const PROGRAM_SCOPE_DATA_BLINK: u64 = 1 << 1;
 
 // Program IDs for cross-program validation
 use anchor_lang::pubkey;
-pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("Co3EAFUnyPLrc13gXkj5wneUkfJFvm16bqB11MGpWUzX");
-pub const DELEGATION_PROGRAM_ID: Pubkey = pubkey!("3m16nfFpUtcCgjFWon3qTuttpTpNu6bnYde5yeXbC1ZF");
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
+pub const DELEGATION_PROGRAM_ID: Pubkey = pubkey!("HRmukQDzeju62kb1frapSX37GvH1qwwrjC2XdezWfS5Z");
 
 /// Agent autonomously submits a task response on behalf of principal.
 /// Key features:
