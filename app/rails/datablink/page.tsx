@@ -251,6 +251,9 @@ export default function DataBlinkPage() {
   // Prevent double submission
   const isSubmitting = useRef(false);
 
+  // Track previous wallet to detect changes
+  const prevWalletRef = useRef<string | null>(null);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -264,6 +267,16 @@ export default function DataBlinkPage() {
 
   // Tab state for task view
   const [activeTab, setActiveTab] = useState<"all" | "my">("all");
+
+  // Reset tab to "all" when wallet changes
+  useEffect(() => {
+    const currentWallet = publicKey?.toBase58() || null;
+    if (currentWallet !== prevWalletRef.current) {
+      // Wallet changed - reset to "all" tab
+      setActiveTab("all");
+      prevWalletRef.current = currentWallet;
+    }
+  }, [publicKey]);
 
   const getProvider = useCallback(() => {
     if (!publicKey || !wallet || !signTransaction) return null;

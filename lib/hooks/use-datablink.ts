@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { Program, AnchorProvider, BN } from "@coral-xyz/anchor";
@@ -163,6 +163,9 @@ export function useDataBlink() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Track the current wallet to detect changes
+  const prevPublicKeyRef = useRef<string | null>(null);
+
   const getProvider = useCallback(() => {
     if (!publicKey || !wallet || !signTransaction) return null;
     const anchorWallet = {
@@ -177,7 +180,7 @@ export function useDataBlink() {
     return new AnchorProvider(connection, anchorWallet as any, { commitment: "confirmed" });
   }, [connection, publicKey, wallet, signTransaction]);
 
-  const fetchTasks = useCallback(async () => {
+  const fetchTasks = useCallback(async (currentPublicKey: PublicKey | null) => {
     if (!connection) return;
     setLoading(true);
     setError(null);
@@ -194,12 +197,17 @@ export function useDataBlink() {
         const taskParsed = parseTask(account.data as Buffer, pubkey);
         if (taskParsed) {
           allTasks.push(taskParsed);
-          if (publicKey && taskParsed.creator.equals(publicKey)) creatorTasks.push(taskParsed);
+          // Use the passed publicKey, not the one from hook (may be stale)
+          if (currentPublicKey && taskParsed.creator.equals(currentPublicKey)) {
+            creatorTasks.push(taskParsed);
+          }
           continue;
         }
-        if (publicKey) {
+        if (currentPublicKey) {
           const responseParsed = parseTaskResponse(account.data as Buffer, pubkey);
-          if (responseParsed && responseParsed.worker.equals(publicKey)) responses.push(responseParsed);
+          if (responseParsed && responseParsed.worker.equals(currentPublicKey)) {
+            responses.push(responseParsed);
+          }
         }
       }
 
@@ -208,32 +216,69 @@ export function useDataBlink() {
       setMyTasks(creatorTasks);
       setMyResponses(responses);
 
-      if (publicKey) {
+      if (currentPublicKey) {
         const [workerStatsPda] = PublicKey.findProgramAddressSync(
-          [Buffer.from("worker_stats"), publicKey.toBuffer()],
+          [Buffer.from("worker_stats"), currentPublicKey.toBuffer()],
           programId
         );
         try {
           const statsAccount = await connection.getAccountInfo(workerStatsPda);
-          if (statsAccount) setWorkerStats(parseWorkerStats(statsAccount.data as Buffer, workerStatsPda));
+          if (statsAccount) {
+            setWorkerStats(parseWorkerStats(statsAccount.data as Buffer, workerStatsPda));
+          } else {
+            setWorkerStats(null);
+          }
         } catch {
           setWorkerStats(null);
         }
+      } else {
+        setWorkerStats(null);
       }
     } catch (err) {
-      console.error("Failed to fetch tasks:", err);
+      console.error("Error fetching tasks:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch tasks");
     } finally {
       setLoading(false);
     }
-  }, [connection, publicKey, cluster]);
+  }, [connection, cluster]);
 
+  // Clear state and refetch when wallet changes
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    const currentKey = publicKey?.toBase58() || null;
+    const prevKey = prevPublicKeyRef.current;
+
+    // Wallet changed (including disconnect)
+    if (currentKey !== prevKey) {
+      // Clear all user-specific data immediately
+      setMyTasks([]);
+      setMyResponses([]);
+      setWorkerStats(null);
+      setError(null);
+
+      // Update ref
+      prevPublicKeyRef.current = currentKey;
+
+      // Refetch with new wallet
+      if (connection) {
+        fetchTasks(publicKey);
+      }
+    }
+  }, [publicKey, connection, fetchTasks]);
+
+  // Initial fetch on mount
+  useEffect(() => {
+    if (connection) {
+      fetchTasks(publicKey);
+    }
+  }, [connection, cluster]); // Only on connection/cluster change, not publicKey (handled above)
+
+  // Public refetch function
+  const refetch = useCallback(() => {
+    fetchTasks(publicKey);
+  }, [fetchTasks, publicKey]);
 
   /**
-   * Create a new task with reward escrow
+   * Create a new task
    */
   const createTask = useCallback(
     async (params: CreateTaskParams): Promise<string> => {
@@ -244,24 +289,22 @@ export function useDataBlink() {
       const program = getDataBlinkProgram(provider, cluster);
       const programId = getProgramId(cluster, "dataBlink");
 
-      // Generate unique nonce for this task
+      // Generate unique nonce
       const nonce = new BN(Date.now());
       const nonceBuffer = Buffer.alloc(8);
       writeBigUint64LE(nonceBuffer, BigInt(nonce.toString()), 0);
 
-      // Derive task PDA: ["task", creator, nonce]
+      // Derive PDAs
       const [taskPda] = PublicKey.findProgramAddressSync(
         [Buffer.from("task"), publicKey.toBuffer(), nonceBuffer],
         programId
       );
-
-      // Derive vault PDA: ["task_vault", task]
       const [vaultPda] = PublicKey.findProgramAddressSync(
         [Buffer.from("task_vault"), taskPda.toBuffer()],
         programId
       );
 
-      // Get creator's token account for the reward mint
+      // Get creator's token account
       const creatorTokenAccount = getAssociatedTokenAddressSync(
         params.rewardMint,
         publicKey,
@@ -269,7 +312,6 @@ export function useDataBlink() {
         TOKEN_2022_PROGRAM_ID
       );
 
-      // Build create_task params
       const createTaskParams = {
         rewardPerResponse: new BN(params.rewardPerResponse),
         totalBudget: new BN(params.totalBudget),
@@ -302,7 +344,7 @@ export function useDataBlink() {
         .rpc();
 
       console.log("Task created:", signature);
-      await fetchTasks();
+      await fetchTasks(publicKey);
       return signature;
     },
     [publicKey, connection, cluster, getProvider, fetchTasks]
@@ -354,7 +396,7 @@ export function useDataBlink() {
         })
         .rpc();
 
-      await fetchTasks();
+      await fetchTasks(publicKey);
       return signature;
     },
     [publicKey, connection, cluster, getProvider, fetchTasks]
@@ -404,7 +446,7 @@ export function useDataBlink() {
         })
         .rpc();
 
-      await fetchTasks();
+      await fetchTasks(publicKey);
       return signature;
     },
     [publicKey, connection, cluster, getProvider, fetchTasks]
@@ -461,7 +503,7 @@ export function useDataBlink() {
         })
         .rpc();
 
-      await fetchTasks();
+      await fetchTasks(publicKey);
       return signature;
     },
     [publicKey, connection, cluster, getProvider, fetchTasks]
@@ -483,7 +525,7 @@ export function useDataBlink() {
     loading,
     error,
     stats,
-    refetch: fetchTasks,
+    refetch,
     createTask,
     submitResponse,
     closeTask,
