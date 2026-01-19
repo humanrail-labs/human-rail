@@ -10,8 +10,10 @@ import {
   deriveFreezePda,
   parseCapability,
   DISCRIMINATORS,
-  Capability,
+  type Capability,
 } from "@/lib/programs";
+
+export type { Capability };
 
 export interface CapabilityWithPda extends Capability {
   pda: PublicKey;
