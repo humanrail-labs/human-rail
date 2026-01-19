@@ -108,10 +108,10 @@ export function useCapabilities() {
 
       // Build IssueCapabilityParams
       const allowedProgramsBuf = Buffer.alloc(8);
-      allowedProgramsBuf.writeBigUInt64LE(0xFFFFFFFFFFFFFFFFn); // All programs allowed
+      allowedProgramsBuf.fill(0xFF); // All programs allowed (0xFFFFFFFFFFFFFFFFn)
 
       const allowedAssetsBuf = Buffer.alloc(8);
-      allowedAssetsBuf.writeBigUInt64LE(0xFFFFFFFFFFFFFFFFn); // All assets allowed
+      allowedAssetsBuf.fill(0xFF); // All assets allowed (0xFFFFFFFFFFFFFFFFn)
 
       const perTxLimitBuf = Buffer.alloc(8);
       perTxLimitBuf.writeBigUInt64LE(BigInt(params.perTxLimit));
