@@ -419,13 +419,13 @@ export function useDocumentRegistry() {
 
     try {
       // SignatureRecord discriminator
-      const signatureDiscriminator = Buffer.from([69, 228, 109, 143, 96, 230, 108, 86]);
+      const signatureDiscriminator = Buffer.from([226, 212, 133, 177, 48, 5, 171, 243]);
 
       const accounts = await connection.getProgramAccounts(programId, {
         filters: [
           { memcmp: { offset: 0, bytes: bs58.encode(signatureDiscriminator) } },
           // signer_pubkey is at offset 8 + 32 + 1 = 41
-          { memcmp: { offset: 41, bytes: publicKey.toBase58() } },
+          { memcmp: { offset: 235, bytes: publicKey.toBase58() } },
         ],
       });
 
