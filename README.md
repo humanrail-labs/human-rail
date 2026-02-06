@@ -1,6 +1,6 @@
 # HumanRail
 
-HumanRail is a set of on-chain programs on :contentReference[oaicite:0]{index=0} for:
+HumanRail is a set of on-chain programs on Solana for:
 
 - **Human profiles** (wallet-bound identity, with optional issuer attestations)
 - **Agent profiles** (agents owned by a human, with key rotation + disable controls)
@@ -38,48 +38,53 @@ The goal is simple: **let apps safely accept actions from humans and agents, wit
 
 ## Devnet program IDs (deployed)
 
-These IDs are the ones produced by `anchor keys list` (and match your `target/deploy/*-keypair.json` files):
-
 | Program | Devnet Program ID |
 |---|---|
 | `human_registry` | `GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo` |
 | `agent_registry` | `GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ` |
-| `delegation` | `HRmukQDzeju62kb1frapSX37GvH1qwwrjC2XdezWfS5Z` |
-| `receipts` | `7Q8tdMyTKvtomuSYiHPCB2inV29wr6P2SB7Cmo4kof6z` |
-| `human_pay` | `CFxYX4vxNef9VwtkNHNd4m3mH3LpwoS3gSvEBGB4jeUV` |
+| `delegation` | `DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT` |
+| `receipts` | `EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM` |
+| `human_pay` | `HpMrfeC5gJZdywnUQS4WEvsUs6edyjrEmLuYEF1W3qF9` |
 | `data_blink` | `GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX` |
 | `document_registry` | `8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28` |
 
 Verify on devnet:
 ```bash
-solana -u devnet program show GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ
 solana -u devnet program show GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo
-solana -u devnet program show HRmukQDzeju62kb1frapSX37GvH1qwwrjC2XdezWfS5Z
-solana -u devnet program show 7Q8tdMyTKvtomuSYiHPCB2inV29wr6P2SB7Cmo4kof6z
-Quick start (localnet)
-Prerequisites
-Solana CLI
+solana -u devnet program show GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ
+solana -u devnet program show DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT
+solana -u devnet program show EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM
+```
 
-Rust (stable)
+---
 
-Anchor 0.32+
+## Quick start (localnet)
 
-Node 18+
+### Prerequisites
+- Solana CLI
+- Rust (stable)
+- Anchor 0.32+
+- Node 18+
 
-Install
+### Install
+```bash
 npm install
-Build
-anchor build
-Test
-anchor test
-Fresh local validator + deploy
-pkill -f solana-test-validator || true
-solana-test-validator --reset --quiet &
-sleep 5
+```
 
-anchor deploy --provider.cluster localnet
-anchor test --skip-local-validator --skip-deploy
-Repo structure
+### Build
+```bash
+anchor build --ignore-keys
+```
+
+### Test
+```bash
+anchor test
+```
+
+---
+
+## Repo structure
+```
 programs/
   human_registry/
   agent_registry/
@@ -91,10 +96,16 @@ programs/
   data_blink/
   document_registry/
 
-packages/
-  sdk/
-
 tests/
-  *.ts
-License
+  humanrail.ts
+  core-v1-integration.ts
+
+scripts/
+  check-no-test-features.sh
+```
+
+---
+
+## License
+
 MIT
