@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// Minimum human score required for verified signing
-pub const MIN_VERIFIED_SIGNING_SCORE: u16 = 0;
+pub const MIN_VERIFIED_SIGNING_SCORE: u16 = 50;
 
 /// Known Human Registry program ID
 pub const HUMAN_REGISTRY_PROGRAM_ID: Pubkey = Pubkey::new_from_array([
@@ -18,9 +18,10 @@ pub const HUMAN_REGISTRY_PROGRAM_ID: Pubkey = Pubkey::new_from_array([
     0x0a, 0x95, 0x94, 0x38, 0xef, 0x52, 0xfb, 0x5f,
     0x57, 0xfc, 0xea, 0x80, 0x13, 0xcf, 0xf5, 0x99,
     0xd0, 0xa0, 0x9c, 0x24, 0x11, 0xda, 0x64, 0x9e
-]);
+]); // GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo
 
 /// HumanProfile account structure (from human_registry)
+/// NO #[account] macro - this is a cross-program type, we deserialize manually
 #[derive(AnchorDeserialize, AnchorSerialize, Clone)]
 pub struct HumanProfile {
     pub wallet: Pubkey,
@@ -33,26 +34,54 @@ pub struct HumanProfile {
 }
 
 impl HumanProfile {
-    pub const DISCRIMINATOR: [u8; 8] = [32, 133, 87, 162, 100, 194, 215, 212];
+    /// Anchor discriminator for HumanProfile from human_registry
+    /// This must match the discriminator in human_registry program
+    pub const DISCRIMINATOR: [u8; 8] = [214, 212, 101, 97, 246, 116, 246, 89];
 }
 
+/// Tier 1: Verified Human Signing
+/// Requires the signer to have a valid HumanProfile with sufficient attestations.
 pub fn handler(ctx: Context<SignDocumentVerified>, params: SignDocumentTxParams) -> Result<()> {
     let clock = Clock::get()?;
     let document = &mut ctx.accounts.document;
     
+    // Manually deserialize human_profile from AccountInfo
     let human_profile_info = &ctx.accounts.human_profile;
     let human_profile_data = human_profile_info.try_borrow_data()?;
     
-    require!(human_profile_data.len() >= 8, DocumentRegistryError::InvalidHumanProfile);
-    require!(human_profile_data[..8] == HumanProfile::DISCRIMINATOR, DocumentRegistryError::InvalidHumanProfile);
+    // Verify discriminator
+    require!(
+        human_profile_data.len() >= 8,
+        DocumentRegistryError::InvalidHumanProfile
+    );
+    require!(
+        human_profile_data[..8] == HumanProfile::DISCRIMINATOR,
+        DocumentRegistryError::InvalidHumanProfile
+    );
     
+    // Deserialize the account data (skip 8-byte discriminator)
     let human_profile: HumanProfile = AnchorDeserialize::deserialize(&mut &human_profile_data[8..])
         .map_err(|_| DocumentRegistryError::InvalidHumanProfile)?;
 
-    require!(document.can_be_signed(), DocumentRegistryError::DocumentVoided);
-    require!(params.role != [0u8; MAX_IDENTIFIER_LEN], DocumentRegistryError::InvalidRole);
-    require!(human_profile.human_score >= MIN_VERIFIED_SIGNING_SCORE, DocumentRegistryError::InsufficientHumanScore);
+    // Validate document can be signed
+    require!(
+        document.can_be_signed(),
+        DocumentRegistryError::DocumentVoided
+    );
 
+    // Validate role is not empty
+    require!(
+        params.role != [0u8; MAX_IDENTIFIER_LEN],
+        DocumentRegistryError::InvalidRole
+    );
+
+    // Validate human profile has sufficient score
+    require!(
+        human_profile.human_score >= MIN_VERIFIED_SIGNING_SCORE,
+        DocumentRegistryError::InsufficientHumanScore
+    );
+
+    // Create signature record
     let signature = &mut ctx.accounts.signature_record;
     signature.document = document.key();
     signature.signer_type = SignerType::Human;
@@ -61,7 +90,7 @@ pub fn handler(ctx: Context<SignDocumentVerified>, params: SignDocumentTxParams)
     signature.has_principal = false;
     signature.capability_id = Pubkey::default();
     signature.has_capability = false;
-    signature.attestation_id = human_profile_info.key();
+    signature.attestation_id = human_profile_info.key(); // Link to attestation
     signature.has_attestation = true;
     signature.signature_mode = SignatureMode::TxApproval;
     signature.signature_bytes = [0u8; 64];
@@ -76,6 +105,7 @@ pub fn handler(ctx: Context<SignDocumentVerified>, params: SignDocumentTxParams)
     signature.human_score_at_signing = human_profile.human_score;
     signature.bump = ctx.bumps.signature_record;
 
+    // Handle optional metadata
     if params.has_metadata {
         signature.metadata = params.signature_metadata;
         signature.has_metadata = true;
@@ -84,8 +114,10 @@ pub fn handler(ctx: Context<SignDocumentVerified>, params: SignDocumentTxParams)
         signature.has_metadata = false;
     }
 
+    // Update document signature count
     document.signature_count = document.signature_count.saturating_add(1);
 
+    // Create receipt for audit trail
     let receipt = &mut ctx.accounts.signing_receipt;
     receipt.document = document.key();
     receipt.signature_record = signature.key();
@@ -114,8 +146,12 @@ pub fn handler(ctx: Context<SignDocumentVerified>, params: SignDocumentTxParams)
         timestamp: clock.unix_timestamp,
     });
 
-    msg!("Document signed (Tier 1 Verified): signer={}, score={}, unique={}", 
-        signature.signer_pubkey, human_profile.human_score, human_profile.is_unique);
+    msg!(
+        "Document signed (Tier 1 Verified): signer={}, score={}, unique={}",
+        signature.signer_pubkey,
+        human_profile.human_score,
+        human_profile.is_unique
+    );
 
     Ok(())
 }
@@ -123,10 +159,12 @@ pub fn handler(ctx: Context<SignDocumentVerified>, params: SignDocumentTxParams)
 #[derive(Accounts)]
 #[instruction(params: SignDocumentTxParams)]
 pub struct SignDocumentVerified<'info> {
+    /// The signer - their tx signature proves intent
     #[account(mut)]
     pub signer: Signer<'info>,
 
-    /// CHECK: Cross-program account - validated via seeds, owner, and discriminator
+    /// The signer's human profile (from human_registry)
+    /// CHECK: Cross-program account - validated via seeds, owner, and manual discriminator check
     #[account(
         seeds = [b"human_profile", signer.key().as_ref()],
         bump,
@@ -135,23 +173,45 @@ pub struct SignDocumentVerified<'info> {
     )]
     pub human_profile: AccountInfo<'info>,
 
-    #[account(mut, seeds = [b"document", document.doc_hash.as_ref()], bump = document.bump)]
+    /// The document being signed
+    #[account(
+        mut,
+        seeds = [b"document", document.doc_hash.as_ref()],
+        bump = document.bump
+    )]
     pub document: Account<'info, Document>,
 
+    /// The signature record PDA
     #[account(
-        init, payer = signer, space = SignatureRecord::LEN,
-        seeds = [b"signature", document.key().as_ref(), signer.key().as_ref(), params.role.as_ref()],
+        init,
+        payer = signer,
+        space = SignatureRecord::LEN,
+        seeds = [
+            b"signature",
+            document.key().as_ref(),
+            signer.key().as_ref(),
+            params.role.as_ref()
+        ],
         bump
     )]
     pub signature_record: Account<'info, SignatureRecord>,
 
+    /// Receipt for audit trail
     #[account(
-        init, payer = signer, space = DocumentSigningReceipt::LEN,
-        seeds = [b"signing_receipt", document.key().as_ref(), signer.key().as_ref(), params.role.as_ref()],
+        init,
+        payer = signer,
+        space = DocumentSigningReceipt::LEN,
+        seeds = [
+            b"signing_receipt",
+            document.key().as_ref(),
+            signer.key().as_ref(),
+            params.role.as_ref()
+        ],
         bump
     )]
     pub signing_receipt: Account<'info, DocumentSigningReceipt>,
 
+    /// Human Registry program for CPI verification
     /// CHECK: Verified by known program ID
     #[account(address = HUMAN_REGISTRY_PROGRAM_ID)]
     pub human_registry_program: AccountInfo<'info>,

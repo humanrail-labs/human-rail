@@ -76,7 +76,7 @@ describe('HumanRail Integration Tests', () => {
           .rpc();
 
         // Use humanProfileLegacy - matches the program's Account type
-        const profile = await humanRegistry.account.humanProfileLegacy.fetch(profilePda);
+        const profile = await humanRegistry.account.humanProfile.fetch(profilePda);
 
         expect(profile.wallet.equals(wallet.publicKey)).to.be.true;
         expect(profile.humanScore).to.equal(0);
@@ -89,7 +89,7 @@ describe('HumanRail Integration Tests', () => {
       } catch (e: any) {
         if (e.message?.includes('already in use')) {
           console.log('Profile already initialized, continuing...');
-          const profile = await humanRegistry.account.humanProfileLegacy.fetch(profilePda);
+          const profile = await humanRegistry.account.humanProfile.fetch(profilePda);
           expect(profile.wallet.equals(wallet.publicKey)).to.be.true;
         } else {
           throw e;

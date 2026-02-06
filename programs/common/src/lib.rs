@@ -1,48 +1,15 @@
 //! Shared types and interfaces for HumanRail programs.
 //! This crate provides common data structures used across all HumanRail programs
 //! to ensure type consistency and avoid circular dependencies.
+//!
+//! NOTE: Program IDs are NOT hardcoded here. Each program uses declare_id!()
+//! and callers pass program accounts with address constraints. This prevents
+//! ID drift between deploys. See Anchor.toml for canonical IDs.
 
 use anchor_lang::prelude::*;
 
 pub mod cpi_validation;
 pub use cpi_validation::*;
-
-// =============================================================================
-// PROGRAM IDS (update these after deployment)
-// =============================================================================
-
-pub mod program_ids {
-    use anchor_lang::prelude::Pubkey;
-    
-    // H-07 FIX: Canonical program IDs matching declare_id! in each program
-    pub fn human_registry() -> Pubkey {
-        "7f9UsctTCcCnQmFCe1rphfuf3SJtkx63qnhwR6hVn5eh".parse().unwrap()
-    }
-    
-    pub fn human_pay() -> Pubkey {
-        "AZWKLjsKYYCajnN1XSC8KGZocRUMRE8GSWtCSnUgz22r".parse().unwrap()
-    }
-    
-    pub fn data_blink() -> Pubkey {
-        "2SQKYWBmqn1XqvkJynbRnCNGhhEyaQy5EF9aJcLVzjQ5".parse().unwrap()
-    }
-    
-    pub fn agent_registry() -> Pubkey {
-        "G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5".parse().unwrap()
-    }
-    
-    pub fn delegation() -> Pubkey {
-        "5LJLTUQR26xPn2mfyM6Y7uMBezKKpATt3CKfKeCnFdtR".parse().unwrap()
-    }
-    
-    pub fn receipts() -> Pubkey {
-        "Fgz7HoBTyjBQ9nmkVrzn1ccCtzWyBUkfMDov2eJdXnGr".parse().unwrap()
-    }
-    
-    pub fn document_registry() -> Pubkey {
-        "EUVJE9VqpejLp56fpVZyi2QTRTDb5kSQ8KLy5Coyc78N".parse().unwrap()
-    }
-}
 
 // =============================================================================
 // SEEDS
@@ -53,22 +20,23 @@ pub mod seeds {
     pub const HUMAN_PROFILE: &[u8] = b"human_profile";
     pub const ISSUER: &[u8] = b"issuer";
     pub const ATTESTATION: &[u8] = b"attestation";
-    
+    pub const ISSUER_REGISTRY: &[u8] = b"issuer_registry";
+
     // Agent Registry
     pub const AGENT: &[u8] = b"agent";
     pub const AGENT_STATS: &[u8] = b"agent_stats";
     pub const KEY_ROTATION: &[u8] = b"key_rotation";
-    
+
     // Delegation
     pub const CAPABILITY: &[u8] = b"capability";
     pub const REVOCATION: &[u8] = b"revocation";
     pub const FREEZE: &[u8] = b"freeze";
     pub const USAGE: &[u8] = b"usage";
-    
+
     // Receipts
     pub const RECEIPT: &[u8] = b"receipt";
     pub const RECEIPT_INDEX: &[u8] = b"receipt_index";
-    
+
     // Document Registry
     pub const DOCUMENT: &[u8] = b"document";
     pub const SIGNATURE: &[u8] = b"signature";
@@ -85,13 +53,13 @@ pub mod constants {
     pub const UNIQUE_THRESHOLD: u16 = 100;
     pub const MIN_HUMAN_SCORE_FOR_AGENT: u16 = 50;
     pub const MIN_VERIFIED_SIGNING_SCORE: u16 = 50;
-    
+
     // Agent Registry
     pub const KEY_ROTATION_GRACE_PERIOD: i64 = 86400; // 24 hours
-    
+
     // Delegation
     pub const MAX_DESTINATION_ALLOWLIST: usize = 10;
-    
+
     // Document Registry
     pub const MAX_URI_LEN: usize = 128;
     pub const MAX_IDENTIFIER_LEN: usize = 32;
@@ -254,33 +222,6 @@ pub struct ReceiptData {
 }
 
 // =============================================================================
-// VALIDATION RESULT (for CPI returns)
-// =============================================================================
-
-/// Result of capability validation
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
-pub struct ValidationResult {
-    pub is_valid: bool,
-    pub remaining_daily: u64,
-    pub remaining_total: u64,
-    pub error_code: u8,
-}
-
-impl ValidationResult {
-    pub const OK: u8 = 0;
-    pub const CAPABILITY_INACTIVE: u8 = 1;
-    pub const CAPABILITY_EXPIRED: u8 = 2;
-    pub const PROGRAM_NOT_ALLOWED: u8 = 3;
-    pub const ASSET_NOT_ALLOWED: u8 = 4;
-    pub const PER_TX_LIMIT_EXCEEDED: u8 = 5;
-    pub const DAILY_LIMIT_EXCEEDED: u8 = 6;
-    pub const TOTAL_LIMIT_EXCEEDED: u8 = 7;
-    pub const COOLDOWN_NOT_ELAPSED: u8 = 8;
-    pub const DESTINATION_NOT_ALLOWED: u8 = 9;
-    pub const AGENT_FROZEN: u8 = 10;
-}
-
-// =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
 
@@ -299,7 +240,8 @@ pub fn get_day_number(timestamp: i64) -> u32 {
     (timestamp / 86400) as u32
 }
 
-/// Compute simple hash for action data
+/// Compute simple XOR-fold hash for action data.
+/// NOTE: This is NOT cryptographic — use only for non-security-critical dedup/indexing.
 pub fn compute_action_hash(data: &[u8]) -> [u8; 32] {
     let mut hash = [0u8; 32];
     for (i, byte) in data.iter().enumerate() {

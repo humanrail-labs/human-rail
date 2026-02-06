@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::set_return_data;
+use anchor_lang::AccountDeserialize;
 
 use crate::{
     error::DelegationError,
@@ -80,26 +81,36 @@ pub fn handler(
 ) -> Result<()> {
     let clock = Clock::get()?;
     let capability = &ctx.accounts.capability;
-    
-    // Check if agent is frozen - use new principal-specific PDA
-    let agent_frozen = ctx.accounts.freeze_record.as_ref()
-        .map(|f| f.is_active)
-        .unwrap_or(false);
-    
+
+    // SECURITY: Mandatory freeze check. Client MUST pass the correct PDA
+    // (enforced by seeds constraint). If freeze record exists and has data,
+    // deserialize and check is_active. If PDA is empty → not frozen.
+    let agent_frozen = {
+        let freeze_info = &ctx.accounts.freeze_record;
+        if !freeze_info.data_is_empty() {
+            let data = freeze_info.try_borrow_data()?;
+            match EmergencyFreezeRecord::try_deserialize(&mut &data[..]) {
+                Ok(record) => record.is_active,
+                Err(_) => false,
+            }
+        } else {
+            false
+        }
+    };
+
     let result = validate_capability_internal(
         capability,
         &params,
         clock.unix_timestamp,
         agent_frozen,
     );
-    
+
     set_return_data(&result.to_bytes());
 
-    // H-06 FIX: Optionally fail on invalid capability
     if params.fail_on_invalid && !result.is_valid {
         return Err(error!(DelegationError::CapabilityNotActive));
     }
-    
+
     emit!(CapabilityValidated {
         capability: capability.key(),
         principal: capability.principal,
@@ -131,11 +142,11 @@ fn validate_capability_internal(
     agent_frozen: bool,
 ) -> ValidationResult {
     let mut flags: u64 = 0;
-    
+
     if agent_frozen {
         return ValidationResult::err(ERR_AGENT_FROZEN);
     }
-    
+
     match capability.status {
         CapabilityStatus::Active => {},
         CapabilityStatus::Revoked => return ValidationResult::err(ERR_CAPABILITY_INACTIVE),
@@ -143,51 +154,50 @@ fn validate_capability_internal(
         CapabilityStatus::Frozen => return ValidationResult::err(ERR_AGENT_FROZEN),
         CapabilityStatus::Disputed => return ValidationResult::err(ERR_CAPABILITY_DISPUTED),
     }
-    
+
     if current_time < capability.valid_from {
         return ValidationResult::err(ERR_CAPABILITY_NOT_YET_VALID);
     }
     if current_time >= capability.expires_at {
         return ValidationResult::err(ERR_CAPABILITY_EXPIRED);
     }
-    
+
     if params.check_cooldown && !capability.is_cooldown_passed(current_time) {
         flags |= FLAG_IN_COOLDOWN;
         return ValidationResult::err(ERR_COOLDOWN_NOT_ELAPSED);
     }
-    
+
     if params.program_scope != 0 && !capability.is_program_allowed(params.program_scope) {
         return ValidationResult::err(ERR_PROGRAM_NOT_ALLOWED);
     }
-    
+
     if params.asset_scope != 0 && !capability.is_asset_allowed(params.asset_scope) {
         return ValidationResult::err(ERR_ASSET_NOT_ALLOWED);
     }
-    
+
     if params.amount > capability.per_tx_limit {
         return ValidationResult::err(ERR_PER_TX_LIMIT_EXCEEDED);
     }
-    
+
     let current_day = Capability::get_day_number(current_time);
     let effective_daily_spent = if current_day != capability.current_day {
         0
     } else {
         capability.daily_spent
     };
-    
+
     let new_daily_spent = effective_daily_spent.saturating_add(params.amount);
     if new_daily_spent > capability.daily_limit {
         return ValidationResult::err(ERR_DAILY_LIMIT_EXCEEDED);
     }
-    
+
     let new_total_spent = capability.total_spent.saturating_add(params.amount);
     if new_total_spent > capability.total_limit {
         return ValidationResult::err(ERR_TOTAL_LIMIT_EXCEEDED);
     }
-    
+
     if capability.enforce_allowlist {
         flags |= FLAG_ALLOWLIST_ENFORCED;
-        // C-08 FIX: Require destination when allowlist is enforced
         match params.destination {
             Some(destination) => {
                 if !capability.is_destination_allowed(&destination) {
@@ -195,14 +205,13 @@ fn validate_capability_internal(
                 }
             }
             None => {
-                // Allowlist enforced but no destination provided - reject
                 return ValidationResult::err(ERR_DESTINATION_NOT_ALLOWED);
             }
         }
     }
     let remaining_daily = capability.daily_limit.saturating_sub(new_daily_spent);
     let remaining_total = capability.total_limit.saturating_sub(new_total_spent);
-    
+
     let daily_percent = if capability.daily_limit > 0 {
         (new_daily_spent as u128 * 100) / capability.daily_limit as u128
     } else {
@@ -211,7 +220,7 @@ fn validate_capability_internal(
     if daily_percent >= 80 {
         flags |= FLAG_NEAR_DAILY_LIMIT;
     }
-    
+
     let total_percent = if capability.total_limit > 0 {
         (new_total_spent as u128 * 100) / capability.total_limit as u128
     } else {
@@ -220,7 +229,7 @@ fn validate_capability_internal(
     if total_percent >= 80 {
         flags |= FLAG_NEAR_TOTAL_LIMIT;
     }
-    
+
     ValidationResult::ok(remaining_daily, remaining_total, flags)
 }
 
@@ -229,13 +238,15 @@ pub struct ValidateCapability<'info> {
     /// The capability to validate
     pub capability: Account<'info, Capability>,
 
-    /// Freeze record - principal-specific PDA
-    /// Seeds: [b"freeze", principal, agent]
+    /// Freeze record PDA — MANDATORY. Client must always pass the PDA at
+    /// [b"freeze", principal, agent]. Seeds constraint verifies the address.
+    /// If no freeze exists on-chain, the account will have no data (empty).
+    /// CHECK: PDA address verified by seeds constraint. Data parsed manually.
     #[account(
         seeds = [b"freeze", capability.principal.as_ref(), capability.agent.as_ref()],
         bump,
     )]
-    pub freeze_record: Option<Account<'info, EmergencyFreezeRecord>>,
+    pub freeze_record: UncheckedAccount<'info>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
@@ -246,7 +257,7 @@ pub struct ValidateCapabilityParams {
     pub amount: u64,
     pub destination: Option<Pubkey>,
     pub check_cooldown: bool,
-    /// H-06 FIX: If true, return error on validation failure instead of Ok
+    /// If true, return error on validation failure instead of Ok
     pub fail_on_invalid: bool,
 }
 

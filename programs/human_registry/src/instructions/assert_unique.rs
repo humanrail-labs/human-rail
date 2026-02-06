@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::{
     error::HumanRegistryError,
-    state::HumanProfileLegacy,
+    state_v2::HumanProfile,
 };
 
 #[derive(Accounts)]
@@ -11,28 +11,24 @@ pub struct AssertUnique<'info> {
         bump = profile.bump,
         constraint = profile.wallet == wallet.key() @ HumanRegistryError::Unauthorized
     )]
-    pub profile: Account<'info, HumanProfileLegacy>,
+    pub profile: Account<'info, HumanProfile>,
 
-    /// The wallet being verified - must match profile
-    /// CHECK: Verified via profile constraint
+    /// The wallet being verified — must match profile.
+    /// CHECK: Verified via profile constraint.
     pub wallet: UncheckedAccount<'info>,
 }
 
 /// Assert that a human profile meets minimum requirements.
-/// Designed for CPI calls from other programs (human_pay, data_blink).
-/// 
-/// This instruction does not modify state - it only validates and returns
-/// an error if requirements are not met.
+/// Designed for CPI calls from other programs.
+/// Does not modify state — only validates.
 pub fn handler(ctx: Context<AssertUnique>, min_score: u16) -> Result<()> {
     let profile = &ctx.accounts.profile;
 
-    // Check minimum score requirement
     require!(
         profile.human_score >= min_score,
         HumanRegistryError::InsufficientHumanScore
     );
 
-    // Check unique human status if minimum score suggests it's needed
     if min_score >= 5000 {
         require!(
             profile.is_unique,
@@ -41,10 +37,11 @@ pub fn handler(ctx: Context<AssertUnique>, min_score: u16) -> Result<()> {
     }
 
     msg!(
-        "Profile {} verified: score={}, unique={}",
+        "Profile {} verified: score={}, unique={}, can_register_agents={}",
         profile.wallet,
         profile.human_score,
-        profile.is_unique
+        profile.is_unique,
+        profile.can_register_agents
     );
 
     Ok(())

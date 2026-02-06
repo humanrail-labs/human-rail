@@ -19,6 +19,7 @@ idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 anchor-debug = []
 custom-heap = []
 custom-panic = []
+# ⚠️  TEST ONLY — never deploy with this enabled!
 test-skip-sig-verify = []
 
 [dependencies]

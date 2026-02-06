@@ -6,22 +6,22 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-agent_registry = "72Ap2EvaFejm8B2HA7m4vtwnygH2gUJ4bTqdMgFkauVy"
-data_blink = "8JwHGZjAXqD1ZjSLQYq1eqEGnHXiqbTU1yXAEkygwuKo"
-delegation = "46znqjLJSWhj1j7By7cycJY5ZhouCJHwgpKoYpmTsBdU"
-document_registry = "B9jwdt5kc95CkdTrPEYM4HkFNp4NZNdXjKMLHvDGqTQ7"
-human_pay = "9rAuzu9kTkk92VnHHYfYGKJzjqjQnhA7TzKGGDWrX62C"
-human_registry = "2QtqddEyVhJWV7ysU1b8mpvQrQpWr84yxiHyqUqRcDzL"
-receipts = "62tKD1n3nJkiXtGSDAQbARxrMggfSBK6oq5YVrXzUjXe"
+agent_registry = "GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ"
+data_blink = "GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX"
+delegation = "DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT"
+document_registry = "8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28"
+human_pay = "HpMrfeC5gJZdywnUQS4WEvsUs6edyjrEmLuYEF1W3qF9"
+human_registry = "GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo"
+receipts = "EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM"
 
 [programs.localnet]
 agent_registry = "GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ"
 data_blink = "GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX"
-delegation = "HRmukQDzeju62kb1frapSX37GvH1qwwrjC2XdezWfS5Z"
+delegation = "DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT"
 document_registry = "8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28"
-human_pay = "CFxYX4vxNef9VwtkNHNd4m3mH3LpwoS3gSvEBGB4jeUV"
+human_pay = "HpMrfeC5gJZdywnUQS4WEvsUs6edyjrEmLuYEF1W3qF9"
 human_registry = "GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo"
-receipts = "7Q8tdMyTKvtomuSYiHPCB2inV29wr6P2SB7Cmo4kof6z"
+receipts = "EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM"
 
 [registry]
 url = "https://api.apr.dev"

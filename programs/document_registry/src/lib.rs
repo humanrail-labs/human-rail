@@ -222,3 +222,6 @@ pub enum SignatureTier {
     /// Tier 2: Agent signing with KYA delegation
     AgentOnBehalf,
 }
+
+// Human Registry Program ID for cross-program verification
+pub const HUMAN_REGISTRY_PROGRAM_ID: anchor_lang::prelude::Pubkey = anchor_lang::prelude::Pubkey::new_from_array([225, 113, 118, 254, 168, 183, 18, 109, 10, 149, 148, 56, 239, 82, 251, 95, 87, 252, 234, 128, 19, 207, 245, 153, 208, 160, 156, 36, 17, 218, 100, 158]);
