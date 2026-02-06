@@ -2,8 +2,9 @@
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Wallet, LogOut, Copy, ExternalLink } from "lucide-react";
+import { Wallet, LogOut, Copy, ExternalLink, LayoutDashboard } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 export function WalletButton() {
   const { publicKey, disconnect, connected } = useWallet();
   const { setVisible } = useWalletModal();
+  const router = useRouter();
 
   const handleCopyAddress = () => {
     if (publicKey) {
@@ -42,6 +44,14 @@ export function WalletButton() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-neutral-900 border-neutral-700">
+        <DropdownMenuItem
+          onClick={() => router.push("/dashboard")}
+          className="cursor-pointer"
+        >
+          <LayoutDashboard className="mr-2 h-4 w-4" />
+          Dashboard
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-neutral-700" />
         <DropdownMenuItem onClick={handleCopyAddress} className="cursor-pointer">
           <Copy className="mr-2 h-4 w-4" />
           Copy Address
