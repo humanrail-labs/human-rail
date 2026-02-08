@@ -21,6 +21,12 @@ pub fn handler(ctx: Context<EmitReceipt>, params: EmitReceiptParams) -> Result<(
         ReceiptsError::AgentMismatch
     );
 
+    // P0-4 / F5 FIX: Validate principal_id matches agent actual owner
+    require!(
+        agent_profile.owner_principal == params.principal_id,
+        ReceiptsError::InvalidPrincipalRef
+    );
+
     let receipt = &mut ctx.accounts.receipt;
     receipt.principal_id = params.principal_id;
     receipt.agent_id = params.agent_id;
@@ -42,10 +48,10 @@ pub fn handler(ctx: Context<EmitReceipt>, params: EmitReceiptParams) -> Result<(
     let agent_index = &mut ctx.accounts.agent_index;
     agent_index.entity = params.agent_id;
     agent_index.entity_type = 0; // Agent
-    agent_index.receipt_count = agent_index.receipt_count.saturating_add(1);
+    agent_index.receipt_count = agent_index.receipt_count.checked_add(1).ok_or(ReceiptsError::InvalidReceiptData)?;
     agent_index.latest_receipt = receipt.key();
     agent_index.latest_timestamp = clock.unix_timestamp;
-    agent_index.total_value = agent_index.total_value.saturating_add(params.value);
+    agent_index.total_value = agent_index.total_value.checked_add(params.value).ok_or(ReceiptsError::InvalidReceiptData)?;
     receipt.sequence = agent_index.receipt_count;
 
     if ctx.bumps.agent_index != 0 {

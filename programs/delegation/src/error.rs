@@ -58,4 +58,7 @@ pub enum DelegationError {
     InvalidProgram,
     #[msg("Agent signer does not match profile signing key")]
     AgentSignerMismatch,
+
+    #[msg("Arithmetic overflow in limit calculation")]
+    LimitOverflow,
 }

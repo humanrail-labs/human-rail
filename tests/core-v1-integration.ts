@@ -6,6 +6,9 @@ import {
   SystemProgram,
   LAMPORTS_PER_SOL,
   SYSVAR_INSTRUCTIONS_PUBKEY,
+  SYSVAR_CLOCK_PUBKEY,
+  Ed25519Program,
+  Transaction,
 } from '@solana/web3.js';
 import BN from 'bn.js';
 import { expect } from 'chai';
@@ -47,6 +50,30 @@ describe('Core v1 Integration Tests', () => {
   const CAPABILITY_NONCE = new BN(1);
   const ATTESTATION_NONCE = new BN(1);
   const agentSigningKeypair = Keypair.generate();
+
+  /** Mirrors on-chain create_signing_bytes exactly. */
+  function createSigningBytes(
+    profile: PublicKey, issuer: PublicKey, payloadHash: Buffer,
+    weight: number, issuedAt: number, expiresAt: number, nonce: number,
+  ): Buffer {
+    const buf = Buffer.alloc(24 + 32 + 32 + 32 + 2 + 8 + 8 + 8);
+    let off = 0;
+    Buffer.from("humanrail:attestation:v1").copy(buf, off); off += 24;
+    profile.toBuffer().copy(buf, off); off += 32;
+    issuer.toBuffer().copy(buf, off); off += 32;
+    payloadHash.copy(buf, off); off += 32;
+    buf.writeUInt16LE(weight, off); off += 2;
+    buf.writeBigInt64LE(BigInt(issuedAt), off); off += 8;
+    buf.writeBigInt64LE(BigInt(expiresAt), off); off += 8;
+    buf.writeBigUInt64LE(BigInt(nonce), off);
+    return buf;
+  }
+
+  async function getClockTimestamp(): Promise<number> {
+    const acct = await provider.connection.getAccountInfo(SYSVAR_CLOCK_PUBKEY);
+    if (!acct) throw new Error("Clock sysvar not found");
+    return Number(acct.data.readBigInt64LE(32));
+  }
 
   before(async () => {
     const balance = await provider.connection.getBalance(wallet.publicKey);
@@ -222,18 +249,28 @@ describe('Core v1 Integration Tests', () => {
     });
 
     it('1.4 Issue attestation → score becomes 55', async () => {
-      // Uses test-skip-sig-verify: no real Ed25519 sig needed
+      // Real Ed25519 signature (no test-skip-sig-verify)
       const payloadHash = Buffer.alloc(32);
       Buffer.from('kyc-verified-2025').copy(payloadHash);
-      const signature = Buffer.alloc(64); // dummy, skipped in test mode
+      const weight = 55;
+      const expiresAt = Math.floor(Date.now() / 1000) + 86400 * 90;
 
-      await humanRegistry.methods
+      const clockTs = await getClockTimestamp();
+      const message = createSigningBytes(
+        profilePda, issuerPda, payloadHash, weight, clockTs, expiresAt, ATTESTATION_NONCE.toNumber());
+
+      const ed25519Ix = Ed25519Program.createInstructionWithPrivateKey({
+        privateKey: issuerKeypair.secretKey,
+        message: Uint8Array.from(message),
+      });
+
+      const attestIx = await humanRegistry.methods
         .issueAttestation({
           payloadHash: Array.from(payloadHash),
-          weight: 55,
-          signature: Array.from(signature),
+          weight,
+          signature: Array.from(Buffer.alloc(64)),
           nonce: ATTESTATION_NONCE,
-          expiresAt: null,
+          expiresAt: new BN(expiresAt),
           externalId: null,
         })
         .accounts({
@@ -245,7 +282,19 @@ describe('Core v1 Integration Tests', () => {
           systemProgram: SystemProgram.programId,
         })
         .signers([issuerKeypair])
-        .rpc();
+        .instruction();
+
+      const tx = new Transaction().add(ed25519Ix).add(attestIx);
+      try {
+        await provider.sendAndConfirm(tx, [issuerKeypair]);
+        console.log("  [DEBUG] tx confirmed successfully");
+      } catch (e: any) {
+        console.log("  [DEBUG] tx FAILED:", e.message?.slice(0, 200));
+        throw e;
+      }
+      console.log("  [DEBUG] tx sent, fetching profile...");
+      const debugProfile = await humanRegistry.account.humanProfile.fetch(profilePda);
+      console.log("  [DEBUG] score:", debugProfile.humanScore, "canRegister:", debugProfile.canRegisterAgents, "attestations:", debugProfile.activeAttestationCount);
 
       const profile = await humanRegistry.account.humanProfile.fetch(profilePda);
       expect(profile.humanScore).to.equal(55);

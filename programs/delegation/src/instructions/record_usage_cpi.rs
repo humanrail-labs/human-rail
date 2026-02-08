@@ -1,3 +1,4 @@
+use anchor_lang::AccountDeserialize;
 use anchor_lang::prelude::*;
 use anchor_lang::pubkey;
 
@@ -50,13 +51,24 @@ pub fn handler(ctx: Context<RecordUsageCpi>, amount_used: u64) -> Result<()> {
         DelegationError::AgentSignerMismatch
     );
 
-    // H-05 FIX: Check if agent is frozen
-    if let Some(freeze_record) = &ctx.accounts.freeze_record {
-        require!(
-            !freeze_record.is_active,
-            DelegationError::AgentFrozen
-        );
-    }
+    // H-05 + F3 FIX: MANDATORY freeze check (non-bypassable)
+    // Matches validate_capability.rs pattern: UncheckedAccount + manual deser
+    let agent_frozen = {
+        let freeze_info = &ctx.accounts.freeze_record;
+        if !freeze_info.data_is_empty() {
+            let data = freeze_info.try_borrow_data()?;
+            match EmergencyFreezeRecord::try_deserialize(&mut &data[..]) {
+                Ok(record) => record.is_active,
+                Err(_) => false,
+            }
+        } else {
+            false
+        }
+    };
+    require!(
+        !agent_frozen,
+        DelegationError::AgentFrozen
+    );
 
     // Reset daily if needed (MUST happen before limit checks)
     capability.maybe_reset_daily(clock.unix_timestamp);
@@ -69,13 +81,13 @@ pub fn handler(ctx: Context<RecordUsageCpi>, amount_used: u64) -> Result<()> {
 
     // Check daily limit (after daily reset)
     require!(
-        capability.daily_spent.saturating_add(amount_used) <= capability.daily_limit,
+        capability.daily_spent.checked_add(amount_used).ok_or(DelegationError::LimitOverflow)? <= capability.daily_limit,
         DelegationError::DailyLimitExceeded
     );
 
     // Check total lifetime limit
     require!(
-        capability.total_spent.saturating_add(amount_used) <= capability.total_limit,
+        capability.total_spent.checked_add(amount_used).ok_or(DelegationError::LimitOverflow)? <= capability.total_limit,
         DelegationError::TotalLimitExceeded
     );
 
@@ -137,12 +149,13 @@ pub struct RecordUsageCpi<'info> {
     )]
     pub agent_profile: UncheckedAccount<'info>,
 
-    /// Freeze record - optional, checked if agent is frozen
+    /// Freeze record PDA — MANDATORY. Same pattern as validate_capability.
+    /// CHECK: PDA address verified by seeds constraint. Data parsed manually.
     #[account(
         seeds = [b"freeze", capability.principal.as_ref(), capability.agent.as_ref()],
         bump,
     )]
-    pub freeze_record: Option<Account<'info, EmergencyFreezeRecord>>,
+    pub freeze_record: UncheckedAccount<'info>,
 
     /// Usage record for audit trail
     #[account(
@@ -173,7 +186,7 @@ pub struct RecordUsageCpi<'info> {
 }
 
 // Agent registry program ID
-pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5");
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
 
 #[event]
 pub struct CapabilityUsedCpi {

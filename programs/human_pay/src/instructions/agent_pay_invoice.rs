@@ -10,7 +10,7 @@ pub const ASSET_SCOPE_ANY_SPL_TOKEN: u64 = 1 << 3;
 
 // Program IDs for CPI validation
 use anchor_lang::pubkey;
-pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("G9cks2iyDCRiByK8R7DmxrSq2iwXZaQtAinG1cbnZPQ5");
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
 
 /// Agent autonomously pays an invoice on behalf of principal.
 /// Key differences from regular pay_invoice:
@@ -183,7 +183,7 @@ pub fn handler(ctx: Context<AgentPayInvoice>) -> Result<()> {
         capability: ctx.accounts.capability.to_account_info(),
         agent_signer: ctx.accounts.agent_signer.to_account_info(),
         agent_profile: ctx.accounts.agent_profile.to_account_info(),
-        freeze_record: ctx.accounts.freeze_record.as_ref().map(|f| f.to_account_info()),
+        freeze_record: ctx.accounts.freeze_record.to_account_info(),
         usage_record: ctx.accounts.usage_record.to_account_info(),
         payer: ctx.accounts.agent_signer.to_account_info(),
         agent_registry_program: ctx.accounts.agent_registry_program.to_account_info(),
@@ -398,7 +398,7 @@ pub struct AgentPayInvoice<'info> {
 
     /// Freeze record - optional, for checking if agent is frozen
     /// CHECK: Validated by delegation program
-    pub freeze_record: Option<UncheckedAccount<'info>>,
+    pub freeze_record: UncheckedAccount<'info>,
 
     /// Agent registry program for CPI validation
     /// CHECK: Validated by address constraint
