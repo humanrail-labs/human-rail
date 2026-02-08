@@ -240,12 +240,11 @@ pub fn get_day_number(timestamp: i64) -> u32 {
     (timestamp / 86400) as u32
 }
 
-/// Compute simple XOR-fold hash for action data.
-/// NOTE: This is NOT cryptographic — use only for non-security-critical dedup/indexing.
+/// Compute SHA-256 hash for action data.
+/// Used for receipt integrity, usage record dedup, and action indexing.
 pub fn compute_action_hash(data: &[u8]) -> [u8; 32] {
-    let mut hash = [0u8; 32];
-    for (i, byte) in data.iter().enumerate() {
-        hash[i % 32] ^= byte;
-    }
-    hash
+    use sha2::{Sha256, Digest};
+    let mut hasher = Sha256::new();
+    hasher.update(data);
+    hasher.finalize().into()
 }

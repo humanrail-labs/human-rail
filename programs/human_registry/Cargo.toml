@@ -20,7 +20,6 @@ anchor-debug = []
 custom-heap = []
 custom-panic = []
 # ⚠️  TEST ONLY — never deploy with this enabled!
-test-skip-sig-verify = []
 
 [dependencies]
 anchor-lang = "0.32.1"

@@ -13,8 +13,8 @@ use crate::state_v2::{
 /// The Ed25519 verification instruction MUST precede this instruction in the transaction.
 /// There is no way to bypass this requirement - it is a structural invariant.
 /// 
-/// For local testing, use the `test-skip-sig-verify` feature flag at compile time,
-/// which is NOT included in release builds.
+/// Testing uses real Ed25519 signatures via Ed25519Program.createInstructionWithPrivateKey.
+/// The test-skip-sig-verify feature has been permanently removed.
 pub fn handler(ctx: Context<IssueAttestation>, params: IssueAttestationParams) -> Result<()> {
     let clock = Clock::get()?;
     let issuer = &mut ctx.accounts.issuer;
@@ -61,8 +61,6 @@ pub fn handler(ctx: Context<IssueAttestation>, params: IssueAttestationParams) -
     // MUST be present in the transaction immediately before this instruction.
     // There is no runtime flag to bypass this.
     
-    #[cfg(not(feature = "test-skip-sig-verify"))]
-    {
         let signing_bytes = create_signing_bytes(
             &profile.key(),
             &issuer.key(),
@@ -79,13 +77,7 @@ pub fn handler(ctx: Context<IssueAttestation>, params: IssueAttestationParams) -
             &signing_bytes,
             &params.signature,
         )?;
-    }
     
-    #[cfg(feature = "test-skip-sig-verify")]
-    {
-        msg!("WARNING: Signature verification skipped (test mode only)");
-    }
-
     // =======================================================================
     // CREATE ATTESTATION
     // =======================================================================
@@ -228,7 +220,7 @@ fn verify_ed25519_signature(
     // Verify instruction has at least one signature and minimum data length
     // Minimum: 16 bytes header + 64 signature + 32 pubkey = 112 bytes
     require!(
-        ix_data.len() >= 112 && ix_data[0] >= 1,
+        ix_data.len() >= 112 && ix_data[0] == 1, // P0-1: exactly 1 signature
         AttestationError::InvalidSignature
     );
 
@@ -301,6 +293,8 @@ pub struct IssueAttestation<'info> {
         init,
         payer = issuer_authority,
         space = SignedAttestation::LEN,
+        // INVARIANT: Attestation accounts are NEVER closed (revoke sets status only).
+        // This prevents nonce replay. Adding close would require a used-nonce registry.
         seeds = [
             b"attestation",
             profile.key().as_ref(),
