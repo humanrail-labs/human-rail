@@ -1,0 +1,55 @@
+name: Devnet Smoke Test
+
+on:
+  workflow_dispatch:  # manual trigger
+  schedule:
+    - cron: '0 6 * * 1-5'  # weekdays 6am UTC
+
+env:
+  NODE_VERSION: "20"
+  SOLANA_VERSION: "1.18.26"
+
+jobs:
+  smoke:
+    name: Hello HumanRail (Devnet)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Create ephemeral wallet
+        run: |
+          solana-keygen new --no-bip39-passphrase -o /tmp/smoke-wallet.json
+          solana config set --url https://api.devnet.solana.com --keypair /tmp/smoke-wallet.json
+          echo "Wallet: $(solana address)"
+
+      - name: Fund wallet
+        run: |
+          for i in 1 2 3; do
+            solana airdrop 1 && break || sleep 5
+          done
+          solana balance
+
+      - name: Install deps
+        working-directory: examples/hello-humanrail
+        run: npm install
+
+      - name: Run Hello HumanRail
+        working-directory: examples/hello-humanrail
+        env:
+          ANCHOR_WALLET: /tmp/smoke-wallet.json
+          SOLANA_RPC_URL: https://api.devnet.solana.com
+        run: npx tsx hello.ts
+
+      - name: Cleanup (close accounts to reclaim SOL)
+        if: always()
+        run: echo "Ephemeral wallet — SOL stays on devnet (negligible cost)"

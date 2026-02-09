@@ -280,3 +280,44 @@ See [examples/hello-humanrail/README.md](../../examples/hello-humanrail/README.m
 | 6002 | delegation | LimitExceeded |
 
 See `packages/sdk/src/errors.ts` for the full map.
+
+---
+
+## Nonce & Idempotency Rules
+
+### Attestation nonce scope
+- Nonce is scoped to `(profile_pda, issuer_pda)` pair
+- The attestation PDA is derived as: `seeds["attestation", profile, issuer, nonce_u64_le]`
+- Each unique nonce creates a new attestation PDA
+- Reusing a nonce for the same (profile, issuer) will fail (PDA already exists)
+
+### KYC service nonce tracking
+- The KYC issuer service tracks nonces per wallet in SQLite
+- `store.getNextNonce(wallet)` returns `MAX(nonce) + 1` for that wallet
+- Nonce is assigned on `approved` status, before submitting the transaction
+
+### Webhook idempotency
+- If a Veriff webhook is delivered twice for the same session:
+  - First delivery: processes normally, issues attestation
+  - Subsequent deliveries: returns `{ status: "ok", note: "already_attested" }`
+  - No double attestation is issued
+- The idempotency key is `veriff_session_id` (primary key in sessions table)
+
+### Webhook freshness
+- Webhooks are rejected if `decisionTime` is more than ±15 minutes from server time
+- This prevents replay of old webhook payloads
+- Adjust `WEBHOOK_FRESHNESS_SECONDS` in server.ts if needed
+
+### Failure modes
+| Scenario | Behavior | Recovery |
+|---|---|---|
+| Webhook arrives, chain tx fails | Status set to `chain_error` | Manual retry or re-trigger from Veriff dashboard |
+| Duplicate webhook after success | Returns `already_attested` | No action needed |
+| Stale webhook (>15 min old) | Rejected with 400 | Veriff retries automatically |
+| Nonce collision on-chain | Transaction fails (PDA exists) | Service increments nonce and retries |
+| RPC timeout | Status stays `approved` (not `attested`) | Cron job or manual retry needed |
+
+### Agent/Capability nonce
+- Agent nonce is scoped to `(principal)` — typically use timestamp or sequential counter
+- Capability nonce is scoped to `(principal, agent)` — use sequential counter starting from 1
+- There is no on-chain nonce counter; the caller manages nonce uniqueness
