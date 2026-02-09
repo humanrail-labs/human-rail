@@ -7,3 +7,9 @@ test-ledger/
 
 # localnet runtime program ids
 .anchor/program-ids.localnet.json
+
+# Keypair files
+.keys/
+
+# KYC SQLite data
+services/kyc-issuer/data/

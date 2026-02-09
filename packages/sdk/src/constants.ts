@@ -1,37 +1,55 @@
 import { PublicKey } from '@solana/web3.js';
 
-// Program IDs - canonical addresses from declare_id! in on-chain programs
-export const HUMAN_REGISTRY_PROGRAM_ID = new PublicKey(
-  'Bzvn211EkzfesXFxXKm81TxGpxx4VsZ8SdGf5N95i8SR'
-);
-
-export const HUMAN_PAY_PROGRAM_ID = new PublicKey(
-  '6tdLvL8JoJTxUrbkWKNoacfNjnXdpnneT9Wo8hxmWmqe'
-);
-
-export const DATA_BLINK_PROGRAM_ID = new PublicKey(
-  'BRzgfv849aBAaDsRyHZtJ1ZVFnn8JzdKx2cxWjum56K5'
-);
-
-// PDA Seeds
-export const HUMAN_PROFILE_SEED = Buffer.from('human_profile');
-export const REGISTRY_CONFIG_SEED = Buffer.from('registry_config');
-export const INVOICE_SEED = Buffer.from('invoice');
-export const INVOICE_VAULT_SEED = Buffer.from('vault');
-export const TASK_SEED = Buffer.from('task');
-export const TASK_VAULT_SEED = Buffer.from('task_vault');
-export const RESPONSE_SEED = Buffer.from('response');
-export const WORKER_STATS_SEED = Buffer.from('worker_stats');
-
-// Score thresholds
-export const UNIQUE_HUMAN_THRESHOLD = 5000;
-export const MAX_HUMAN_SCORE = 10000;
-
-// Attestation type weights (in basis points)
-export const ATTESTATION_WEIGHTS = {
-  SAS: 3000,
-  WorldId: 2500,
-  Civic: 2000,
-  GitcoinPassport: 1500,
-  Custom: 500,
+export const PROGRAM_IDS = {
+  humanRegistry: new PublicKey('GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo'),
+  agentRegistry: new PublicKey('GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ'),
+  delegation: new PublicKey('DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT'),
+  receipts: new PublicKey('EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM'),
 } as const;
+
+export type ProgramIdKeys = keyof typeof PROGRAM_IDS;
+
+export const SEEDS = {
+  HUMAN_PROFILE: Buffer.from('human_profile'),
+  ISSUER: Buffer.from('issuer'),
+  ATTESTATION: Buffer.from('attestation'),
+  ISSUER_REGISTRY: Buffer.from('issuer_registry'),
+  AGENT: Buffer.from('agent'),
+  AGENT_STATS: Buffer.from('agent_stats'),
+  KEY_ROTATION: Buffer.from('key_rotation'),
+  CAPABILITY: Buffer.from('capability'),
+  REVOCATION: Buffer.from('revocation'),
+  FREEZE: Buffer.from('freeze'),
+  USAGE: Buffer.from('usage'),
+  RECEIPT: Buffer.from('receipt'),
+  RECEIPT_INDEX: Buffer.from('receipt_index'),
+} as const;
+
+export const UNIQUE_THRESHOLD = 100;
+export const MIN_HUMAN_SCORE_FOR_AGENT = 50;
+export const VERIFIED_HUMAN_THRESHOLD = 60;
+export const MAX_ATTESTATIONS = 8;
+export const DEFAULT_ATTESTATION_VALIDITY = 90 * 24 * 60 * 60;
+
+export const PROGRAM_SCOPE = {
+  HUMAN_PAY: 1n << 0n,
+  DATA_BLINK: 1n << 1n,
+  TOKEN_TRANSFER: 1n << 2n,
+  NFT_TRANSFER: 1n << 3n,
+  SWAP: 1n << 4n,
+  STAKE: 1n << 5n,
+  GOVERNANCE: 1n << 6n,
+  DOCUMENT_SIGN: 1n << 7n,
+} as const;
+
+export const ASSET_SCOPE = {
+  SOL: 1n << 0n,
+  USDC: 1n << 1n,
+  USDT: 1n << 2n,
+  ANY_SPL_TOKEN: 1n << 3n,
+  ANY_NFT: 1n << 4n,
+} as const;
+
+export const ATTESTATION_DOMAIN_SEPARATOR = 'humanrail:attestation:v1';
+export const ATTESTATION_SIGNING_BYTES_LEN = 146;
+export const INTERFACE_VERSION = 1;

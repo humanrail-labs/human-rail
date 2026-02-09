@@ -1,135 +1,186 @@
 import { PublicKey } from '@solana/web3.js';
-import { BN } from '@coral-xyz/anchor';
+import BN from 'bn.js';
 
-// Attestation types
-export enum AttestationType {
-  SAS = 0,
-  WorldId = 1,
-  Civic = 2,
-  GitcoinPassport = 3,
-  Custom = 4,
+export enum IssuerType {
+  KycProvider = 0,
+  ProofOfPersonhood = 1,
+  SocialVerification = 2,
+  DeviceBased = 3,
+  EventBased = 4,
+  Custom = 5,
 }
 
-// Invoice status
-export enum InvoiceStatus {
-  Open = 0,
-  Paid = 1,
-  Cancelled = 2,
-  Withdrawn = 3,
+export enum IssuerStatus {
+  Active = 0,
+  Suspended = 1,
+  Revoked = 2,
 }
 
-// Human Profile - matches on-chain HumanProfile
+export enum AttestationStatus {
+  Active = 0,
+  Expired = 1,
+  Revoked = 2,
+}
+
+export enum AgentStatus {
+  Active = 0,
+  Suspended = 1,
+  Revoked = 2,
+}
+
+export enum CapabilityStatus {
+  Active = 0,
+  Revoked = 1,
+  Expired = 2,
+  Frozen = 3,
+  Disputed = 4,
+}
+
+export interface AttestationRefV2 {
+  attestation: PublicKey;
+  issuer: PublicKey;
+  attestationType: IssuerType;
+  weight: number;
+  expiresAt: BN;
+}
+
 export interface HumanProfile {
   wallet: PublicKey;
   humanScore: number;
   isUnique: boolean;
-  attestationCount: number;
+  totalAttestationCount: number;
+  activeAttestationCount: number;
   lastAttestationAt: BN;
-  lastAttestationHash: Uint8Array;
-  attestations: AttestationRef[];
+  lastScoreUpdate: BN;
+  attestations: AttestationRefV2[];
+  canRegisterAgents: boolean;
+  agentsRegistered: number;
+  createdAt: BN;
   bump: number;
 }
 
-// Attestation reference - matches on-chain AttestationRef
-export interface AttestationRef {
-  source: PublicKey;
-  payloadHash: Uint8Array;
+export interface IssuerRegistry {
+  admin: PublicKey;
+  issuerCount: number;
+  registrationPaused: boolean;
+  minAttestationWeight: number;
+  maxAttestationWeight: number;
+  bump: number;
+}
+
+export interface Issuer {
+  authority: PublicKey;
+  name: number[];
+  issuerType: IssuerType;
+  status: IssuerStatus;
+  maxWeight: number;
+  contributesToUniqueness: boolean;
+  defaultValidity: BN;
+  attestationsIssued: BN;
+  attestationsRevoked: BN;
+  registeredAt: BN;
+  registeredBy: PublicKey;
+  metadataUri: number[];
+  hasMetadataUri: boolean;
+  bump: number;
+}
+
+export interface SignedAttestation {
+  profile: PublicKey;
+  issuer: PublicKey;
+  issuerAuthority: PublicKey;
+  attestationType: IssuerType;
+  payloadHash: number[];
   weight: number;
-}
-
-// Invoice
-export interface ConfidentialInvoice {
-  merchant: PublicKey;
-  payer: PublicKey;
-  amount: BN;
-  mint: PublicKey;
-  humanRequirements: number;
-  status: InvoiceStatus;
-  createdAt: BN;
+  status: AttestationStatus;
+  issuedAt: BN;
   expiresAt: BN;
-  paidAt: BN;
-  memo: Uint8Array;
-  vault: PublicKey;
-  bump: number;
-  vaultBump: number;
+  revokedAt: BN;
+  signature: number[];
   nonce: BN;
+  externalId: number[];
+  hasExternalId: boolean;
+  bump: number;
 }
 
-// Task
-export interface Task {
-  creator: PublicKey;
-  rewardMint: PublicKey;
-  rewardPerResponse: BN;
-  totalBudget: BN;
-  consumedBudget: BN;
-  humanRequirements: number;
-  metadataUri: string;
-  isOpen: boolean;
-  responseCount: number;
-  maxResponses: number;
-  allowMultipleResponses: boolean;
+export interface AgentProfile {
+  ownerPrincipal: PublicKey;
+  signingKey: PublicKey;
+  name: number[];
+  metadataHash: number[];
+  teeMeasurement: number[];
+  hasTeeMeasurement: boolean;
+  status: AgentStatus;
   createdAt: BN;
-  closedAt: BN;
-  vault: PublicKey;
-  bump: number;
-  vaultBump: number;
+  lastStatusChange: BN;
+  lastMetadataUpdate: BN;
+  capabilityCount: number;
+  actionCount: BN;
   nonce: BN;
-}
-
-// Task Response
-export interface TaskResponse {
-  task: PublicKey;
-  worker: PublicKey;
-  choice: number;
-  responseData: Uint8Array;
-  humanScoreAtSubmission: number;
-  rewardAmount: BN;
-  isClaimed: boolean;
-  submittedAt: BN;
-  claimedAt: BN;
   bump: number;
 }
 
-// Task Metadata (JSON schema for metadata_uri)
-export interface TaskMetadata {
-  title: string;
-  description: string;
-  taskType: 'preference' | 'labeling' | 'classification' | 'custom';
-  options?: TaskOption[];
-  inputData?: string;
-  iconUrl?: string;
-  estimatedTimeSeconds?: number;
-}
-
-export interface TaskOption {
-  id: number;
-  label: string;
-  description?: string;
-  imageUrl?: string;
-}
-
-// Instruction params
-export interface CreateInvoiceParams {
-  amount: BN;
-  humanRequirements: number;
+export interface Capability {
+  principal: PublicKey;
+  agent: PublicKey;
+  allowedPrograms: BN;
+  allowedAssets: BN;
+  perTxLimit: BN;
+  dailyLimit: BN;
+  totalLimit: BN;
+  maxSlippageBps: number;
+  maxFee: BN;
+  validFrom: BN;
   expiresAt: BN;
-  memo: Uint8Array;
+  cooldownSeconds: number;
+  riskTier: number;
+  status: CapabilityStatus;
+  issuedAt: BN;
+  lastUsedAt: BN;
+  dailySpent: BN;
+  currentDay: number;
+  totalSpent: BN;
+  useCount: BN;
+  enforceAllowlist: boolean;
+  allowlistCount: number;
+  destinationAllowlist: PublicKey[];
+  disputeReason: number[];
   nonce: BN;
+  bump: number;
 }
 
-export interface CreateTaskParams {
-  rewardPerResponse: BN;
-  totalBudget: BN;
-  humanRequirements: number;
-  metadataUri: string;
-  maxResponses: number;
-  allowMultipleResponses: boolean;
+export interface ActionReceipt {
+  principalId: PublicKey;
+  agentId: PublicKey;
+  capabilityId: PublicKey;
+  actionHash: number[];
+  resultHash: number[];
+  actionType: number;
+  value: BN;
+  destination: PublicKey;
+  timestamp: BN;
+  slot: BN;
+  blockHash: number[];
+  offchainRef: number[];
+  hasOffchainRef: boolean;
+  sequence: BN;
   nonce: BN;
+  bump: number;
 }
 
-export interface AttestationInput {
-  sourceId: PublicKey;
-  payloadHash: Uint8Array;
-  signature?: Uint8Array;
-  attestationType: AttestationType;
+export interface ReceiptIndex {
+  entity: PublicKey;
+  entityType: number;
+  receiptCount: BN;
+  latestReceipt: PublicKey;
+  latestTimestamp: BN;
+  totalValue: BN;
+  bump: number;
+}
+
+export interface HumanRailConfig {
+  humanRegistryProgramId?: PublicKey;
+  agentRegistryProgramId?: PublicKey;
+  delegationProgramId?: PublicKey;
+  receiptsProgramId?: PublicKey;
 }

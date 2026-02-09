@@ -1,0 +1,16 @@
+{
+  "name": "@humanrail/gated-action",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npx tsx gated-action.ts"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.3"
+  }
+}

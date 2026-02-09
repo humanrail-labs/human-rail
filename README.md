@@ -109,3 +109,54 @@ scripts/
 ## License
 
 MIT
+
+---
+
+## Phase 3: SDK + KYC + Integration
+
+### TypeScript SDK
+```bash
+cd packages/sdk
+npm install
+npm run typecheck  # zero errors
+```
+
+**Quick start:**
+```typescript
+import { deriveHumanProfile, fetchHumanProfile } from '@humanrail/sdk';
+
+const [profilePda] = deriveHumanProfile(walletPubkey);
+const profile = await fetchHumanProfile(connection, walletPubkey);
+console.log('Score:', profile.humanityScore);
+```
+
+### KYC Issuer Service
+```bash
+cd services/kyc-issuer
+cp .env.example .env   # add Veriff credentials
+npm install
+npm run dev            # starts on :3100
+npm test               # 10/10 pass
+```
+
+**Endpoints:**
+- `POST /kyc/session` — Create Veriff verification session
+- `POST /kyc/webhook` — Veriff decision webhook (HMAC verified)
+- `GET /kyc/status?walletPubkey=...` — Check attestation status
+- `GET /health` — Health check
+
+### Examples
+
+| Example | Description | Run |
+|---|---|---|
+| [hello-humanrail](examples/hello-humanrail/) | Full lifecycle: profile → attestation → agent → capability | `ANCHOR_WALLET=~/.config/solana/id.json npx tsx hello.ts` |
+| [gated-action](examples/gated-action/) | Check humanity score before allowing action | `npx tsx gated-action.ts <WALLET>` |
+
+### Integration Cookbook
+
+See [docs/integration/cookbook.md](docs/integration/cookbook.md) for patterns:
+- Human Gate (score-based access control)
+- KYC Issuer (Veriff → on-chain attestation)
+- Agent Registration & Capability Delegation
+- Receipt Logging
+- PDA Reference & Error Codes
