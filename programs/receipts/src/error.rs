@@ -39,4 +39,16 @@ pub enum ReceiptsError {
 
     #[msg("Invalid principal reference")]
     InvalidPrincipalRef,
+
+    #[msg("Capability account must be provided when capability_id is set")]
+    MissingCapabilityAccount,
+
+    #[msg("Capability account key does not match capability_id")]
+    CapabilityMismatch,
+
+    #[msg("Capability account does not exist")]
+    CapabilityNotFound,
+
+    #[msg("Capability account not owned by delegation program")]
+    InvalidCapabilityOwner,
 }

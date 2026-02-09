@@ -20,3 +20,4 @@ default = []
 anchor-lang = "0.32.1"
 anchor-spl = "0.32.1"
 humanrail-common = { path = "../common" }
+agent-registry = { path = "../agent_registry", features = ["cpi"] }

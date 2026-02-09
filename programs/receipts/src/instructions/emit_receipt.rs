@@ -27,6 +27,28 @@ pub fn handler(ctx: Context<EmitReceipt>, params: EmitReceiptParams) -> Result<(
         ReceiptsError::InvalidPrincipalRef
     );
 
+    // P1-2 FIX: Validate capability_id if provided
+    if params.capability_id != Pubkey::default() {
+        // Require capability account passed as remaining_account
+        let remaining = &ctx.remaining_accounts;
+        require!(!remaining.is_empty(), ReceiptsError::MissingCapabilityAccount);
+        let cap_info = &remaining[0];
+        // Verify key matches claimed capability_id
+        require!(
+            cap_info.key() == params.capability_id,
+            ReceiptsError::CapabilityMismatch
+        );
+        // Verify account exists (non-zero data = initialized)
+        require!(
+            !cap_info.data_is_empty(),
+            ReceiptsError::CapabilityNotFound
+        );
+        // Verify owned by delegation program (prevents fake accounts)
+        require!(
+            cap_info.owner == &delegation::ID,
+            ReceiptsError::InvalidCapabilityOwner
+        );
+    }
     let receipt = &mut ctx.accounts.receipt;
     receipt.principal_id = params.principal_id;
     receipt.agent_id = params.agent_id;

@@ -9,6 +9,17 @@ use crate::{
 pub fn handler(ctx: Context<IssueCapability>, params: IssueCapabilityParams) -> Result<()> {
     let clock = Clock::get()?;
 
+    // P1-3 FIX: Validate agent is a real AgentProfile (not arbitrary pubkey)
+    let agent_info = &ctx.accounts.agent;
+    require!(
+        !agent_info.data_is_empty(),
+        DelegationError::InvalidAgentProfile
+    );
+    require!(
+        agent_info.owner == &agent_registry::ID,
+        DelegationError::InvalidAgentProfile
+    );
+
     // Validate parameters
     require!(
         params.expires_at > clock.unix_timestamp,
