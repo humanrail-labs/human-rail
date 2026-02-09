@@ -23,7 +23,8 @@ pub fn handler(ctx: Context<RevokeSignature>) -> Result<()> {
         SignerType::Agent => {
             // Either the agent's signing key OR the principal can revoke
             signature.signer_pubkey == ctx.accounts.revoker.key()
-                || (signature.has_principal && signature.principal_pubkey == ctx.accounts.revoker.key())
+                || (signature.has_principal
+                    && signature.principal_pubkey == ctx.accounts.revoker.key())
         }
         SignerType::Organization => signature.signer_pubkey == ctx.accounts.revoker.key(),
     };

@@ -3,8 +3,8 @@ use anchor_lang::prelude::*;
 use crate::{
     error::DocumentRegistryError,
     state::{
-        Document, DocumentSigningReceipt, SignatureMode, SignatureRecord,
-        SignatureStatus, SignerType, MAX_IDENTIFIER_LEN,
+        Document, DocumentSigningReceipt, SignatureMode, SignatureRecord, SignatureStatus,
+        SignerType, MAX_IDENTIFIER_LEN,
     },
     SignDocumentTxParams, SignatureTier,
 };

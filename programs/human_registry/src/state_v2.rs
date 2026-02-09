@@ -95,7 +95,7 @@ impl Issuer {
         32 + // registered_by
         64 + // metadata_uri
         1 +  // has_metadata_uri
-        1;   // bump
+        1; // bump
 
     pub fn is_active(&self) -> bool {
         self.status == IssuerStatus::Active
@@ -126,7 +126,7 @@ impl IssuerRegistry {
         1 +  // registration_paused
         2 +  // min_attestation_weight
         2 +  // max_attestation_weight
-        1;   // bump
+        1; // bump
 }
 
 // =============================================================================
@@ -193,7 +193,7 @@ impl SignedAttestation {
         8 +  // nonce
         32 + // external_id
         1 +  // has_external_id
-        1;   // bump
+        1; // bump
 
     /// Check if attestation is currently valid
     pub fn is_valid(&self, current_time: i64) -> bool {
@@ -248,7 +248,7 @@ impl AttestationRef {
         32 + // issuer
         1 +  // attestation_type
         2 +  // weight
-        8;   // expires_at
+        8; // expires_at
 }
 
 /// Human profile account - stores identity score and attestation references
@@ -293,7 +293,7 @@ impl HumanProfile {
         1 +  // can_register_agents
         4 +  // agents_registered
         8 +  // created_at
-        1;   // bump
+        1; // bump
 
     /// Recompute human_score from active attestations
     /// Call this after any attestation change
@@ -307,7 +307,7 @@ impl HumanProfile {
             if att_ref.expires_at == 0 || current_time < att_ref.expires_at {
                 total_score = total_score.saturating_add(att_ref.weight);
                 active_count += 1;
-                
+
                 // PoP attestations contribute to uniqueness
                 if att_ref.attestation_type == IssuerType::ProofOfPersonhood {
                     has_uniqueness_attestation = true;
@@ -335,7 +335,11 @@ impl HumanProfile {
 
     /// Remove attestation reference by pubkey
     pub fn remove_attestation(&mut self, attestation: &Pubkey) -> bool {
-        if let Some(pos) = self.attestations.iter().position(|a| a.attestation == *attestation) {
+        if let Some(pos) = self
+            .attestations
+            .iter()
+            .position(|a| a.attestation == *attestation)
+        {
             self.attestations.remove(pos);
             true
         } else {
@@ -381,5 +385,5 @@ impl RegistryConfig {
         2 +  // uniqueness_threshold
         8 +  // total_profiles
         8 +  // total_attestations
-        1;   // bump
+        1; // bump
 }

@@ -1,8 +1,8 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Token, TokenAccount, Mint, Transfer};
+use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
-use crate::state::{AgentEscrow, ConfidentialInvoice, InvoiceStatus, PaymentReceipt};
 use crate::error::HumanPayError;
+use crate::state::{AgentEscrow, ConfidentialInvoice, InvoiceStatus, PaymentReceipt};
 
 // Import from common types
 pub const PROGRAM_SCOPE_HUMAN_PAY: u64 = 1 << 0;
@@ -10,7 +10,8 @@ pub const ASSET_SCOPE_ANY_SPL_TOKEN: u64 = 1 << 3;
 
 // Program IDs for CPI validation
 use anchor_lang::pubkey;
-pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey =
+    pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
 
 /// Agent autonomously pays an invoice on behalf of principal.
 /// Key differences from regular pay_invoice:
@@ -113,7 +114,8 @@ pub fn handler(ctx: Context<AgentPayInvoice>) -> Result<()> {
 
     // Check destination allowlist if enforced
     if capability.enforce_allowlist {
-        let merchant_allowed = capability.destination_allowlist
+        let merchant_allowed = capability
+            .destination_allowlist
             .iter()
             .take(capability.allowlist_count as usize)
             .any(|d| *d == invoice.merchant);
@@ -176,7 +178,6 @@ pub fn handler(ctx: Context<AgentPayInvoice>) -> Result<()> {
     receipt.payer_human_score = 0; // Agent payment doesn't track human score
     receipt.tx_signature = [0u8; 32]; // Would be filled by client
     receipt.bump = ctx.bumps.payment_receipt;
-
 
     // === H-02 FIX: Record capability usage via CPI ===
     let cpi_accounts = delegation::cpi::accounts::RecordUsageCpi {

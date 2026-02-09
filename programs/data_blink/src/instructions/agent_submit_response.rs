@@ -1,15 +1,16 @@
 use anchor_lang::prelude::*;
 
+use crate::error::DataBlinkError;
 use crate::state::{Task, TaskResponse, WorkerStats};
 use human_registry::state_v2::HumanProfile;
-use crate::error::DataBlinkError;
 
 // Program scope bit for data_blink
 pub const PROGRAM_SCOPE_DATA_BLINK: u64 = 1 << 1;
 
 // Program IDs for cross-program validation
 use anchor_lang::pubkey;
-pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey =
+    pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
 pub const DELEGATION_PROGRAM_ID: Pubkey = pubkey!("HRmukQDzeju62kb1frapSX37GvH1qwwrjC2XdezWfS5Z");
 
 /// Agent autonomously submits a task response on behalf of principal.
@@ -100,9 +101,6 @@ pub fn handler(
         ctx.accounts.principal_profile.human_score >= task.human_requirements,
         DataBlinkError::InsufficientHumanScore
     );
-    
-    
-    
 
     // === EXECUTE RESPONSE ===
 
@@ -121,7 +119,9 @@ pub fn handler(
 
     // Update task
     task.response_count = task.response_count.saturating_add(1);
-    task.consumed_budget = task.consumed_budget.saturating_add(task.reward_per_response);
+    task.consumed_budget = task
+        .consumed_budget
+        .saturating_add(task.reward_per_response);
 
     // Update worker stats
     let stats = &mut ctx.accounts.worker_stats;
@@ -131,7 +131,9 @@ pub fn handler(
         stats.bump = ctx.bumps.worker_stats;
     }
     stats.tasks_completed = stats.tasks_completed.saturating_add(1);
-    stats.total_rewards_earned = stats.total_rewards_earned.saturating_add(task.reward_per_response);
+    stats.total_rewards_earned = stats
+        .total_rewards_earned
+        .saturating_add(task.reward_per_response);
     stats.last_activity = clock.unix_timestamp;
 
     // === EMIT RECEIPT FOR ACCOUNTABILITY ===

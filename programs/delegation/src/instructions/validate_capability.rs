@@ -75,10 +75,7 @@ pub const FLAG_IN_COOLDOWN: u64 = 1 << 17;
 pub const FLAG_NEAR_DAILY_LIMIT: u64 = 1 << 18;
 pub const FLAG_NEAR_TOTAL_LIMIT: u64 = 1 << 19;
 
-pub fn handler(
-    ctx: Context<ValidateCapability>,
-    params: ValidateCapabilityParams,
-) -> Result<()> {
+pub fn handler(ctx: Context<ValidateCapability>, params: ValidateCapabilityParams) -> Result<()> {
     let clock = Clock::get()?;
     let capability = &ctx.accounts.capability;
 
@@ -98,12 +95,8 @@ pub fn handler(
         }
     };
 
-    let result = validate_capability_internal(
-        capability,
-        &params,
-        clock.unix_timestamp,
-        agent_frozen,
-    );
+    let result =
+        validate_capability_internal(capability, &params, clock.unix_timestamp, agent_frozen);
 
     set_return_data(&result.to_bytes());
 
@@ -148,7 +141,7 @@ fn validate_capability_internal(
     }
 
     match capability.status {
-        CapabilityStatus::Active => {},
+        CapabilityStatus::Active => {}
         CapabilityStatus::Revoked => return ValidationResult::err(ERR_CAPABILITY_INACTIVE),
         CapabilityStatus::Expired => return ValidationResult::err(ERR_CAPABILITY_EXPIRED),
         CapabilityStatus::Frozen => return ValidationResult::err(ERR_AGENT_FROZEN),
@@ -163,7 +156,7 @@ fn validate_capability_internal(
     }
 
     if params.check_cooldown && !capability.is_cooldown_passed(current_time) {
-        flags |= FLAG_IN_COOLDOWN;
+        // flags |= FLAG_IN_COOLDOWN; -- returned before read
         return ValidationResult::err(ERR_COOLDOWN_NOT_ELAPSED);
     }
 

@@ -132,7 +132,7 @@ impl AgentEscrow {
         8 +  // created_at
         8 +  // last_used_at
         1 +  // bump
-        1;   // token_account_bump
+        1; // token_account_bump
 
     /// Available balance
     pub fn available(&self) -> u64 {

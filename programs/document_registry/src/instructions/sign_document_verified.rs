@@ -3,21 +3,19 @@ use anchor_lang::prelude::*;
 use crate::{
     error::DocumentRegistryError,
     state::{
-        Document, DocumentSigningReceipt, SignatureMode, SignatureRecord,
-        SignatureStatus, SignerType, MAX_IDENTIFIER_LEN,
+        Document, DocumentSigningReceipt, SignatureMode, SignatureRecord, SignatureStatus,
+        SignerType, MAX_IDENTIFIER_LEN,
     },
     SignDocumentTxParams, SignatureTier,
 };
 
 /// Minimum human score required for verified signing
-pub const MIN_VERIFIED_SIGNING_SCORE: u16 = 0;
+pub const MIN_VERIFIED_SIGNING_SCORE: u16 = 50;
 
 /// Known Human Registry program ID
 pub const HUMAN_REGISTRY_PROGRAM_ID: Pubkey = Pubkey::new_from_array([
-    0xe1, 0x71, 0x76, 0xfe, 0xa8, 0xb7, 0x12, 0x6d,
-    0x0a, 0x95, 0x94, 0x38, 0xef, 0x52, 0xfb, 0x5f,
-    0x57, 0xfc, 0xea, 0x80, 0x13, 0xcf, 0xf5, 0x99,
-    0xd0, 0xa0, 0x9c, 0x24, 0x11, 0xda, 0x64, 0x9e
+    0xe1, 0x71, 0x76, 0xfe, 0xa8, 0xb7, 0x12, 0x6d, 0x0a, 0x95, 0x94, 0x38, 0xef, 0x52, 0xfb, 0x5f,
+    0x57, 0xfc, 0xea, 0x80, 0x13, 0xcf, 0xf5, 0x99, 0xd0, 0xa0, 0x9c, 0x24, 0x11, 0xda, 0x64, 0x9e,
 ]);
 
 /// HumanProfile account structure (from human_registry)
@@ -39,19 +37,34 @@ impl HumanProfile {
 pub fn handler(ctx: Context<SignDocumentVerified>, params: SignDocumentTxParams) -> Result<()> {
     let clock = Clock::get()?;
     let document = &mut ctx.accounts.document;
-    
+
     let human_profile_info = &ctx.accounts.human_profile;
     let human_profile_data = human_profile_info.try_borrow_data()?;
-    
-    require!(human_profile_data.len() >= 8, DocumentRegistryError::InvalidHumanProfile);
-    require!(human_profile_data[..8] == HumanProfile::DISCRIMINATOR, DocumentRegistryError::InvalidHumanProfile);
-    
+
+    require!(
+        human_profile_data.len() >= 8,
+        DocumentRegistryError::InvalidHumanProfile
+    );
+    require!(
+        human_profile_data[..8] == HumanProfile::DISCRIMINATOR,
+        DocumentRegistryError::InvalidHumanProfile
+    );
+
     let human_profile: HumanProfile = AnchorDeserialize::deserialize(&mut &human_profile_data[8..])
         .map_err(|_| DocumentRegistryError::InvalidHumanProfile)?;
 
-    require!(document.can_be_signed(), DocumentRegistryError::DocumentVoided);
-    require!(params.role != [0u8; MAX_IDENTIFIER_LEN], DocumentRegistryError::InvalidRole);
-    require!(human_profile.human_score >= MIN_VERIFIED_SIGNING_SCORE, DocumentRegistryError::InsufficientHumanScore);
+    require!(
+        document.can_be_signed(),
+        DocumentRegistryError::DocumentVoided
+    );
+    require!(
+        params.role != [0u8; MAX_IDENTIFIER_LEN],
+        DocumentRegistryError::InvalidRole
+    );
+    require!(
+        human_profile.human_score >= MIN_VERIFIED_SIGNING_SCORE,
+        DocumentRegistryError::InsufficientHumanScore
+    );
 
     let signature = &mut ctx.accounts.signature_record;
     signature.document = document.key();
@@ -114,8 +127,12 @@ pub fn handler(ctx: Context<SignDocumentVerified>, params: SignDocumentTxParams)
         timestamp: clock.unix_timestamp,
     });
 
-    msg!("Document signed (Tier 1 Verified): signer={}, score={}, unique={}", 
-        signature.signer_pubkey, human_profile.human_score, human_profile.is_unique);
+    msg!(
+        "Document signed (Tier 1 Verified): signer={}, score={}, unique={}",
+        signature.signer_pubkey,
+        human_profile.human_score,
+        human_profile.is_unique
+    );
 
     Ok(())
 }

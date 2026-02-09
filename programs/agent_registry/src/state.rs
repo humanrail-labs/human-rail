@@ -63,7 +63,7 @@ impl AgentProfile {
         4 +  // capability_count
         8 +  // action_count
         8 +  // nonce
-        1;   // bump
+        1; // bump
 
     pub fn is_active(&self) -> bool {
         self.status == AgentStatus::Active
@@ -97,7 +97,7 @@ impl KeyRotation {
         8 +  // rotated_at
         8 +  // old_key_expires_at
         4 +  // sequence
-        1;   // bump
+        1; // bump
 
     /// Check if the old key is still valid (within grace period)
     pub fn is_old_key_valid(&self, current_time: i64) -> bool {
@@ -138,5 +138,5 @@ impl AgentOperatorStats {
         8 +  // last_activity
         2 +  // risk_score
         4 +  // anomaly_flags
-        1;   // bump
+        1; // bump
 }

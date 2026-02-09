@@ -1,11 +1,11 @@
-use anchor_lang::prelude::*;
 use crate::state_v2::IssuerRegistry;
+use anchor_lang::prelude::*;
 
 /// Initialize the issuer registry.
 /// This must be called once before any issuers can be registered.
 pub fn handler(ctx: Context<InitRegistry>) -> Result<()> {
     let registry = &mut ctx.accounts.registry;
-    
+
     registry.admin = ctx.accounts.admin.key();
     registry.issuer_count = 0;
     registry.registration_paused = false;

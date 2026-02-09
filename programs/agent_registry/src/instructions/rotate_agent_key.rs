@@ -22,10 +22,10 @@ pub fn handler(ctx: Context<RotateAgentKey>, new_signing_key: Pubkey) -> Result<
     );
 
     let old_key = agent.signing_key;
-    
+
     // H-09 FIX: Capture sequence before increment for PDA/record consistency
     let current_sequence = agent.action_count;
-    
+
     // Create key rotation record
     let rotation = &mut ctx.accounts.key_rotation;
     rotation.agent = agent.key();
@@ -38,7 +38,7 @@ pub fn handler(ctx: Context<RotateAgentKey>, new_signing_key: Pubkey) -> Result<
 
     // Update agent with new key
     agent.signing_key = new_signing_key;
-    
+
     // H-09 FIX: Increment action_count so next rotation gets unique PDA seed
     agent.action_count = agent.action_count.saturating_add(1);
 
@@ -105,4 +105,4 @@ pub struct AgentKeyRotated {
     pub new_key: Pubkey,
     pub grace_period_expires: i64,
     pub timestamp: i64,
-} 
+}

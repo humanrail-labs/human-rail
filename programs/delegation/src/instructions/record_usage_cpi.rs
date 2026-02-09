@@ -1,6 +1,6 @@
-use anchor_lang::AccountDeserialize;
 use anchor_lang::prelude::*;
 use anchor_lang::pubkey;
+use anchor_lang::AccountDeserialize;
 
 use crate::{
     error::DelegationError,
@@ -14,6 +14,7 @@ pub struct AgentProfileRef<'info> {
     pub info: AccountInfo<'info>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'info> AgentProfileRef<'info> {
     pub fn signing_key(&self) -> Result<Pubkey> {
         // AgentProfile layout: discriminator(8) + owner_principal(32) + signing_key(32)
@@ -40,10 +41,7 @@ pub fn handler(ctx: Context<RecordUsageCpi>, amount_used: u64) -> Result<()> {
 
     // Validate agent_signer matches agent_profile.signing_key
     let agent_data = ctx.accounts.agent_profile.try_borrow_data()?;
-    require!(
-        agent_data.len() >= 72,
-        DelegationError::InvalidAgentProfile
-    );
+    require!(agent_data.len() >= 72, DelegationError::InvalidAgentProfile);
     let signing_key = Pubkey::try_from(&agent_data[40..72]).unwrap();
     drop(agent_data);
     require!(
@@ -65,10 +63,7 @@ pub fn handler(ctx: Context<RecordUsageCpi>, amount_used: u64) -> Result<()> {
             false
         }
     };
-    require!(
-        !agent_frozen,
-        DelegationError::AgentFrozen
-    );
+    require!(!agent_frozen, DelegationError::AgentFrozen);
 
     // Reset daily if needed (MUST happen before limit checks)
     capability.maybe_reset_daily(clock.unix_timestamp);
@@ -81,13 +76,21 @@ pub fn handler(ctx: Context<RecordUsageCpi>, amount_used: u64) -> Result<()> {
 
     // Check daily limit (after daily reset)
     require!(
-        capability.daily_spent.checked_add(amount_used).ok_or(DelegationError::LimitOverflow)? <= capability.daily_limit,
+        capability
+            .daily_spent
+            .checked_add(amount_used)
+            .ok_or(DelegationError::LimitOverflow)?
+            <= capability.daily_limit,
         DelegationError::DailyLimitExceeded
     );
 
     // Check total lifetime limit
     require!(
-        capability.total_spent.checked_add(amount_used).ok_or(DelegationError::LimitOverflow)? <= capability.total_limit,
+        capability
+            .total_spent
+            .checked_add(amount_used)
+            .ok_or(DelegationError::LimitOverflow)?
+            <= capability.total_limit,
         DelegationError::TotalLimitExceeded
     );
 
@@ -186,7 +189,8 @@ pub struct RecordUsageCpi<'info> {
 }
 
 // Agent registry program ID
-pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
+pub const AGENT_REGISTRY_PROGRAM_ID: Pubkey =
+    pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
 
 #[event]
 pub struct CapabilityUsedCpi {

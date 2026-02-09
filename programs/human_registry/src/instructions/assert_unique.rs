@@ -1,8 +1,5 @@
+use crate::{error::HumanRegistryError, state_v2::HumanProfile};
 use anchor_lang::prelude::*;
-use crate::{
-    error::HumanRegistryError,
-    state_v2::HumanProfile,
-};
 
 #[derive(Accounts)]
 pub struct AssertUnique<'info> {
@@ -30,10 +27,7 @@ pub fn handler(ctx: Context<AssertUnique>, min_score: u16) -> Result<()> {
     );
 
     if min_score >= 5000 {
-        require!(
-            profile.is_unique,
-            HumanRegistryError::NotUniqueHuman
-        );
+        require!(profile.is_unique, HumanRegistryError::NotUniqueHuman);
     }
 
     msg!(

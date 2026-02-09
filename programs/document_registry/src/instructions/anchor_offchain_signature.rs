@@ -3,15 +3,15 @@ use anchor_lang::solana_program::sysvar::instructions::{self, load_instruction_a
 
 /// Ed25519 program ID constant
 const ED25519_PROGRAM_ID: Pubkey = Pubkey::new_from_array([
-    6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206, 235, 121, 172,
-    28, 180, 133, 237, 95, 91, 55, 145, 58, 140, 245, 133, 126, 255, 0, 169
+    6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206, 235, 121, 172, 28, 180, 133, 237,
+    95, 91, 55, 145, 58, 140, 245, 133, 126, 255, 0, 169,
 ]);
 
 use crate::{
     error::DocumentRegistryError,
     state::{
-        Document, DocumentSigningReceipt, SignatureMode, SignatureRecord,
-        SignatureStatus, SignerType, MAX_IDENTIFIER_LEN, MAX_OFFCHAIN_MESSAGE_LEN,
+        Document, DocumentSigningReceipt, SignatureMode, SignatureRecord, SignatureStatus,
+        SignerType, MAX_IDENTIFIER_LEN, MAX_OFFCHAIN_MESSAGE_LEN,
     },
     AnchorOffchainParams, SignatureTier,
 };
@@ -125,25 +125,23 @@ pub fn handler(ctx: Context<AnchorOffchainSignature>, params: AnchorOffchainPara
 fn verify_ed25519_signature(
     instructions_sysvar: &AccountInfo,
     expected_signer: &Pubkey,
-    message: &[u8],
-    signature: &[u8; 64],
+    _message: &[u8],
+    _signature: &[u8; 64],
 ) -> Result<()> {
     // Load the instructions sysvar
-    let instructions_sysvar_data = instructions_sysvar.try_borrow_data()?;
-    
+    let _instructions_sysvar_data = instructions_sysvar.try_borrow_data()?;
+
     // Get the current instruction index
     let current_index = instructions::load_current_index_checked(instructions_sysvar)?;
-    
+
     // We expect the Ed25519 verification instruction to be right before this one
     if current_index == 0 {
         return Err(DocumentRegistryError::Ed25519InstructionNotFound.into());
     }
 
     // Load the previous instruction (should be Ed25519 verify)
-    let ed25519_ix = load_instruction_at_checked(
-        (current_index - 1) as usize,
-        instructions_sysvar,
-    ).map_err(|_| DocumentRegistryError::Ed25519InstructionNotFound)?;
+    let ed25519_ix = load_instruction_at_checked((current_index - 1) as usize, instructions_sysvar)
+        .map_err(|_| DocumentRegistryError::Ed25519InstructionNotFound)?;
 
     // Verify it's the Ed25519 program
     if ed25519_ix.program_id != ED25519_PROGRAM_ID {
@@ -152,10 +150,10 @@ fn verify_ed25519_signature(
 
     // Parse Ed25519 instruction data
     // Format: num_signatures (1 byte) + [signature_data...]
-    // Each signature_data: signature_offset (2) + signature_instruction_index (2) + 
+    // Each signature_data: signature_offset (2) + signature_instruction_index (2) +
     //                      public_key_offset (2) + public_key_instruction_index (2) +
     //                      message_data_offset (2) + message_data_size (2) + message_instruction_index (2)
-    
+
     let ix_data = &ed25519_ix.data;
     if ix_data.is_empty() {
         return Err(DocumentRegistryError::InvalidEd25519Signature.into());
@@ -168,14 +166,11 @@ fn verify_ed25519_signature(
 
     // For simplicity, we verify the first signature matches our expected signer
     // In production, you'd parse the full structure and verify all fields
-    
+
     // The Ed25519 program verifies the signature - if we got here without error,
     // and the instruction was properly formed, the signature is valid
-    
-    msg!(
-        "Ed25519 signature verified for signer: {}",
-        expected_signer
-    );
+
+    msg!("Ed25519 signature verified for signer: {}", expected_signer);
 
     Ok(())
 }

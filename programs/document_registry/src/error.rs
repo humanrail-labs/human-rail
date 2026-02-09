@@ -137,7 +137,7 @@ pub enum DocumentRegistryError {
     #[msg("Invalid account data")]
     InvalidAccountData,
 
-        #[msg("Invalid human profile account")]
+    #[msg("Invalid human profile account")]
     InvalidHumanProfile,
 
     #[msg("Arithmetic overflow")]

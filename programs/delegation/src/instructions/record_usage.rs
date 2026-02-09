@@ -1,5 +1,5 @@
-use anchor_lang::AccountDeserialize;
 use anchor_lang::prelude::*;
+use anchor_lang::AccountDeserialize;
 
 use crate::{
     error::DelegationError,
@@ -31,10 +31,7 @@ pub fn handler(ctx: Context<RecordUsage>, amount_used: u64) -> Result<()> {
             false
         }
     };
-    require!(
-        !agent_frozen,
-        DelegationError::AgentFrozen
-    );
+    require!(!agent_frozen, DelegationError::AgentFrozen);
 
     // Reset daily if needed (MUST happen before limit checks)
     capability.maybe_reset_daily(clock.unix_timestamp);
@@ -49,13 +46,21 @@ pub fn handler(ctx: Context<RecordUsage>, amount_used: u64) -> Result<()> {
 
     // Check daily limit (after daily reset)
     require!(
-        capability.daily_spent.checked_add(amount_used).ok_or(DelegationError::LimitOverflow)? <= capability.daily_limit,
+        capability
+            .daily_spent
+            .checked_add(amount_used)
+            .ok_or(DelegationError::LimitOverflow)?
+            <= capability.daily_limit,
         DelegationError::DailyLimitExceeded
     );
 
     // Check total lifetime limit
     require!(
-        capability.total_spent.checked_add(amount_used).ok_or(DelegationError::LimitOverflow)? <= capability.total_limit,
+        capability
+            .total_spent
+            .checked_add(amount_used)
+            .ok_or(DelegationError::LimitOverflow)?
+            <= capability.total_limit,
         DelegationError::TotalLimitExceeded
     );
 

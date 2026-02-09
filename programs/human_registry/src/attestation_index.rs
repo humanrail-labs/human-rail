@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state_v2::{AttestationStatus, HumanProfile, IssuerType};
+use crate::state_v2::{HumanProfile, IssuerType};
 
 // =============================================================================
 // ATTESTATION INDEX - Pagination-Ready Design
@@ -69,7 +69,7 @@ impl AttestationIndexPage {
         (INDEX_PAGE_SIZE * AttestationPointer::LEN) + // attestations
         2 +  // cached_score
         8 +  // cache_updated_at
-        1;   // bump
+        1; // bump
 
     /// Find first empty slot (inactive pointer)
     pub fn find_empty_slot(&self) -> Option<usize> {
@@ -145,7 +145,7 @@ impl ProfileAttestationMeta {
         2 +  // aggregated_score
         1 +  // has_uniqueness_attestation
         8 +  // score_computed_at
-        1;   // bump
+        1; // bump
 
     /// Check if can add more pages
     pub fn can_add_page(&self) -> bool {
@@ -191,7 +191,7 @@ pub fn initialize_index(ctx: Context<InitializeAttestationIndex>) -> Result<()> 
 /// Allocate additional index page when current pages are full
 pub fn allocate_page(ctx: Context<AllocateIndexPage>) -> Result<()> {
     let meta = &mut ctx.accounts.meta;
-    
+
     require!(meta.can_add_page(), IndexError::MaxPagesReached);
 
     let new_page = &mut ctx.accounts.new_page;
@@ -219,7 +219,7 @@ pub fn allocate_page(ctx: Context<AllocateIndexPage>) -> Result<()> {
 pub fn recompute_aggregated_score(ctx: Context<RecomputeScore>) -> Result<()> {
     let clock = Clock::get()?;
     let meta = &mut ctx.accounts.meta;
-    
+
     // Score will be accumulated from remaining_accounts (all pages)
     let mut total_score: u16 = 0;
     let mut has_pop = false;
@@ -229,15 +229,14 @@ pub fn recompute_aggregated_score(ctx: Context<RecomputeScore>) -> Result<()> {
         let page_data = account.try_borrow_data()?;
         if page_data.len() >= AttestationIndexPage::LEN {
             // Skip discriminator and parse
-            let page: AttestationIndexPage = 
-                AnchorDeserialize::deserialize(&mut &page_data[8..])?;
-            
+            let page: AttestationIndexPage = AnchorDeserialize::deserialize(&mut &page_data[8..])?;
+
             // Verify page belongs to this profile
             if page.profile == meta.profile {
                 for pointer in &page.attestations {
                     let weight = pointer.effective_weight(clock.unix_timestamp);
                     total_score = total_score.saturating_add(weight);
-                    
+
                     if weight > 0 && pointer.issuer_type == IssuerType::ProofOfPersonhood {
                         has_pop = true;
                     }
@@ -329,7 +328,6 @@ pub struct RecomputeScore<'info> {
         bump = meta.bump
     )]
     pub meta: Account<'info, ProfileAttestationMeta>,
-    
     // Remaining accounts: all AttestationIndexPage accounts for this profile
 }
 

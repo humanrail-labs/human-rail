@@ -14,10 +14,7 @@ pub mod receipts {
 
     /// Emit a receipt for an agent action.
     /// Creates an immutable, timestamped record of what happened.
-    pub fn emit_receipt(
-        ctx: Context<EmitReceipt>,
-        params: EmitReceiptParams,
-    ) -> Result<()> {
+    pub fn emit_receipt(ctx: Context<EmitReceipt>, params: EmitReceiptParams) -> Result<()> {
         instructions::emit_receipt::handler(ctx, params)
     }
 

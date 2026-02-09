@@ -1,18 +1,17 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::instructions::{self, load_instruction_at_checked};
-use anchor_lang::solana_program::sysvar::instructions as ix_sysvar;
 
 use crate::state_v2::{
-    AttestationRef, AttestationStatus, HumanProfile, Issuer, IssuerStatus,
-    SignedAttestation, MAX_ATTESTATIONS,
+    AttestationRef, AttestationStatus, HumanProfile, Issuer, IssuerStatus, SignedAttestation,
+    MAX_ATTESTATIONS,
 };
 
 /// Issue a signed attestation to a human profile.
-/// 
+///
 /// SECURITY: Signature verification is ALWAYS required in production.
 /// The Ed25519 verification instruction MUST precede this instruction in the transaction.
 /// There is no way to bypass this requirement - it is a structural invariant.
-/// 
+///
 /// Testing uses real Ed25519 signatures via Ed25519Program.createInstructionWithPrivateKey.
 /// The test-skip-sig-verify feature has been permanently removed.
 pub fn handler(ctx: Context<IssueAttestation>, params: IssueAttestationParams) -> Result<()> {
@@ -41,17 +40,11 @@ pub fn handler(ctx: Context<IssueAttestation>, params: IssueAttestationParams) -
 
     // Validate nonce is > 0 (replay prevention is handled by PDA seeds)
     // The PDA [attestation, profile, issuer, nonce] ensures uniqueness
-    require!(
-        params.nonce > 0,
-        AttestationError::InvalidNonce
-    );
+    require!(params.nonce > 0, AttestationError::InvalidNonce);
 
     // Validate expiry is in the future (if set)
     if let Some(exp) = params.expires_at {
-        require!(
-            exp > clock.unix_timestamp,
-            AttestationError::InvalidExpiry
-        );
+        require!(exp > clock.unix_timestamp, AttestationError::InvalidExpiry);
     }
 
     // =======================================================================
@@ -60,24 +53,26 @@ pub fn handler(ctx: Context<IssueAttestation>, params: IssueAttestationParams) -
     // This is a structural invariant. The Ed25519 verification instruction
     // MUST be present in the transaction immediately before this instruction.
     // There is no runtime flag to bypass this.
-    
-        let signing_bytes = create_signing_bytes(
-            &profile.key(),
-            &issuer.key(),
-            &params.payload_hash,
-            params.weight,
-            clock.unix_timestamp,
-            params.expires_at.unwrap_or(clock.unix_timestamp + issuer.default_validity),
-            params.nonce,
-        );
-        
-        verify_ed25519_signature(
-            &ctx.accounts.instructions_sysvar,
-            &issuer.authority,
-            &signing_bytes,
-            &params.signature,
-        )?;
-    
+
+    let signing_bytes = create_signing_bytes(
+        &profile.key(),
+        &issuer.key(),
+        &params.payload_hash,
+        params.weight,
+        clock.unix_timestamp,
+        params
+            .expires_at
+            .unwrap_or(clock.unix_timestamp + issuer.default_validity),
+        params.nonce,
+    );
+
+    verify_ed25519_signature(
+        &ctx.accounts.instructions_sysvar,
+        &issuer.authority,
+        &signing_bytes,
+        &params.signature,
+    )?;
+
     // =======================================================================
     // CREATE ATTESTATION
     // =======================================================================
@@ -90,9 +85,9 @@ pub fn handler(ctx: Context<IssueAttestation>, params: IssueAttestationParams) -
     attestation.weight = params.weight;
     attestation.status = AttestationStatus::Active;
     attestation.issued_at = clock.unix_timestamp;
-    attestation.expires_at = params.expires_at.unwrap_or(
-        clock.unix_timestamp + issuer.default_validity
-    );
+    attestation.expires_at = params
+        .expires_at
+        .unwrap_or(clock.unix_timestamp + issuer.default_validity);
     attestation.revoked_at = 0;
     attestation.signature = params.signature;
     attestation.nonce = params.nonce;
@@ -170,12 +165,12 @@ fn create_signing_bytes(
 }
 
 /// Verify Ed25519 signature via instruction introspection.
-/// 
+///
 /// INVARIANT: The Ed25519 verification instruction MUST be immediately
 /// before this instruction in the transaction. We verify:
 /// 1. Previous instruction is Ed25519 program
 /// 2. Signature verification passed (Ed25519 program would have failed otherwise)
-/// 
+///
 /// The Ed25519 program itself verifies:
 /// - Signature is valid for the public key and message
 /// - No tampering with any inputs
@@ -192,8 +187,8 @@ fn verify_ed25519_signature(
     // Canonical Ed25519 program ID: Ed25519SigVerify111111111111111111111111111
     // Base58-decoded to prevent copy-paste drift (verified against solana-program SDK).
     const ED25519_SIG_VERIFY_ID: Pubkey = Pubkey::new_from_array([
-        3, 125, 70, 214, 124, 147, 251, 190, 18, 249, 66, 143, 131, 141, 64, 255,
-        5, 112, 116, 73, 39, 244, 138, 100, 252, 202, 112, 68, 128, 0, 0, 0,
+        3, 125, 70, 214, 124, 147, 251, 190, 18, 249, 66, 143, 131, 141, 64, 255, 5, 112, 116, 73,
+        39, 244, 138, 100, 252, 202, 112, 68, 128, 0, 0, 0,
     ]);
 
     // Scan ALL instructions for Ed25519 verify. More robust than assuming current_index - 1,
@@ -201,17 +196,12 @@ fn verify_ed25519_signature(
     // Pattern used by Wormhole, Switchboard, and other production Solana programs.
     let mut ed25519_ix = None;
     let mut idx: usize = 0;
-    loop {
-        match load_instruction_at_checked(idx, instructions_sysvar) {
-            Ok(ix) => {
-                if ix.program_id == ED25519_SIG_VERIFY_ID {
-                    ed25519_ix = Some(ix);
-                    break;
-                }
-                idx += 1;
-            }
-            Err(_) => break,
+    while let Ok(ix) = load_instruction_at_checked(idx, instructions_sysvar) {
+        if ix.program_id == ED25519_SIG_VERIFY_ID {
+            ed25519_ix = Some(ix);
+            break;
         }
+        idx += 1;
     }
     let ed25519_ix = ed25519_ix.ok_or(AttestationError::Ed25519InstructionNotFound)?;
 
@@ -258,7 +248,7 @@ fn verify_ed25519_signature(
     // === END C-05 FIX ===
 
     msg!("Ed25519 signature verified for issuer: {}", expected_signer);
-    
+
     Ok(())
 }
 

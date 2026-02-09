@@ -65,10 +65,10 @@ pub const FLAG_HAS_POP: u64 = 1 << 3;
 // =============================================================================
 
 /// Verify a human profile meets requirements.
-/// 
+///
 /// This is the CPI validation interface for human_registry.
 /// Other programs call this via CPI and read the ValidationResult from return data.
-/// 
+///
 /// The instruction:
 /// 1. Validates the profile against provided requirements
 /// 2. Returns ValidationResult via set_return_data
@@ -83,12 +83,12 @@ pub fn handler(ctx: Context<VerifyHuman>, params: VerifyHumanParams) -> Result<(
     let mut has_pop = false;
     let mut has_kyc = false;
     let mut active_count: u32 = 0;
-    
+
     for att_ref in &profile.attestations {
         if att_ref.expires_at == 0 || clock.unix_timestamp < att_ref.expires_at {
             effective_score = effective_score.saturating_add(att_ref.weight);
             active_count += 1;
-            
+
             match att_ref.attestation_type {
                 crate::state_v2::IssuerType::ProofOfPersonhood => has_pop = true,
                 crate::state_v2::IssuerType::KycProvider => has_kyc = true,
@@ -102,10 +102,18 @@ pub fn handler(ctx: Context<VerifyHuman>, params: VerifyHumanParams) -> Result<(
 
     // Build context flags
     let mut flags: u64 = 0;
-    if effective_unique { flags |= FLAG_IS_UNIQUE; }
-    if can_register_agents { flags |= FLAG_CAN_REGISTER_AGENTS; }
-    if has_kyc { flags |= FLAG_HAS_KYC; }
-    if has_pop { flags |= FLAG_HAS_POP; }
+    if effective_unique {
+        flags |= FLAG_IS_UNIQUE;
+    }
+    if can_register_agents {
+        flags |= FLAG_CAN_REGISTER_AGENTS;
+    }
+    if has_kyc {
+        flags |= FLAG_HAS_KYC;
+    }
+    if has_pop {
+        flags |= FLAG_HAS_POP;
+    }
 
     // Validate against requirements and build result
     let result = if let Some(min_score) = params.min_score {

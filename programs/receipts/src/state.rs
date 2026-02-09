@@ -57,7 +57,7 @@ impl ActionReceipt {
         1 +  // has_offchain_ref
         8 +  // sequence
         8 +  // nonce
-        1;   // bump
+        1; // bump
 }
 
 /// Receipt index - for efficient lookups by agent or principal
@@ -87,7 +87,7 @@ impl ReceiptIndex {
         32 + // latest_receipt
         8 +  // latest_timestamp
         8 +  // total_value
-        1;   // bump
+        1; // bump
 }
 
 /// Batch receipt summary - for high-throughput operations
@@ -120,5 +120,5 @@ impl BatchReceiptSummary {
         32 + // last_receipt
         8 +  // created_at
         8 +  // total_value
-        1;   // bump
+        1; // bump
 }

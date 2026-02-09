@@ -3,12 +3,12 @@ use human_registry::{program::HumanRegistry, state_v2::HumanProfile};
 
 use crate::{
     error::AgentRegistryError,
-    state::{AgentProfile, AgentStatus, AgentOperatorStats},
+    state::{AgentOperatorStats, AgentProfile, AgentStatus},
     RegisterAgentParams,
 };
 
 /// Minimum human score required to register an agent
-pub const MIN_HUMAN_SCORE_FOR_AGENT: u16 = 0;
+pub const MIN_HUMAN_SCORE_FOR_AGENT: u16 = 50;
 
 pub fn handler(ctx: Context<RegisterAgent>, params: RegisterAgentParams) -> Result<()> {
     let clock = Clock::get()?;

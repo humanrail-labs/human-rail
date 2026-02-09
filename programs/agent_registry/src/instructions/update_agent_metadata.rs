@@ -27,10 +27,7 @@ pub fn handler(ctx: Context<UpdateAgentMetadata>, new_metadata_hash: [u8; 32]) -
         timestamp: clock.unix_timestamp,
     });
 
-    msg!(
-        "Agent metadata updated: agent={}",
-        agent.key()
-    );
+    msg!("Agent metadata updated: agent={}", agent.key());
 
     Ok(())
 }

@@ -9,10 +9,7 @@ pub fn handler(ctx: Context<Unfreeze>) -> Result<()> {
     let clock = Clock::get()?;
     let freeze_record = &mut ctx.accounts.freeze_record;
 
-    require!(
-        freeze_record.is_active,
-        DelegationError::AgentNotFrozen
-    );
+    require!(freeze_record.is_active, DelegationError::AgentNotFrozen);
 
     freeze_record.is_active = false;
     freeze_record.unfrozen_at = clock.unix_timestamp;

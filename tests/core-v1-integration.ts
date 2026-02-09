@@ -623,7 +623,7 @@ describe('Core v1 Integration Tests', () => {
           .rpc();
         expect.fail('Should have thrown — score too low');
       } catch (e: any) {
-        expect(e.toString()).to.include('AgentRegistrationNotAllowed');
+        expect(e.toString()).to.include('InsufficientHumanScore');
         console.log('  ✅ Correctly rejected: insufficient score');
       }
     });

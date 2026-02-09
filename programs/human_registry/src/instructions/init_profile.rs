@@ -1,5 +1,5 @@
-use anchor_lang::prelude::*;
 use crate::state_v2::HumanProfile;
+use anchor_lang::prelude::*;
 
 /// Initialize a new HumanProfile PDA for the calling authority.
 pub fn handle(ctx: Context<InitProfile>) -> Result<()> {

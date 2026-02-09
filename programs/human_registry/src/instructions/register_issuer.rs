@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
 
-use crate::state_v2::{Issuer, IssuerRegistry, IssuerStatus, IssuerType, DEFAULT_ATTESTATION_VALIDITY};
+use crate::state_v2::{
+    Issuer, IssuerRegistry, IssuerStatus, IssuerType, DEFAULT_ATTESTATION_VALIDITY,
+};
 
 /// Register a new trusted attestation issuer.
 /// Only the registry admin can add issuers.
@@ -11,7 +13,7 @@ pub fn handler(ctx: Context<RegisterIssuer>, params: RegisterIssuerParams) -> Re
 
     // Validate weight limits
     require!(
-        params.max_weight >= registry.min_attestation_weight 
+        params.max_weight >= registry.min_attestation_weight
             && params.max_weight <= registry.max_attestation_weight,
         IssuerError::InvalidWeight
     );
@@ -22,7 +24,9 @@ pub fn handler(ctx: Context<RegisterIssuer>, params: RegisterIssuerParams) -> Re
     issuer.status = IssuerStatus::Active;
     issuer.max_weight = params.max_weight;
     issuer.contributes_to_uniqueness = params.contributes_to_uniqueness;
-    issuer.default_validity = params.default_validity.unwrap_or(DEFAULT_ATTESTATION_VALIDITY);
+    issuer.default_validity = params
+        .default_validity
+        .unwrap_or(DEFAULT_ATTESTATION_VALIDITY);
     issuer.attestations_issued = 0;
     issuer.attestations_revoked = 0;
     issuer.registered_at = clock.unix_timestamp;

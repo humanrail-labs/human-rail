@@ -11,14 +11,14 @@ pub fn handler(ctx: Context<EmitToReceipts>) -> Result<()> {
     let local_receipt = &ctx.accounts.local_receipt;
 
     // Build receipt data for the unified receipts program
-    let receipt_data = UnifiedReceiptData {
+    let _receipt_data = UnifiedReceiptData {
         principal: local_receipt.principal,
         agent: local_receipt.agent,
         capability: local_receipt.capability,
         action_type: ActionType::DocumentSign,
         action_hash: local_receipt.doc_hash,
         result_hash: [0u8; 32], // Could hash the signature record
-        value: 0, // Document signing doesn't have monetary value
+        value: 0,               // Document signing doesn't have monetary value
         destination: local_receipt.document,
         source_program: crate::ID,
     };

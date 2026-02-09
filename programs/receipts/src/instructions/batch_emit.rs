@@ -1,33 +1,27 @@
 use anchor_lang::prelude::*;
 
-use crate::{
-    error::ReceiptsError,
-    state::BatchReceiptSummary,
-    EmitReceiptParams,
-};
+use crate::{error::ReceiptsError, state::BatchReceiptSummary, EmitReceiptParams};
 
 /// Maximum receipts per batch
 pub const MAX_BATCH_SIZE: usize = 10;
 
 /// Batch emit multiple receipts.
 /// Creates a summary with merkle root for efficient verification.
-pub fn handler(ctx: Context<BatchEmit>, receipts: Vec<EmitReceiptParams>, _nonce: u64) -> Result<()> {
+pub fn handler(
+    ctx: Context<BatchEmit>,
+    receipts: Vec<EmitReceiptParams>,
+    _nonce: u64,
+) -> Result<()> {
     let clock = Clock::get()?;
 
     require!(
         receipts.len() <= MAX_BATCH_SIZE,
         ReceiptsError::BatchTooLarge
     );
-    require!(
-        !receipts.is_empty(),
-        ReceiptsError::InvalidReceiptData
-    );
+    require!(!receipts.is_empty(), ReceiptsError::InvalidReceiptData);
 
     // Compute merkle root of receipt hashes
-    let mut hashes: Vec<[u8; 32]> = receipts
-        .iter()
-        .map(|r| r.action_hash)
-        .collect();
+    let mut hashes: Vec<[u8; 32]> = receipts.iter().map(|r| r.action_hash).collect();
 
     let merkle_root = compute_merkle_root(&mut hashes);
 
@@ -81,7 +75,7 @@ fn compute_merkle_root(hashes: &mut Vec<[u8; 32]>) -> [u8; 32] {
         let mut combined = [0u8; 64];
         combined[..32].copy_from_slice(&chunk[0]);
         combined[32..].copy_from_slice(&chunk[1]);
-        
+
         // Simple hash (in production, use proper hash function)
         let mut result = [0u8; 32];
         for (i, byte) in combined.iter().enumerate() {

@@ -1,8 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state_v2::{
-    AttestationStatus, HumanProfile, Issuer, SignedAttestation,
-};
+use crate::state_v2::{AttestationStatus, HumanProfile, Issuer, SignedAttestation};
 
 /// Revoke an attestation. Can be called by:
 /// - The issuer authority (issuer-initiated revocation)
@@ -22,10 +20,7 @@ pub fn handler(ctx: Context<RevokeAttestation>) -> Result<()> {
     // Validate caller is either issuer or profile owner
     let is_issuer = ctx.accounts.authority.key() == issuer.authority;
     let is_profile_owner = ctx.accounts.authority.key() == profile.wallet;
-    require!(
-        is_issuer || is_profile_owner,
-        RevokeError::Unauthorized
-    );
+    require!(is_issuer || is_profile_owner, RevokeError::Unauthorized);
 
     // Revoke attestation
     attestation.status = AttestationStatus::Revoked;

@@ -1,14 +1,14 @@
-use anchor_lang::prelude::*;
 use crate::state::AttestationRef;
+use anchor_lang::prelude::*;
 
 /// Calculate total human score from attestations
 pub fn calculate_human_score(attestations: &[AttestationRef], _count: u8) -> u16 {
     let mut total: u32 = 0;
-    
+
     for att in attestations.iter() {
         total = total.saturating_add(att.weight as u32);
     }
-    
+
     // Cap at maximum score (10000 = 100%)
     std::cmp::min(total, 10000) as u16
 }
@@ -20,7 +20,7 @@ pub fn is_unique_human(score: u16, attestation_count: u8) -> bool {
 }
 
 /// Seeds for HumanProfile PDA
-pub fn get_profile_seeds<'a>(wallet: &'a Pubkey) -> [&'a [u8]; 2] {
+pub fn get_profile_seeds(wallet: &Pubkey) -> [&[u8]; 2] {
     [b"human_profile", wallet.as_ref()]
 }
 

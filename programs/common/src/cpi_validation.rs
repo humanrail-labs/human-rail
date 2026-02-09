@@ -91,14 +91,14 @@ pub mod error_codes {
     pub const UNKNOWN: u8 = 1;
     pub const INVALID_ACCOUNT: u8 = 2;
     pub const UNAUTHORIZED: u8 = 3;
-    
+
     // Human Registry (10-29)
     pub const HUMAN_PROFILE_NOT_FOUND: u8 = 10;
     pub const INSUFFICIENT_HUMAN_SCORE: u8 = 11;
     pub const NOT_UNIQUE_HUMAN: u8 = 12;
     pub const INSUFFICIENT_ATTESTATIONS: u8 = 13;
     pub const CANNOT_REGISTER_AGENTS: u8 = 14;
-    
+
     // Agent Registry (30-49)
     pub const AGENT_NOT_FOUND: u8 = 30;
     pub const AGENT_NOT_ACTIVE: u8 = 31;
@@ -106,7 +106,7 @@ pub mod error_codes {
     pub const AGENT_REVOKED: u8 = 33;
     pub const AGENT_SIGNER_MISMATCH: u8 = 34;
     pub const AGENT_PRINCIPAL_MISMATCH: u8 = 35;
-    
+
     // Delegation (50-79)
     pub const CAPABILITY_NOT_FOUND: u8 = 50;
     pub const CAPABILITY_INACTIVE: u8 = 51;
@@ -121,7 +121,7 @@ pub mod error_codes {
     pub const DESTINATION_NOT_ALLOWED: u8 = 60;
     pub const AGENT_FROZEN: u8 = 61;
     pub const CAPABILITY_DISPUTED: u8 = 62;
-    
+
     // Document Registry (80-99)
     pub const DOCUMENT_NOT_FOUND: u8 = 80;
     pub const DOCUMENT_VOIDED: u8 = 81;
@@ -140,16 +140,16 @@ pub mod context_flags {
     pub const CAN_REGISTER_AGENTS: u64 = 1 << 1;
     pub const HAS_KYC_ATTESTATION: u64 = 1 << 2;
     pub const HAS_POP_ATTESTATION: u64 = 1 << 3;
-    
+
     // Agent Registry context
     pub const AGENT_HAS_TEE: u64 = 1 << 8;
     pub const AGENT_KEY_ROTATING: u64 = 1 << 9;
-    
+
     // Delegation context
     pub const ALLOWLIST_ENFORCED: u64 = 1 << 16;
     pub const IN_COOLDOWN: u64 = 1 << 17;
-    pub const NEAR_DAILY_LIMIT: u64 = 1 << 18;  // >80% used
-    pub const NEAR_TOTAL_LIMIT: u64 = 1 << 19;  // >80% used
+    pub const NEAR_DAILY_LIMIT: u64 = 1 << 18; // >80% used
+    pub const NEAR_TOTAL_LIMIT: u64 = 1 << 19; // >80% used
 }
 
 // =============================================================================
@@ -159,12 +159,13 @@ pub mod context_flags {
 pub mod discriminators {
     // Human Registry
     pub const VERIFY_HUMAN: [u8; 8] = [0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x68, 0x75]; // "verifyhu"
-    
+
     // Agent Registry
     pub const VERIFY_AGENT: [u8; 8] = [0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x61, 0x67]; // "verifyag"
-    
+
     // Delegation
-    pub const VALIDATE_CAPABILITY: [u8; 8] = [0x76, 0x61, 0x6c, 0x69, 0x64, 0x63, 0x61, 0x70]; // "validcap"
+    pub const VALIDATE_CAPABILITY: [u8; 8] = [0x76, 0x61, 0x6c, 0x69, 0x64, 0x63, 0x61, 0x70];
+    // "validcap"
 }
 
 // =============================================================================

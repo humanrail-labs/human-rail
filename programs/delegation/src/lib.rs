@@ -59,27 +59,18 @@ pub mod delegation {
 
     /// Record capability usage after successful action.
     /// Updates spend tracking and cooldowns.
-    pub fn record_usage(
-        ctx: Context<RecordUsage>,
-        amount_used: u64,
-    ) -> Result<()> {
+    pub fn record_usage(ctx: Context<RecordUsage>, amount_used: u64) -> Result<()> {
         instructions::record_usage::handler(ctx, amount_used)
     }
 
     /// Record capability usage via CPI from authorized programs.
     /// Validates agent_signer matches agent_profile.signing_key.
-    pub fn record_usage_cpi(
-        ctx: Context<RecordUsageCpi>,
-        amount_used: u64,
-    ) -> Result<()> {
+    pub fn record_usage_cpi(ctx: Context<RecordUsageCpi>, amount_used: u64) -> Result<()> {
         instructions::record_usage_cpi::handler(ctx, amount_used)
     }
 
     /// Flag a capability for dispute review.
-    pub fn flag_dispute(
-        ctx: Context<FlagDispute>,
-        reason: [u8; 32],
-    ) -> Result<()> {
+    pub fn flag_dispute(ctx: Context<FlagDispute>, reason: [u8; 32]) -> Result<()> {
         instructions::flag_dispute::handler(ctx, reason)
     }
 

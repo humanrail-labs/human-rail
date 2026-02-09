@@ -133,7 +133,9 @@ pub enum IssuerStatus {
 }
 
 /// Signature tier levels
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Debug)]
+#[derive(
+    AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Debug,
+)]
 pub enum SignatureTier {
     #[default]
     WalletNotarization,
@@ -243,7 +245,7 @@ pub fn get_day_number(timestamp: i64) -> u32 {
 /// Compute SHA-256 hash for action data.
 /// Used for receipt integrity, usage record dedup, and action indexing.
 pub fn compute_action_hash(data: &[u8]) -> [u8; 32] {
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
     hasher.update(data);
     hasher.finalize().into()

@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 
 // H-03 FIX: Import shared types from common crate to avoid drift
-pub use humanrail_common::CapabilityStatus;
-pub use humanrail_common::program_scope;
 pub use humanrail_common::asset_scope;
 pub use humanrail_common::constants::MAX_DESTINATION_ALLOWLIST;
+pub use humanrail_common::program_scope;
+pub use humanrail_common::CapabilityStatus;
 
 /// Capability credential - the core KYA primitive
 #[account]
@@ -90,7 +90,7 @@ impl Capability {
         (32 * MAX_DESTINATION_ALLOWLIST) + // destination_allowlist
         32 + // dispute_reason
         8 +  // nonce
-        1;   // bump
+        1; // bump
 
     /// Check if capability is currently valid for use
     pub fn is_valid(&self, current_time: i64) -> bool {
@@ -163,7 +163,7 @@ impl RevocationEntry {
         32 + // revoked_by
         8 +  // revoked_at
         32 + // reason_hash
-        1;   // bump
+        1; // bump
 }
 
 /// Emergency freeze record - for tracking frozen agents
@@ -193,7 +193,7 @@ impl EmergencyFreezeRecord {
         1 +  // is_active
         8 +  // unfrozen_at
         32 + // reason_hash
-        1;   // bump
+        1; // bump
 }
 
 /// Usage record - for tracking capability usage
@@ -229,5 +229,5 @@ impl UsageRecord {
         8 +  // used_at
         32 + // tx_signature
         8 +  // sequence
-        1;   // bump
+        1; // bump
 }

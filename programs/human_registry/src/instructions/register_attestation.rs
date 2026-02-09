@@ -1,12 +1,9 @@
 use anchor_lang::prelude::*;
 
-use crate::{
-    error::HumanRegistryError,
-    state::{AttestationRef, HumanProfileLegacy, MAX_ATTESTATIONS},
-};
+use crate::{error::HumanRegistryError, state::HumanProfileLegacy};
 
 /// Register a new attestation and update the profile's human score.
-/// 
+///
 /// SECURITY: This legacy path is DISABLED. It allowed arbitrary attestations
 /// without issuer verification, enabling score inflation attacks.
 /// Use `issue_attestation` with a registered issuer instead.
@@ -19,7 +16,7 @@ pub fn handle(
 ) -> Result<()> {
     // H-12 FIX: Disable legacy attestation path - no issuer verification
     // All attestations must go through issue_attestation with verified issuers
-    return Err(HumanRegistryError::LegacyPathDisabled.into());
+    Err(HumanRegistryError::LegacyPathDisabled.into())
 }
 
 #[derive(Accounts)]

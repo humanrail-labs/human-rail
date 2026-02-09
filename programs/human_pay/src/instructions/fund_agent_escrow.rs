@@ -1,7 +1,7 @@
-use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Token, TokenAccount, Mint, Transfer};
-use crate::state::AgentEscrow;
 use crate::error::HumanPayError;
+use crate::state::AgentEscrow;
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
 pub fn handler(ctx: Context<FundAgentEscrow>, amount: u64) -> Result<()> {
     let clock = Clock::get()?;
@@ -43,7 +43,12 @@ pub fn handler(ctx: Context<FundAgentEscrow>, amount: u64) -> Result<()> {
         timestamp: clock.unix_timestamp,
     });
 
-    msg!("Escrow funded: principal={}, agent={}, amount={}", escrow.principal, escrow.agent, amount);
+    msg!(
+        "Escrow funded: principal={}, agent={}, amount={}",
+        escrow.principal,
+        escrow.agent,
+        amount
+    );
     Ok(())
 }
 

@@ -1,5 +1,5 @@
-use anchor_lang::prelude::*;
 use agent_registry::state::AgentProfile;
+use anchor_lang::prelude::*;
 
 use crate::{
     error::ReceiptsError,
@@ -31,7 +31,10 @@ pub fn handler(ctx: Context<EmitReceipt>, params: EmitReceiptParams) -> Result<(
     if params.capability_id != Pubkey::default() {
         // Require capability account passed as remaining_account
         let remaining = &ctx.remaining_accounts;
-        require!(!remaining.is_empty(), ReceiptsError::MissingCapabilityAccount);
+        require!(
+            !remaining.is_empty(),
+            ReceiptsError::MissingCapabilityAccount
+        );
         let cap_info = &remaining[0];
         // Verify key matches claimed capability_id
         require!(
@@ -39,10 +42,7 @@ pub fn handler(ctx: Context<EmitReceipt>, params: EmitReceiptParams) -> Result<(
             ReceiptsError::CapabilityMismatch
         );
         // Verify account exists (non-zero data = initialized)
-        require!(
-            !cap_info.data_is_empty(),
-            ReceiptsError::CapabilityNotFound
-        );
+        require!(!cap_info.data_is_empty(), ReceiptsError::CapabilityNotFound);
         // Verify owned by delegation program (prevents fake accounts)
         require!(
             cap_info.owner == &delegation::ID,
@@ -70,10 +70,16 @@ pub fn handler(ctx: Context<EmitReceipt>, params: EmitReceiptParams) -> Result<(
     let agent_index = &mut ctx.accounts.agent_index;
     agent_index.entity = params.agent_id;
     agent_index.entity_type = 0; // Agent
-    agent_index.receipt_count = agent_index.receipt_count.checked_add(1).ok_or(ReceiptsError::InvalidReceiptData)?;
+    agent_index.receipt_count = agent_index
+        .receipt_count
+        .checked_add(1)
+        .ok_or(ReceiptsError::InvalidReceiptData)?;
     agent_index.latest_receipt = receipt.key();
     agent_index.latest_timestamp = clock.unix_timestamp;
-    agent_index.total_value = agent_index.total_value.checked_add(params.value).ok_or(ReceiptsError::InvalidReceiptData)?;
+    agent_index.total_value = agent_index
+        .total_value
+        .checked_add(params.value)
+        .ok_or(ReceiptsError::InvalidReceiptData)?;
     receipt.sequence = agent_index.receipt_count;
 
     if ctx.bumps.agent_index != 0 {

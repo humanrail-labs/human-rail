@@ -1,8 +1,5 @@
+use crate::{error::HumanRegistryError, state_v2::HumanProfile};
 use anchor_lang::prelude::*;
-use crate::{
-    error::HumanRegistryError,
-    state_v2::HumanProfile,
-};
 
 #[derive(Accounts)]
 pub struct RecomputeScore<'info> {

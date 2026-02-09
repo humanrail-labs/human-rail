@@ -1,5 +1,5 @@
-use anchor_lang::prelude::*;
 use crate::{HashAlgorithm, SignatureTier};
+use anchor_lang::prelude::*;
 
 // =============================================================================
 // CONSTANTS
@@ -147,7 +147,7 @@ impl Document {
         4 +  // version_number
         4 +  // signature_count
         1 +  // required_signer_count
-        1;   // bump
+        1; // bump
 
     /// Check if document can be signed
     pub fn can_be_signed(&self) -> bool {
@@ -244,7 +244,7 @@ impl SignatureRecord {
         MAX_SIG_METADATA_LEN + // metadata
         1 +  // has_metadata
         2 +  // human_score_at_signing
-        1;   // bump
+        1; // bump
 
     /// Check if signature is valid (active and not revoked)
     pub fn is_valid(&self) -> bool {
@@ -289,7 +289,7 @@ impl RequiredSigner {
         1 +  // is_satisfied
         32 + // satisfying_signature
         1 +  // sequence
-        1;   // bump
+        1; // bump
 }
 
 // =============================================================================
@@ -380,5 +380,5 @@ impl DocumentSigningReceipt {
         1 +  // tier
         8 +  // slot
         8 +  // timestamp
-        1;   // bump
+        1; // bump
 }
