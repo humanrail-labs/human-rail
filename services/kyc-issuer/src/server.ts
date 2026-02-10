@@ -1,7 +1,8 @@
 import express from 'express';
+import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { getConfig, loadIssuerKeypair } from './config';
+import { getConfig, getDbPath, loadIssuerKeypair } from './config';
 import { Store } from './store';
 import {
   createVeriffSession,
@@ -12,6 +13,25 @@ import { issueAttestationOnChain } from './issuer';
 
 const app = express();
 
+// ── CORS — only allow configured frontend origin ──
+const config = getConfig();
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (server-to-server, curl, health checks)
+    if (!origin) return callback(null, true);
+    const allowed = config.FRONTEND_ORIGIN.split(',').map(s => s.trim());
+    if (allowed.includes(origin)) return callback(null, true);
+    if (config.NODE_ENV === 'development' && (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1'))) {
+      return callback(null, true);
+    }
+    console.warn(`CORS rejected origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+}));
+
 // Parse raw body for HMAC verification on webhook route
 app.use('/kyc/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
@@ -21,7 +41,7 @@ const statusLimiter = rateLimit({ windowMs: 60 * 1000, max: 60 });
 
 const WEBHOOK_FRESHNESS_SECONDS = 15 * 60; // ±15 min
 
-const store = new Store();
+const store = new Store(getDbPath());
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -41,7 +61,6 @@ app.post('/kyc/session', sessionLimiter, async (req, res) => {
       return;
     }
 
-    const config = getConfig();
     const veriffResp = await createVeriffSession(
       config.VERIFF_API_KEY,
       config.VERIFF_BASE_URL,
@@ -61,7 +80,6 @@ app.post('/kyc/session', sessionLimiter, async (req, res) => {
 // POST /kyc/webhook
 app.post('/kyc/webhook', async (req, res) => {
   try {
-    const config = getConfig();
     const rawBody = req.body as Buffer;
     const hmacHeader = req.headers['x-hmac-signature'] as string;
 
@@ -168,7 +186,9 @@ app.get('/kyc/status', statusLimiter, (req, res) => {
 
 const port = parseInt(process.env.PORT ?? '3100', 10);
 app.listen(port, () => {
-  console.log(`🚀 KYC Issuer running on :${port}`);
+  console.log(`🚀 KYC Issuer running on :${port} (${config.NODE_ENV})`);
+  console.log(`   CORS origin: ${config.FRONTEND_ORIGIN}`);
+  console.log(`   Cluster: ${config.SOLANA_CLUSTER}`);
 });
 
 export default app;

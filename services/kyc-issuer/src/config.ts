@@ -10,6 +10,8 @@ const envSchema = z.object({
   VERIFF_API_KEY: z.string().min(1),
   VERIFF_API_SECRET: z.string().min(1),
   VERIFF_BASE_URL: z.string().url().default('https://stationapi.veriff.com/v1'),
+  FRONTEND_ORIGIN: z.string().url().default('http://localhost:3000'),
+  DB_PATH: z.string().default(''),
   PORT: z.coerce.number().int().positive().default(3100),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });
@@ -22,6 +24,14 @@ export function getConfig(): Config {
   if (_config) return _config;
   _config = envSchema.parse(process.env);
   return _config;
+}
+
+/** Resolve SQLite database path: DB_PATH env > /app/data/kyc.db (prod) > ../data/kyc.db (dev) */
+export function getDbPath(): string {
+  const config = getConfig();
+  if (config.DB_PATH) return config.DB_PATH;
+  if (config.NODE_ENV === 'production') return '/app/data/kyc.db';
+  return path.resolve(__dirname, '../data/kyc.db');
 }
 
 export function loadIssuerKeypair(cfg?: Config): Keypair {

@@ -1,0 +1,12 @@
+node_modules
+dist
+data
+.keys
+*.db
+test
+scripts
+vitest.config.ts
+fly.toml
+deploy.sh
+.env*
+!.env.example
