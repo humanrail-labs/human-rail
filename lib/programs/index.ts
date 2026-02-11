@@ -17,20 +17,20 @@ const PROGRAM_IDS: Record<Cluster, Record<string, string>> = {
   devnet: {
     humanRegistry: "GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo",
     agentRegistry: "GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ",
-    delegation: "HRmukQDzeju62kb1frapSX37GvH1qwwrjC2XdezWfS5Z",
-    humanPay: "CFxYX4vxNef9VwtkNHNd4m3mH3LpwoS3gSvEBGB4jeUV",
+    delegation: "DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT",
+    humanPay: "HpMrfeC5gJZdywnUQS4WEvsUs6edyjrEmLuYEF1W3qF9",
     dataBlink: "GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX",
     documentRegistry: "8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28",
-    receipts: "7Q8tdMyTKvtomuSYiHPCB2inV29wr6P2SB7Cmo4kof6z",
+    receipts: "EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM",
   },
   localnet: {
     humanRegistry: "GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo",
     agentRegistry: "GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ",
-    delegation: "HRmukQDzeju62kb1frapSX37GvH1qwwrjC2XdezWfS5Z",
-    humanPay: "CFxYX4vxNef9VwtkNHNd4m3mH3LpwoS3gSvEBGB4jeUV",
+    delegation: "DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT",
+    humanPay: "HpMrfeC5gJZdywnUQS4WEvsUs6edyjrEmLuYEF1W3qF9",
     dataBlink: "GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX",
     documentRegistry: "8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28",
-    receipts: "7Q8tdMyTKvtomuSYiHPCB2inV29wr6P2SB7Cmo4kof6z",
+    receipts: "EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM",
   },
   "mainnet-beta": {
     humanRegistry: "GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo",
@@ -494,5 +494,90 @@ export function parseCapability(data: Buffer): Capability | null {
   } catch (e) {
     console.error("Failed to parse capability:", e);
     return null;
+  }
+}
+
+// ============================================================================
+// SIGNED ATTESTATION PARSING
+// ============================================================================
+export interface SignedAttestation {
+  profile: PublicKey;
+  issuer: PublicKey;
+  issuerAuthority: PublicKey;
+  attestationType: number;
+  weight: number;
+  issuedAt: number;
+  expiresAt: number;
+  isActive: boolean;
+  decisionHash: Uint8Array;
+  nonce: bigint;
+  bump: number;
+}
+
+export function parseSignedAttestation(data: Buffer): SignedAttestation | null {
+  try {
+    if (data.length < 165) return null;
+
+    let offset = 8; // Skip discriminator
+
+    const profile = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const issuer = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const issuerAuthority = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const attestationType = data[offset];
+    offset += 1;
+
+    const weight = data.readUInt16LE(offset);
+    offset += 2;
+
+    const issuedAt = Number(data.readBigInt64LE(offset));
+    offset += 8;
+
+    const expiresAt = Number(data.readBigInt64LE(offset));
+    offset += 8;
+
+    const isActive = data[offset] === 1;
+    offset += 1;
+
+    const decisionHash = new Uint8Array(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const nonce = data.readBigUInt64LE(offset);
+    offset += 8;
+
+    const bump = data[offset];
+
+    return {
+      profile,
+      issuer,
+      issuerAuthority,
+      attestationType,
+      weight,
+      issuedAt,
+      expiresAt,
+      isActive,
+      decisionHash,
+      nonce,
+      bump,
+    };
+  } catch (e) {
+    console.error("Failed to parse signed attestation:", e);
+    return null;
+  }
+}
+
+export function attestationTypeName(t: number): string {
+  switch (t) {
+    case 0: return "KYC";
+    case 1: return "Biometric";
+    case 2: return "Social";
+    case 3: return "Government ID";
+    case 4: return "Custom";
+    default: return `Type ${t}`;
   }
 }
