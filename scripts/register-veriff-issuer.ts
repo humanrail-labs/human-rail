@@ -2,9 +2,6 @@
  * One-time admin script: register the Veriff KYC issuer on-chain.
  *
  * Usage:
- *   ANCHOR_WALLET=~/.config/solana/id.json npx tsx scripts/register-veriff-issuer.ts <ISSUER_KEYPAIR_PATH>
- *
- * Example:
  *   ANCHOR_WALLET=~/.config/solana/id.json npx tsx scripts/register-veriff-issuer.ts .keys/veriff-issuer.json
  */
 import {
@@ -54,7 +51,7 @@ async function main() {
   console.log('Issuer authority:', issuerKp.publicKey.toBase58());
   console.log('RPC:            ', RPC);
 
-  // Derive PDAs
+  // Derive PDAs — seeds use params.authority (the issuer's pubkey)
   const [registry] = PublicKey.findProgramAddressSync(
     [Buffer.from('issuer_registry')], HUMAN_REGISTRY
   );
@@ -70,7 +67,6 @@ async function main() {
   if (!registryInfo) {
     console.log('\n>>> Initializing IssuerRegistry...');
     const disc = anchorDisc('init_registry');
-    const data = Buffer.from(disc);
     const ix = {
       programId: HUMAN_REGISTRY,
       keys: [
@@ -78,7 +74,7 @@ async function main() {
         { pubkey: registry, isSigner: false, isWritable: true },
         { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
       ],
-      data,
+      data: Buffer.from(disc),
     };
     const tx = new Transaction().add(ix);
     const sig = await sendAndConfirmTransaction(connection, tx, [admin], { commitment: 'confirmed' });
@@ -94,33 +90,52 @@ async function main() {
     return;
   }
 
-  // Build RegisterIssuerParams
-  // name: [u8;32] "Veriff KYC"
+  // Build RegisterIssuerParams (Anchor borsh serialization)
+  // Struct fields in order:
+  //   authority: Pubkey (32)
+  //   name: [u8; 32]
+  //   issuer_type: enum u8 (0=KycProvider)
+  //   max_weight: u16
+  //   contributes_to_uniqueness: bool
+  //   default_validity: Option<i64> (1 tag + 8 value if Some)
+  //   metadata_uri: Option<[u8;64]> (1 tag + 64 value if Some)
+
+  const disc = anchorDisc('register_issuer');
+
   const nameBuf = new Uint8Array(32);
   new TextEncoder().encode('Veriff KYC').forEach((b, i) => { nameBuf[i] = b; });
 
-  // metadata_uri: [u8;64] empty
-  const metaUri = new Uint8Array(64);
-
-  // Anchor borsh: RegisterIssuerParams
-  // { name: [u8;32], issuer_type: enum(0=KycProvider), max_weight: u16,
-  //   contributes_to_uniqueness: bool, default_validity: i64, metadata_uri: [u8;64], has_metadata_uri: bool }
-  const disc = anchorDisc('register_issuer');
-  const paramsBuf = new ArrayBuffer(8 + 32 + 1 + 2 + 1 + 8 + 64 + 1);
-  const paramsView = new DataView(paramsBuf);
-  const paramsArr = new Uint8Array(paramsBuf);
-
+  // Total: 8(disc) + 32(authority) + 32(name) + 1(type) + 2(weight) + 1(bool) + 1+8(Option<i64> Some) + 1(Option None) = 86
+  const buf = Buffer.alloc(86);
   let off = 0;
-  paramsArr.set(disc, off); off += 8;
-  paramsArr.set(nameBuf, off); off += 32;
-  paramsArr[off] = 0; off += 1;  // IssuerType::KycProvider
-  paramsView.setUint16(off, 100, true); off += 2; // max_weight
-  paramsArr[off] = 0; off += 1;  // contributes_to_uniqueness: false
-  paramsView.setBigInt64(off, BigInt(90 * 86400), true); off += 8; // default_validity: 90 days
-  paramsArr.set(metaUri, off); off += 64;
-  paramsArr[off] = 0; off += 1;  // has_metadata_uri: false
 
-  console.log('\n>>> Registering issuer...');
+  // Discriminator
+  buf.set(disc, off); off += 8;
+
+  // authority: Pubkey
+  buf.set(issuerKp.publicKey.toBytes(), off); off += 32;
+
+  // name: [u8; 32]
+  buf.set(nameBuf, off); off += 32;
+
+  // issuer_type: KycProvider = 0
+  buf.writeUInt8(0, off); off += 1;
+
+  // max_weight: u16
+  buf.writeUInt16LE(100, off); off += 2;
+
+  // contributes_to_uniqueness: false
+  buf.writeUInt8(0, off); off += 1;
+
+  // default_validity: Some(90 days in seconds)
+  buf.writeUInt8(1, off); off += 1; // Option tag: Some
+  buf.writeBigInt64LE(BigInt(90 * 86400), off); off += 8;
+
+  // metadata_uri: None
+  buf.writeUInt8(0, off); off += 1;
+
+  console.log(`\n>>> Registering issuer (${off} bytes)...`);
+
   const ix = {
     programId: HUMAN_REGISTRY,
     keys: [
@@ -129,7 +144,7 @@ async function main() {
       { pubkey: issuerPda, isSigner: false, isWritable: true },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
-    data: Buffer.from(paramsBuf),
+    data: buf,
   };
 
   const tx = new Transaction().add(ix);
