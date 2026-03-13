@@ -22,9 +22,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   User, Fingerprint, Shield, CheckCircle2, XCircle, RefreshCw, Plus,
   ExternalLink, Clock, Award, Bot, Copy, Wallet, ShieldCheck, Loader2,
-  AlertTriangle, ArrowRight,
+  AlertTriangle, ArrowRight, TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import { TrustTierBadge, TrustTierProgress } from "@/components/ui/trust-tier-badge";
+import { IssuersSection } from "@/components/issuer/issuers-section";
 
 const fadeUp = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.06 } } };
@@ -507,6 +509,111 @@ export default function IdentityPage() {
           onAttested={handleRefreshAll}
         />
       </motion.div>
+
+      {/* Trust Tier Card */}
+      <motion.div variants={fadeUp}>
+        <Card className="border-white/[0.04] bg-white/[0.015]">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <TrendingUp className="h-4 w-4 text-violet-500" />
+                Trust Tier
+              </CardTitle>
+              {(() => {
+                const hasKyc = attestations.some(a => a.attestationType === 0 && a.isActive);
+                const activeAttestations = attestations.filter(a => a.isActive);
+                const uniqueIssuers = new Set(activeAttestations.map(a => a.issuer.toBase58())).size;
+                
+                let tier: 0 | 1 | 2 = 0;
+                if (hasKyc && uniqueIssuers >= 3) tier = 2;
+                else if (hasKyc || activeAttestations.length >= 2) tier = 1;
+                
+                return <TrustTierBadge tier={tier} />;
+              })()}
+            </div>
+            <CardDescription className="text-xs">
+              Your trust level is determined by attestations and verification status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const hasKyc = attestations.some(a => a.attestationType === 0 && a.isActive);
+              const activeAttestations = attestations.filter(a => a.isActive);
+              const uniqueIssuers = new Set(activeAttestations.map(a => a.issuer.toBase58())).size;
+              
+              let tier: 0 | 1 | 2 = 0;
+              if (hasKyc && uniqueIssuers >= 3) tier = 2;
+              else if (hasKyc || activeAttestations.length >= 2) tier = 1;
+              
+              return (
+                <TrustTierProgress
+                  currentTier={tier}
+                  progress={{
+                    hasProfile: true,
+                    hasKyc,
+                    attestationCount: activeAttestations.length,
+                    uniqueIssuers,
+                  }}
+                />
+              );
+            })()}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Trust Tier Card */}
+      <motion.div variants={fadeUp}>
+        <Card className="border-white/[0.04] bg-white/[0.015]">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <TrendingUp className="h-4 w-4 text-violet-500" />
+                Trust Tier
+              </CardTitle>
+              {(() => {
+                const hasKyc = attestations.some(a => a.attestationType === 0 && a.isActive);
+                const activeAttestations = attestations.filter(a => a.isActive);
+                const uniqueIssuers = new Set(activeAttestations.map(a => a.issuer.toBase58())).size;
+                
+                let tier: 0 | 1 | 2 = 0;
+                if (hasKyc && uniqueIssuers >= 3) tier = 2;
+                else if (hasKyc || activeAttestations.length >= 2) tier = 1;
+                
+                return <TrustTierBadge tier={tier} />;
+              })()}
+            </div>
+            <CardDescription className="text-xs">
+              Your trust level is determined by attestations and verification status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const hasKyc = attestations.some(a => a.attestationType === 0 && a.isActive);
+              const activeAttestations = attestations.filter(a => a.isActive);
+              const uniqueIssuers = new Set(activeAttestations.map(a => a.issuer.toBase58())).size;
+              
+              let tier: 0 | 1 | 2 = 0;
+              if (hasKyc && uniqueIssuers >= 3) tier = 2;
+              else if (hasKyc || activeAttestations.length >= 2) tier = 1;
+              
+              return (
+                <TrustTierProgress
+                  currentTier={tier}
+                  progress={{
+                    hasProfile: true,
+                    hasKyc,
+                    attestationCount: activeAttestations.length,
+                    uniqueIssuers,
+                  }}
+                />
+              );
+            })()}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Trusted Issuers Section */}
+      <IssuersSection />
 
       {/* Agent Registration Card */}
       <motion.div variants={fadeUp}>
