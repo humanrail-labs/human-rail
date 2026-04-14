@@ -1,36 +1,207 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HumanRail Protocol
+
+> Identity Rails for AI Agents on Solana
+
+HumanRail is an open protocol for **verified human identity**, **delegated agent authority**, and **full on-chain auditability**. As AI agents become more autonomous, the question shifts from "what can they do?" to "who authorized them and can we verify it?" HumanRail provides the missing trust layer — a **Know Your Agent (KYA)** protocol where every agent traces back to a verified human, every action is bounded by explicit capabilities, and every transaction leaves an immutable receipt.
+
+---
+
+## Live Demo
+
+**Dashboard:** [Open App](/dashboard)  
+**Network:** Solana Devnet  
+**Status:** 7/7 Programs Deployed
+
+---
+
+## Protocol Architecture
+
+Four layers. Seven programs. One unified trust stack.
+
+| Layer | Programs | Description |
+|-------|----------|-------------|
+| **Identity Layer** | Human Registry · Agent Registry | Verified human profiles and AI agent lifecycle management |
+| **Authorization Layer** | Delegation · Capabilities · Freeze | Bounded authority with spending limits, scopes, and emergency controls |
+| **Rails Layer** | HumanPay · DataBlink · Document Registry | PDA-controlled payments, data actions, and on-chain document signing |
+| **Audit Layer** | Receipts · Compliance Trail | Immutable action logs for every protocol interaction |
+
+---
+
+## Devnet Program IDs
+
+| Program | Address |
+|---------|---------|
+| Human Registry | `GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo` |
+| Agent Registry | `GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ` |
+| Delegation | `DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT` |
+| HumanPay | `HpMrfeC5gJZdywnUQS4WEvsUs6edyjrEmLuYEF1W3qF9` |
+| DataBlink | `GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX` |
+| Document Registry | `8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28` |
+| Receipts | `EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM` |
+
+---
+
+## Tech Stack
+
+- **Framework:** [Next.js](https://nextjs.org/) 16 + [React](https://react.dev/) 19
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4, Radix UI, Framer Motion
+- **Blockchain:** Solana Web3.js, Anchor, Wallet Adapter
+- **3D Graphics:** Three.js (landing page)
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- npm or pnpm
+
+### Installation
+
+```bash
+npm install
+```
+
+### Environment Variables
+
+Copy `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+The example file already contains the correct devnet program IDs.
+
+### Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Dashboard Features
 
-## Learn More
+| Route | Feature |
+|-------|---------|
+| `/dashboard` | Protocol overview, wallet stats, deployed programs |
+| `/dashboard/identity` | Create and manage your on-chain human profile |
+| `/dashboard/agents` | Register, suspend, reactivate, and revoke AI agents |
+| `/dashboard/delegation` | Issue capabilities with limits, freeze/unfreeze agents |
+| `/dashboard/payments` | HumanPay escrow invoices and agent payments |
+| `/dashboard/documents` | On-chain document signing and attestation |
+| `/dashboard/receipts` | Full audit trail of all protocol actions |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Core Concepts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Human Registry
+- On-chain human profiles with attestation-based trust scoring
+- Third-party issuer attestations (KYC, Biometric, Social, Government ID)
+- `canRegisterAgents` flag controls who can spawn agents
 
-## Deploy on Vercel
+### Agent Registry (KYA)
+- Agents are PDAs owned by a verified human principal
+- Lifecycle states: `Active`, `Suspended`, `Revoked`
+- Features: key rotation, TEE measurement verification, metadata updates
+- Operator stats track transaction history and risk scoring
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Delegation
+- **Capabilities** are scoped authority tokens issued to agents
+- Limits: per-transaction, daily, total spending caps
+- Constraints: program scopes, asset allowlists, max slippage, max fee, expiry
+- **Emergency Freeze** allows principals to instantly halt an agent's capabilities
+- Risk tiers enforce behavioral guardrails
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### HumanPay
+- PDA-controlled escrow payments
+- Invoice creation with capability-checked authorization
+- Dispute resolution support
+
+### Document Registry
+- On-chain document hash verification
+- Multi-signer attestation support
+
+### Receipts & DataBlink
+- Every protocol interaction emits an immutable receipt
+- Compliance-ready audit trails from day one
+
+---
+
+## Project Structure
+
+```
+app/
+  ├── page.tsx                 # Landing page
+  ├── dashboard/               # Dashboard routes
+  ├── agent/                   # Agent public pages
+  ├── human/                   # Human public pages
+  ├── delegation/              # Delegation public pages
+  ├── rails/                   # Rails sub-pages
+  └── receipts/                # Receipt explorer
+
+components/
+  ├── dashboard/               # Dashboard UI components
+  ├── issuer/                  # Issuer-related components
+  ├── layout/                  # Layout components
+  ├── ui/                      # Base UI (Radix + Tailwind)
+  └── wallet/                  # Wallet connector
+
+lib/
+  ├── idl/                     # Anchor IDLs for all 7 programs
+  ├── programs/                # Program IDs, PDA helpers, parsers
+  ├── hooks/                   # React hooks for on-chain data
+  ├── solana/                  # Solana provider setup
+  └── config/                  # Protocol configuration
+```
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+
+---
+
+## Roadmap
+
+### V1 — Identity + Agent Authorization
+- [x] Canonical human profile and agent profile
+- [x] Capabilities v1 (scopes, limits, allowlists, expiry)
+- [x] Receipts v1 (standard action log)
+- [ ] TypeScript SDK + documentation
+- [ ] Issuer framework + revocation
+- [ ] Trust tiers UI (Tier 0 / 1 / 2 badges)
+
+### V2 — Ecosystem Modules
+- Payment rails with full escrow
+- Task marketplace
+- Runtime attestations (TEE / signed builds)
+
+---
+
+## Security & Compliance
+
+- All sensitive credentials (e.g., Veriff KYC secrets) live in the **backend KYC issuer service only**
+- Frontend uses `NEXT_PUBLIC_` vars for program IDs and RPC endpoints
+- Never commit `.env.local` to version control
+
+---
+
+## License
+
+Open source. Contributions welcome.
+
+---
+
+Built with ♥ by the HumanRail Labs team.
