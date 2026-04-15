@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HumanRail Protocol",
-  description: "Human-verified payments & tasks on Solana",
+  title: { default: "Agent Vault · HumanRail", template: "%s · Agent Vault · HumanRail" },
+  description: "Deploy, monitor, and control AI agents on Solana with on-chain guardrails.",
 };
 
 export default function RootLayout({

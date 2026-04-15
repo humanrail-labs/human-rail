@@ -7,16 +7,23 @@ import { WalletButton } from "@/components/wallet/wallet-button";
 import { useCluster } from "@/lib/solana/cluster-context";
 import { Badge } from "@/components/ui/badge";
 import {
-  LayoutDashboard, Fingerprint, Bot, Shield, Zap, FileText, Receipt,
+  Home, Fingerprint, Bot, Shield, Zap, Receipt,
 } from "lucide-react";
 
 const ROUTE_META: Record<string, { label: string; icon: FC<{ className?: string }> }> = {
-  "/dashboard": { label: "Overview", icon: LayoutDashboard },
+  "/vault": { label: "Home", icon: Home },
+  "/vault/identity": { label: "My Identity", icon: Fingerprint },
+  "/vault/agents": { label: "My Agents", icon: Bot },
+  "/vault/capabilities": { label: "Capabilities", icon: Shield },
+  "/vault/payments": { label: "Payments", icon: Zap },
+  "/vault/activity": { label: "Activity Log", icon: Receipt },
+  // Legacy dashboard routes (for redirects)
+  "/dashboard": { label: "Overview", icon: Home },
   "/dashboard/identity": { label: "Human Identity", icon: Fingerprint },
   "/dashboard/agents": { label: "Agent Registry", icon: Bot },
   "/dashboard/delegation": { label: "Delegation", icon: Shield },
   "/dashboard/payments": { label: "HumanPay", icon: Zap },
-  "/dashboard/documents": { label: "Documents", icon: FileText },
+  "/dashboard/documents": { label: "Documents", icon: Receipt },
   "/dashboard/receipts": { label: "Receipts", icon: Receipt },
 };
 
@@ -24,7 +31,7 @@ export const DashboardHeader: FC = () => {
   const pathname = usePathname();
   const { connected, publicKey } = useWallet();
   const { cluster } = useCluster();
-  const route = ROUTE_META[pathname] ?? ROUTE_META["/dashboard"];
+  const route = ROUTE_META[pathname] ?? ROUTE_META["/vault"];
   const RouteIcon = route.icon;
 
   return (

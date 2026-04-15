@@ -45,11 +45,11 @@ export function WalletButton() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-neutral-900 border-neutral-700">
         <DropdownMenuItem
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/vault")}
           className="cursor-pointer"
         >
           <LayoutDashboard className="mr-2 h-4 w-4" />
-          Dashboard
+          Agent Vault
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-neutral-700" />
         <DropdownMenuItem onClick={handleCopyAddress} className="cursor-pointer">

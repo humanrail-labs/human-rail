@@ -51,7 +51,7 @@ export const Navbar: FC = () => {
               height={32}
               className="h-8 w-8"
             />
-            <span className="text-lg font-semibold text-white">HumanRail</span>
+            <span className="text-lg font-semibold text-white">Agent Vault</span>
           </Link>
 
           <div className="hidden items-center gap-1 md:flex">
