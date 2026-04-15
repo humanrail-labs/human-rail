@@ -25,7 +25,7 @@ import {
 } from "recharts";
 import {
   Bot, ArrowLeft, Copy, CheckCircle2, ExternalLink, RefreshCw, PauseCircle, PlayCircle, Trash2, Snowflake, Flame,
-  Shield, Receipt, Activity, AlertTriangle, Clock, Wallet, Zap, FileText, StickyNote, ChevronDown, ChevronUp,
+  Shield, Receipt, Activity, AlertTriangle, Clock, Wallet, Zap, FileText, StickyNote, ChevronDown, ChevronUp, MessageSquare,
 } from "lucide-react";
 
 const fadeUp = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
@@ -407,38 +407,43 @@ export default function AgentDetailPage() {
                   </div>
                 </div>
 
-                {isPrincipal && (
-                  <div className="flex flex-wrap gap-2">
-                    {agent.status === "Active" && (
-                      <Button variant="outline" size="sm" className="gap-1.5 border-amber-500/20 text-amber-400 hover:bg-amber-500/10"
-                        onClick={handleSuspend} disabled={!!actionLoading}>
-                        {actionLoading === "suspend" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <PauseCircle className="h-3.5 w-3.5" />} Suspend
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" className="gap-1.5 bg-sky-600 hover:bg-sky-700 text-white" onClick={() => router.push(`/vault/agents/${agentIdParam}/chat`)}>
+                    <MessageSquare className="h-3.5 w-3.5" /> Chat
+                  </Button>
+                  {isPrincipal && (
+                    <>
+                      {agent.status === "Active" && (
+                        <Button variant="outline" size="sm" className="gap-1.5 border-amber-500/20 text-amber-400 hover:bg-amber-500/10"
+                          onClick={handleSuspend} disabled={!!actionLoading}>
+                          {actionLoading === "suspend" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <PauseCircle className="h-3.5 w-3.5" />} Suspend
+                        </Button>
+                      )}
+                      {agent.status === "Suspended" && (
+                        <Button variant="outline" size="sm" className="gap-1.5 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10"
+                          onClick={handleReactivate} disabled={!!actionLoading}>
+                          {actionLoading === "reactivate" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <PlayCircle className="h-3.5 w-3.5" />} Reactivate
+                        </Button>
+                      )}
+                      {agent.status !== "Revoked" && (
+                        <Button variant="outline" size="sm" className="gap-1.5 border-red-500/20 text-red-400 hover:bg-red-500/10"
+                          onClick={() => setRevokeDialogOpen(true)} disabled={!!actionLoading}>
+                          {actionLoading === "revoke" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />} Revoke
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        className={`gap-1.5 ${isFrozen ? "border-sky-500/20 text-sky-400 hover:bg-sky-500/10" : "bg-red-600 hover:bg-red-700 text-white"}`}
+                        variant={isFrozen ? "outline" : "default"}
+                        onClick={handleFreezeToggle}
+                        disabled={!!actionLoading || capabilities.length === 0}
+                      >
+                        {actionLoading === "freeze-toggle" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : isFrozen ? <Flame className="h-3.5 w-3.5" /> : <Snowflake className="h-3.5 w-3.5" />}
+                        {isFrozen ? "Unfreeze Agent" : "Emergency Freeze"}
                       </Button>
-                    )}
-                    {agent.status === "Suspended" && (
-                      <Button variant="outline" size="sm" className="gap-1.5 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10"
-                        onClick={handleReactivate} disabled={!!actionLoading}>
-                        {actionLoading === "reactivate" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <PlayCircle className="h-3.5 w-3.5" />} Reactivate
-                      </Button>
-                    )}
-                    {agent.status !== "Revoked" && (
-                      <Button variant="outline" size="sm" className="gap-1.5 border-red-500/20 text-red-400 hover:bg-red-500/10"
-                        onClick={() => setRevokeDialogOpen(true)} disabled={!!actionLoading}>
-                        {actionLoading === "revoke" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />} Revoke
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      className={`gap-1.5 ${isFrozen ? "border-sky-500/20 text-sky-400 hover:bg-sky-500/10" : "bg-red-600 hover:bg-red-700 text-white"}`}
-                      variant={isFrozen ? "outline" : "default"}
-                      onClick={handleFreezeToggle}
-                      disabled={!!actionLoading || capabilities.length === 0}
-                    >
-                      {actionLoading === "freeze-toggle" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : isFrozen ? <Flame className="h-3.5 w-3.5" /> : <Snowflake className="h-3.5 w-3.5" />}
-                      {isFrozen ? "Unfreeze Agent" : "Emergency Freeze"}
-                    </Button>
-                  </div>
-                )}
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>

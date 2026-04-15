@@ -23,6 +23,7 @@ import {
   Bot, ChevronLeft, ChevronRight, Copy, CheckCircle2, RefreshCw, Wallet, Shield, Zap, FileText,
   AlertTriangle, ArrowRight, Sparkles, ExternalLink, Loader2,
 } from "lucide-react";
+import { AGENT_TEMPLATES } from "./templates";
 
 const fade = { initial: { opacity: 0, x: 20 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -20 }, transition: { duration: 0.25 } };
 
@@ -54,6 +55,15 @@ function formatDateInput(d: Date) {
   return d.toISOString().split("T")[0];
 }
 
+function getTemplateIcon(name: string) {
+  switch (name) {
+    case "Wallet": return <Wallet className="h-6 w-6" />;
+    case "Zap": return <Zap className="h-6 w-6" />;
+    case "FileText": return <FileText className="h-6 w-6" />;
+    default: return <Bot className="h-6 w-6" />;
+  }
+}
+
 export default function NewAgentWizardPage() {
   const router = useRouter();
   const { connected, publicKey, sendTransaction } = useWallet();
@@ -72,12 +82,13 @@ export default function NewAgentWizardPage() {
     );
   }
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | "success">(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | "success">(1);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
-  // Step 1: Identity
+  // Step 2: Identity
   const [identity, setIdentity] = useState({
     name: "",
-    type: "trading",
+    type: "custom",
     description: "",
     walletMode: "generate" as "generate" | "existing",
     walletKey: "",
@@ -86,7 +97,7 @@ export default function NewAgentWizardPage() {
   });
   const [generatedKeypair, setGeneratedKeypair] = useState<Keypair | null>(null);
 
-  // Step 2: Capabilities
+  // Step 3: Capabilities
   const [capabilities, setCapabilities] = useState<Array<{
     name: string;
     scope: string;
@@ -100,14 +111,12 @@ export default function NewAgentWizardPage() {
     { name: "", scope: "full", perTxLimit: "0.1", dailyLimit: "1", totalLimit: "10", expiryDate: formatDateInput(new Date(Date.now() + 30 * 86400000)), noExpiry: false, allowedPrograms: "" },
   ]);
 
-  // Step 3: Funding
-  const totalCapabilityBudget = useMemo(() => {
-    return capabilities.reduce((sum, c) => sum + (Number(c.totalLimit) || 0), 0);
-  }, [capabilities]);
+  // Step 4: Funding
+  const totalCapabilityBudget = useMemo(() => capabilities.reduce((sum, c) => sum + (Number(c.totalLimit) || 0), 0), [capabilities]);
   const recommendedFunding = totalCapabilityBudget + 0.05;
   const [funding, setFunding] = useState({ fundNow: false, amount: recommendedFunding.toFixed(4) });
 
-  // Step 4: Deployment
+  // Step 5: Deployment
   const [deployState, setDeployState] = useState<{
     steps: Array<{ label: string; status: "pending" | "running" | "done" | "error"; tx?: string; error?: string }>;
     agentPda?: string;
@@ -124,7 +133,19 @@ export default function NewAgentWizardPage() {
   const agentNonceRef = useRef<bigint | null>(null);
   const agentPdaRef = useRef<string | null>(null);
 
-  // Validation helpers
+  const applyTemplate = (templateId: string) => {
+    const t = AGENT_TEMPLATES.find((x) => x.id === templateId);
+    if (!t) return;
+    setSelectedTemplateId(templateId);
+    setIdentity((prev) => ({
+      ...prev,
+      type: t.identity.type,
+      description: t.identity.description,
+    }));
+    setCapabilities(t.capabilities.map((c) => ({ ...c })));
+    setStep(2);
+  };
+
   const identityErrors = useMemo(() => {
     const errs: string[] = [];
     const nameRes = validateAgentName(identity.name);
@@ -172,7 +193,6 @@ export default function NewAgentWizardPage() {
     return identity.walletKey.trim();
   }, [identity.walletMode, identity.walletKey, generatedKeypair]);
 
-  // Actions
   const handleGenerateWallet = () => {
     const kp = Keypair.generate();
     setGeneratedKeypair(kp);
@@ -203,14 +223,12 @@ export default function NewAgentWizardPage() {
     }
   };
 
-  // Deployment logic
   const deploy = async (resumeFromStep = 0) => {
     if (!publicKey || !connection) {
       toast.error("Wallet not connected");
       return;
     }
 
-    // Reset statuses from resume point onward
     setDeployState((prev) => ({
       ...prev,
       steps: prev.steps.map((s, i) => ({
@@ -223,7 +241,6 @@ export default function NewAgentWizardPage() {
 
     const signingKey = new PublicKey(agentWalletKey);
 
-    // Step 0: Register Agent
     if (resumeFromStep <= 0) {
       try {
         const programId = getProgramId(cluster, "agentRegistry");
@@ -248,22 +265,8 @@ export default function NewAgentWizardPage() {
         const nameBuffer = Buffer.alloc(32);
         Buffer.from(identity.name.slice(0, 32), "utf-8").copy(nameBuffer);
 
-        // metadata hash: sha256 of type + description (or zeros if empty)
         const metadataHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${identity.type}:${identity.description}`)).then((buf) => new Uint8Array(buf));
 
-        const teeBuf = Buffer.alloc(33);
-        if (identity.tee && identity.tee.length === 64) {
-          teeBuf[0] = 1;
-          Buffer.from(identity.tee, "hex").copy(teeBuf, 1);
-        } else {
-          teeBuf[0] = 0;
-        }
-
-        const paramsData = Buffer.concat([nameBuffer, Buffer.from(metadataHash), signingKey.toBuffer(), teeBuf.slice(0, 33), nonceBuffer]);
-        // Wait, tee_measurement in IDL is Option<[u8;32]> which is 1 byte prefix + 32 bytes if present.
-        // So total 33 bytes.
-        // But original code used Buffer.from([0]) for None (1 byte). That works because the program parses Option<T> as 1 byte prefix.
-        // Let's match original pattern exactly: 1 byte prefix + optional 32 bytes.
         const teeOption = identity.tee && identity.tee.length === 64
           ? Buffer.concat([Buffer.from([1]), Buffer.from(identity.tee, "hex")])
           : Buffer.from([0]);
@@ -311,7 +314,6 @@ export default function NewAgentWizardPage() {
 
     const agentPda = new PublicKey(agentPdaRef.current!);
 
-    // Step 1: Issue Capabilities
     if (resumeFromStep <= 1) {
       try {
         const programId = getProgramId(cluster, "delegation");
@@ -408,7 +410,6 @@ export default function NewAgentWizardPage() {
       }
     }
 
-    // Step 2: Fund Agent
     if (resumeFromStep <= 2 && funding.fundNow) {
       try {
         const amountLamports = Math.floor(Number(funding.amount) * LAMPORTS_PER_SOL);
@@ -446,26 +447,26 @@ export default function NewAgentWizardPage() {
     setStep("success");
   };
 
-  // Render helpers
   const StepIndicator = () => (
     <div className="mb-6 flex items-center justify-between">
       {[
-        { num: 1, label: "Identity" },
-        { num: 2, label: "Capabilities" },
-        { num: 3, label: "Fund" },
-        { num: 4, label: "Review" },
+        { num: 1, label: "Template" },
+        { num: 2, label: "Identity" },
+        { num: 3, label: "Capabilities" },
+        { num: 4, label: "Fund" },
+        { num: 5, label: "Review" },
       ].map((s, idx, arr) => (
         <div key={s.num} className="flex flex-1 items-center">
           <div className="flex flex-col items-center">
             <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
               step === "success"
                 ? "bg-emerald-500 text-white"
-                : step >= s.num || (step === 4 && s.num === 4)
+                : step >= s.num || (step === 5 && s.num === 5)
                 ? "bg-emerald-500 text-white"
                 : "bg-neutral-800 text-neutral-500"
             }`}>
-              {step === "success" || (typeof step === "number" && step > s.num) || step === 4 ? (
-                s.num === 4 && step !== "success" ? 4 : <CheckCircle2 className="h-4 w-4" />
+              {step === "success" || (typeof step === "number" && step > s.num) || step === 5 ? (
+                s.num === 5 && step !== "success" ? 5 : <CheckCircle2 className="h-4 w-4" />
               ) : (
                 s.num
               )}
@@ -504,6 +505,47 @@ export default function NewAgentWizardPage() {
             {step === 1 && (
               <motion.div key="step1" {...fade} className="space-y-5">
                 <div>
+                  <h2 className="text-lg font-semibold text-white">Choose a Template</h2>
+                  <p className="text-sm text-neutral-500">Start from a pre-configured agent template or customize from scratch.</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {AGENT_TEMPLATES.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => applyTemplate(t.id)}
+                      className={`flex flex-col items-start gap-3 rounded-xl border p-4 text-left transition-all hover:border-white/[0.12] ${
+                        selectedTemplateId === t.id ? "border-sky-500/40 bg-sky-500/5" : "border-white/[0.06] bg-white/[0.02]"
+                      }`}
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/10 text-sky-500">
+                        {getTemplateIcon(t.icon)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-white">{t.name}</span>
+                          <Badge variant="outline" className="text-[10px] border-white/[0.08] text-neutral-400">{t.category}</Badge>
+                        </div>
+                        <p className="mt-1 text-xs text-neutral-500">{t.description}</p>
+                        <p className="mt-2 text-[10px] text-neutral-600">
+                          {t.capabilities.length} capability{t.capabilities.length === 1 ? "" : "ies"} · {t.identity.type.replace("_", " ")}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <Button onClick={() => { setSelectedTemplateId(null); setStep(2); }} variant="ghost" className="text-neutral-400 hover:text-white">
+                    Skip template <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 2 && (
+              <motion.div key="step2" {...fade} className="space-y-5">
+                <div>
                   <h2 className="text-lg font-semibold text-white">Agent Identity</h2>
                   <p className="text-sm text-neutral-500">Define your agent&apos;s identity and wallet.</p>
                 </div>
@@ -521,6 +563,7 @@ export default function NewAgentWizardPage() {
                     <option value="customer_service">Customer Service</option>
                     <option value="data_processor">Data Processor</option>
                     <option value="content_creator">Content Creator</option>
+                    <option value="payment">Payment</option>
                     <option value="custom">Custom</option>
                   </select>
                 </div>
@@ -580,16 +623,17 @@ export default function NewAgentWizardPage() {
                   </div>
                 )}
 
-                <div className="flex justify-end pt-2">
-                  <Button onClick={() => setStep(2)} disabled={identityErrors.length > 0} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+                <div className="flex justify-between pt-2">
+                  <BackButton to={1} />
+                  <Button onClick={() => setStep(3)} disabled={identityErrors.length > 0} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
                     Next <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
               </motion.div>
             )}
 
-            {step === 2 && (
-              <motion.div key="step2" {...fade} className="space-y-5">
+            {step === 3 && (
+              <motion.div key="step3" {...fade} className="space-y-5">
                 <div>
                   <h2 className="text-lg font-semibold text-white">Capabilities</h2>
                   <p className="text-sm text-neutral-500">Set spending limits and permissions for this agent.</p>
@@ -651,7 +695,6 @@ export default function NewAgentWizardPage() {
                           className="min-h-[60px] w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white placeholder:text-neutral-700" />
                       </div>
 
-                      {/* Preview card */}
                       <div className="rounded-lg bg-neutral-950/50 p-3 ring-1 ring-white/[0.03]">
                         <p className="text-sm font-medium text-white">📋 {cap.name || "Untitled Capability"}</p>
                         <p className="text-[11px] text-neutral-400">
@@ -677,16 +720,16 @@ export default function NewAgentWizardPage() {
                 )}
 
                 <div className="flex justify-between pt-2">
-                  <BackButton to={1} />
-                  <Button onClick={() => setStep(3)} disabled={capabilityErrors.length > 0} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+                  <BackButton to={2} />
+                  <Button onClick={() => setStep(4)} disabled={capabilityErrors.length > 0} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
                     Next <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
               </motion.div>
             )}
 
-            {step === 3 && (
-              <motion.div key="step3" {...fade} className="space-y-5">
+            {step === 4 && (
+              <motion.div key="step4" {...fade} className="space-y-5">
                 <div>
                   <h2 className="text-lg font-semibold text-white">Fund Agent</h2>
                   <p className="text-sm text-neutral-500">Send SOL to the agent wallet so it can pay for transactions.</p>
@@ -731,16 +774,16 @@ export default function NewAgentWizardPage() {
                 </div>
 
                 <div className="flex justify-between pt-2">
-                  <BackButton to={2} />
-                  <Button onClick={() => setStep(4)} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+                  <BackButton to={3} />
+                  <Button onClick={() => setStep(5)} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
                     Review <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
               </motion.div>
             )}
 
-            {step === 4 && (
-              <motion.div key="step4" {...fade} className="space-y-5">
+            {step === 5 && (
+              <motion.div key="step5" {...fade} className="space-y-5">
                 <div>
                   <h2 className="text-lg font-semibold text-white">Review & Deploy</h2>
                   <p className="text-sm text-neutral-500">Confirm everything before submitting on-chain.</p>
@@ -780,7 +823,6 @@ export default function NewAgentWizardPage() {
                   </div>
                 </div>
 
-                {/* Progress */}
                 {deployState.steps.some((s) => s.status !== "pending") && (
                   <div className="rounded-lg border border-white/[0.04] bg-neutral-950 p-4">
                     <h4 className="mb-3 text-sm font-semibold text-white">Deployment Progress</h4>
@@ -810,7 +852,7 @@ export default function NewAgentWizardPage() {
                 )}
 
                 <div className="flex justify-between pt-2">
-                  <BackButton to={3} />
+                  <BackButton to={4} />
                   <Button
                     onClick={() => deploy(0)}
                     disabled={deployState.steps.some((s) => s.status === "running") || deployState.failedStepIndex !== null}
@@ -820,8 +862,6 @@ export default function NewAgentWizardPage() {
                       <><Loader2 className="h-4 w-4 animate-spin" /> Deploying…</>
                     ) : deployState.failedStepIndex !== null ? (
                       <><AlertTriangle className="h-4 w-4" /> Failed</>
-                    ) : deployState.steps.every((s) => s.status === "pending") ? (
-                      <><Sparkles className="h-4 w-4" /> Deploy Agent</>
                     ) : (
                       <><Sparkles className="h-4 w-4" /> Deploy Agent</>
                     )}

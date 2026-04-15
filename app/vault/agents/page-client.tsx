@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   Bot, Plus, RefreshCw, ExternalLink, Key, Clock, Activity, PauseCircle,
-  PlayCircle, Trash2, Copy, CheckCircle2, Wallet, Shield, Eye,
+  PlayCircle, Trash2, Copy, CheckCircle2, Wallet, Shield, Eye, MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -160,6 +160,7 @@ export default function AgentsPage() {
                 {agent.hasTeeMeasurement && <div className="mt-3"><Badge variant="outline" className="border-violet-500/20 bg-violet-500/5 text-violet-400">TEE Verified</Badge></div>}
                 <div className="mt-4 flex items-center gap-2 border-t border-white/[0.04] pt-4">
                   <Link href={`/vault/agents/${addr}`}><Button variant="outline" size="sm" className="gap-1.5 border-white/[0.08] hover:bg-white/[0.04]"><Eye className="h-3.5 w-3.5" /> View Details</Button></Link>
+                  <Link href={`/vault/agents/${addr}/chat`}><Button size="sm" className="gap-1.5 bg-sky-600 hover:bg-sky-700 text-white"><MessageSquare className="h-3.5 w-3.5" /> Chat</Button></Link>
                   {agent.status === "Active" && <Button variant="outline" size="sm" className="gap-1.5 border-amber-500/20 text-amber-400 hover:bg-amber-500/10"
                     onClick={() => handleAction("suspend", agent)} disabled={!!actionLoading}>
                     {isLoading("suspend") ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <PauseCircle className="h-3.5 w-3.5" />} Suspend</Button>}

@@ -1,0 +1,23 @@
+{
+  "name": "@humanrail/agent",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx tests/runtime.test.ts",
+    "server": "tsx src/server.ts"
+  },
+  "dependencies": {
+    "@humanrail/sdk": "file:../sdk",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "openai": "^4.77.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "tsx": "^4",
+    "@types/node": "^20",
+    "@types/ws": "^8.5.13"
+  }
+}

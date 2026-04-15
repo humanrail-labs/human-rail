@@ -1,0 +1,20 @@
+{
+  "name": "@humanrail/sdk",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx tests/index.test.ts"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "@coral-xyz/anchor": "^0.32.1",
+    "bs58": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "tsx": "^4",
+    "@types/node": "^20"
+  }
+}
