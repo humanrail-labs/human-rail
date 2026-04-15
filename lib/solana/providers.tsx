@@ -1,5 +1,5 @@
 "use client";
-import { FC, ReactNode, useMemo, useRef, useCallback, useState } from "react";
+import { FC, ReactNode, useMemo, useRef, useCallback, useState, useEffect } from "react";
 import {
   ConnectionProvider,
   WalletProvider,
@@ -81,9 +81,14 @@ export const SolanaProviders: FC<SolanaProvidersProps> = ({
     [primary, fallback, usingFallback]
   );
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
-    []
+    () => (mounted ? [new PhantomWalletAdapter(), new SolflareWalletAdapter()] : []),
+    [mounted]
   );
 
   return (

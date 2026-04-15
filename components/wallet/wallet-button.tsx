@@ -3,6 +3,7 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Wallet, LogOut, Copy, ExternalLink, LayoutDashboard } from "lucide-react";
 import {
@@ -15,9 +16,21 @@ import {
 import { toast } from "sonner";
 
 export function WalletButton() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const { publicKey, disconnect, connected } = useWallet();
   const { setVisible } = useWalletModal();
   const router = useRouter();
+
+  if (!mounted) {
+    return (
+      <Button variant="default" size="sm" disabled className="gap-2">
+        <Wallet className="h-4 w-4" />
+        Connect Wallet
+      </Button>
+    );
+  }
 
   const handleCopyAddress = () => {
     if (publicKey) {
@@ -28,7 +41,7 @@ export function WalletButton() {
 
   if (!connected || !publicKey) {
     return (
-      <Button onClick={() => setVisible(true)} variant="default" size="sm">
+      <Button onClick={() => setVisible(true)} variant="default" size="sm" className="gap-2">
         <Wallet className="h-4 w-4" />
         Connect Wallet
       </Button>
