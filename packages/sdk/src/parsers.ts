@@ -8,7 +8,10 @@ import type {
   Receipt,
   DocumentRecord,
   SignatureRecord,
+  GuardSigningRequest,
+  GuardedDwallet,
 } from "./types.js";
+import { guardRejectionCodeFromNumber } from "./types.js";
 
 export function parseAgentStatus(statusByte: number): "Active" | "Suspended" | "Revoked" {
   switch (statusByte) {
@@ -537,4 +540,204 @@ export function getActionTypeName(actionType: number): string {
     4: "Task Response", 5: "Document Sign", 6: "Payment", 7: "Custom",
   };
   return names[actionType] || `Action #${actionType}`;
+}
+
+// ============================================================================
+// HUMANRAIL DWALLET GUARD PARSERS (Phase 2 — skeleton)
+// ============================================================================
+// These parsers are placeholder skeletons. Once the Anchor IDL is generated
+// from the Rust program, the exact discriminators and field offsets should be
+// verified and these parsers completed.
+
+
+
+export function parseGuardedDwalletStatus(frozen: boolean): "Active" | "Frozen" {
+  return frozen ? "Frozen" : "Active";
+}
+
+export function parseGuardSigningRequestStatus(statusByte: number): GuardSigningRequest["status"] {
+  switch (statusByte) {
+    case 0: return "Pending";
+    case 1: return "Approved";
+    case 2: return "Rejected";
+    default: return "Pending";
+  }
+}
+
+/** Parse a GuardedDwallet account from raw on-chain data.
+ *  TODO: verify offsets against generated IDL after Anchor build.
+ */
+export function parseGuardedDwallet(data: Buffer, pda: PublicKey): GuardedDwallet | null {
+  try {
+    if (data.length < 80) return null;
+    let offset = 8; // Skip discriminator
+
+    const version = data[offset];
+    offset += 1;
+
+    const principal = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const humanProfile = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const agent = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const humanrailCapability = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const dwallet = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const allowedChainId = data.readUInt32LE(offset);
+    offset += 4;
+
+    const allowedAssetHash = new Uint8Array(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const allowedRecipientHash = new Uint8Array(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const perTxLimit = data.readBigUInt64LE(offset);
+    offset += 8;
+
+    const dailyLimit = data.readBigUInt64LE(offset);
+    offset += 8;
+
+    const totalLimit = data.readBigUInt64LE(offset);
+    offset += 8;
+
+    const dailySpent = data.readBigUInt64LE(offset);
+    offset += 8;
+
+    const totalSpent = data.readBigUInt64LE(offset);
+    offset += 8;
+
+    const lastSpendDay = data.readBigInt64LE(offset);
+    offset += 8;
+
+    const expiresAt = data.readBigInt64LE(offset);
+    offset += 8;
+
+    const frozen = data[offset] === 1;
+    offset += 1;
+
+    const bump = data[offset];
+
+    return {
+      version,
+      principal,
+      humanProfile,
+      agent,
+      humanrailCapability,
+      dwallet,
+      allowedChainId,
+      allowedAssetHash,
+      allowedRecipientHash,
+      perTxLimit,
+      dailyLimit,
+      totalLimit,
+      dailySpent,
+      totalSpent,
+      lastSpendDay,
+      expiresAt,
+      frozen,
+      bump,
+      pda,
+    };
+  } catch (e) {
+    console.error("Failed to parse GuardedDwallet:", e);
+    return null;
+  }
+}
+
+/** Parse a GuardSigningRequest account from raw on-chain data.
+ *  TODO: verify offsets against generated IDL after Anchor build.
+ */
+export function parseGuardSigningRequest(data: Buffer, pda: PublicKey): GuardSigningRequest | null {
+  try {
+    if (data.length < 200) return null;
+    let offset = 8; // Skip discriminator
+
+    const version = data[offset];
+    offset += 1;
+
+    const requestId = new Uint8Array(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const guardedDwallet = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const principal = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const agent = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const dwallet = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const messageDigest = new Uint8Array(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const messageMetadataDigest = new Uint8Array(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const destinationChainId = data.readUInt32LE(offset);
+    offset += 4;
+
+    const assetHash = new Uint8Array(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const recipientHash = new Uint8Array(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const amount = data.readBigUInt64LE(offset);
+    offset += 8;
+
+    const signatureScheme = data.readUInt16LE(offset);
+    offset += 2;
+
+    const statusByte = data[offset];
+    const status = parseGuardSigningRequestStatus(statusByte);
+    offset += 1;
+
+    const rejectionCodeNum = data.readUInt16LE(offset);
+    const rejectionCode = guardRejectionCodeFromNumber(rejectionCodeNum);
+    offset += 2;
+
+    const ikaMessageApproval = new PublicKey(data.slice(offset, offset + 32));
+    offset += 32;
+
+    const createdAt = data.readBigInt64LE(offset);
+    offset += 8;
+
+    const bump = data[offset];
+
+    return {
+      version,
+      requestId,
+      guardedDwallet,
+      principal,
+      agent,
+      dwallet,
+      messageDigest,
+      messageMetadataDigest,
+      destinationChainId,
+      assetHash,
+      recipientHash,
+      amount,
+      signatureScheme,
+      status,
+      rejectionCode,
+      ikaMessageApproval,
+      createdAt,
+      bump,
+      pda,
+    };
+  } catch (e) {
+    console.error("Failed to parse GuardSigningRequest:", e);
+    return null;
+  }
 }

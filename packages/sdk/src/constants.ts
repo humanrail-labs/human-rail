@@ -130,3 +130,68 @@ export const ACCOUNT_DISCRIMINATORS = {
 
 // Legacy alias
 export const ACTION_RECEIPT_DISCRIMINATOR = ACCOUNT_DISCRIMINATORS.ActionReceipt;
+
+// ============================================================================
+// HUMANRAIL DWALLET GUARD (Phase 2 — not deployed yet)
+// ============================================================================
+
+/** Placeholder program ID for the HumanRail dWallet Guard program.
+ *  This MUST be updated after the program is deployed to devnet.
+ *  Until then, all helpers that depend on this will throw or return null.
+ */
+export const HUMANRAIL_DWALLET_GUARD_PROGRAM_ID_DEVNET: PublicKey | null = null;
+
+export function getDwalletGuardProgramId(): PublicKey {
+  if (!HUMANRAIL_DWALLET_GUARD_PROGRAM_ID_DEVNET) {
+    throw new Error(
+      "HumanRail dWallet Guard program ID not set. Deploy the program and update HUMANRAIL_DWALLET_GUARD_PROGRAM_ID_DEVNET in constants.ts"
+    );
+  }
+  return HUMANRAIL_DWALLET_GUARD_PROGRAM_ID_DEVNET;
+}
+
+/** Derive the CPI authority PDA used for Ika cross-program invocations.
+ *  Seeds: ["__ika_cpi_authority"]
+ *  Program: HumanRail dWallet Guard program ID
+ */
+export function deriveDwalletGuardCpiAuthority(programId?: PublicKey): [PublicKey, number] {
+  const id = programId ?? getDwalletGuardProgramId();
+  return PublicKey.findProgramAddressSync([Buffer.from("__ika_cpi_authority")], id);
+}
+
+/** Derive the GuardedDwallet PDA.
+ *  Seeds: ["guarded_dwallet", principal, agent, dwallet]
+ */
+export function deriveGuardedDwalletPda(
+  principal: PublicKey,
+  agent: PublicKey,
+  dwallet: PublicKey,
+  programId?: PublicKey
+): [PublicKey, number] {
+  const id = programId ?? getDwalletGuardProgramId();
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("guarded_dwallet"), principal.toBuffer(), agent.toBuffer(), dwallet.toBuffer()],
+    id
+  );
+}
+
+/** Derive the GuardSigningRequest PDA.
+ *  Seeds: ["guard_signing_request", guardedDwallet, requestId]
+ */
+export function deriveGuardSigningRequestPda(
+  guardedDwallet: PublicKey,
+  requestId: Uint8Array,
+  programId?: PublicKey
+): [PublicKey, number] {
+  const id = programId ?? getDwalletGuardProgramId();
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("guard_signing_request"), guardedDwallet.toBuffer(), Buffer.from(requestId)],
+    id
+  );
+}
+
+// Placeholder discriminators for Guard accounts (will be generated from Anchor IDL after build)
+export const GUARD_ACCOUNT_DISCRIMINATORS = {
+  GuardedDwallet: Buffer.from([]), // TODO: populate from IDL after anchor build
+  GuardSigningRequest: Buffer.from([]), // TODO: populate from IDL after anchor build
+};

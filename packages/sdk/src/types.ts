@@ -117,3 +117,90 @@ export interface SignatureRecord {
   signedAt: number;
   humanScoreAtSigning: number;
 }
+
+// ============================================================================
+// HUMANRAIL DWALLET GUARD TYPES (Phase 2)
+// ============================================================================
+
+export type GuardSigningRequestStatus = "Pending" | "Approved" | "Rejected";
+
+export type GuardRejectionCode =
+  | "None"
+  | "Frozen"
+  | "Expired"
+  | "ChainNotAllowed"
+  | "AssetNotAllowed"
+  | "RecipientNotAllowed"
+  | "InvalidAmount"
+  | "PerTxLimitExceeded"
+  | "DailyLimitExceeded"
+  | "TotalLimitExceeded"
+  | "DwalletMismatch"
+  | "UnauthorizedPrincipal";
+
+export const GUARD_REJECTION_CODES: GuardRejectionCode[] = [
+  "None",
+  "Frozen",
+  "Expired",
+  "ChainNotAllowed",
+  "AssetNotAllowed",
+  "RecipientNotAllowed",
+  "InvalidAmount",
+  "PerTxLimitExceeded",
+  "DailyLimitExceeded",
+  "TotalLimitExceeded",
+  "DwalletMismatch",
+  "UnauthorizedPrincipal",
+];
+
+export function guardRejectionCodeFromNumber(n: number): GuardRejectionCode {
+  return GUARD_REJECTION_CODES[n] ?? `Unknown(${n})`;
+}
+
+export function guardRejectionCodeToNumber(code: GuardRejectionCode): number {
+  return GUARD_REJECTION_CODES.indexOf(code);
+}
+
+export interface GuardedDwallet {
+  version: number;
+  principal: PublicKey;
+  humanProfile: PublicKey;
+  agent: PublicKey;
+  humanrailCapability: PublicKey;
+  dwallet: PublicKey;
+  allowedChainId: number;
+  allowedAssetHash: Uint8Array;
+  allowedRecipientHash: Uint8Array;
+  perTxLimit: bigint;
+  dailyLimit: bigint;
+  totalLimit: bigint;
+  dailySpent: bigint;
+  totalSpent: bigint;
+  lastSpendDay: bigint;
+  expiresAt: bigint;
+  frozen: boolean;
+  bump: number;
+  pda: PublicKey;
+}
+
+export interface GuardSigningRequest {
+  version: number;
+  requestId: Uint8Array;
+  guardedDwallet: PublicKey;
+  principal: PublicKey;
+  agent: PublicKey;
+  dwallet: PublicKey;
+  messageDigest: Uint8Array;
+  messageMetadataDigest: Uint8Array;
+  destinationChainId: number;
+  assetHash: Uint8Array;
+  recipientHash: Uint8Array;
+  amount: bigint;
+  signatureScheme: number;
+  status: GuardSigningRequestStatus;
+  rejectionCode: GuardRejectionCode;
+  ikaMessageApproval: PublicKey;
+  createdAt: bigint;
+  bump: number;
+  pda: PublicKey;
+}

@@ -23,6 +23,7 @@ const PROGRAM_IDS: Record<Cluster, Record<string, string>> = {
     dataBlink: "GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX",
     documentRegistry: "8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28",
     receipts: "EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM",
+    dwalletGuard: "", // Phase 2 — not deployed yet
   },
   localnet: {
     humanRegistry: "GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo",
@@ -32,6 +33,7 @@ const PROGRAM_IDS: Record<Cluster, Record<string, string>> = {
     dataBlink: "GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX",
     documentRegistry: "8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28",
     receipts: "EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM",
+    dwalletGuard: "", // Phase 2 — not deployed yet
   },
   "mainnet-beta": {
     humanRegistry: "GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo",
@@ -41,6 +43,7 @@ const PROGRAM_IDS: Record<Cluster, Record<string, string>> = {
     dataBlink: "",
     documentRegistry: "",
     receipts: "",
+    dwalletGuard: "",
   },
 };
 

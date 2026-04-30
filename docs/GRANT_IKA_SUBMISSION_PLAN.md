@@ -225,20 +225,29 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Repo structure analysis
 - [x] `BASELINE_REPORT.md` created
 
-### Phase 1 — Documentation & Framing (IN PROGRESS)
-- [ ] `docs/GRANT_IKA_SUBMISSION_PLAN.md` — this document
-- [ ] `docs/IKA_TECHNICAL_NOTES.md` — Ika protocol implementation notes
-- [ ] `README.md` update — grant track section
-- [ ] Homepage/vault banner — small non-invasive grant card
-- [ ] TODO markers in relevant source files
+### Phase 1 — Documentation & Framing (COMPLETE)
+- [x] `docs/GRANT_IKA_SUBMISSION_PLAN.md` — this document
+- [x] `docs/IKA_TECHNICAL_NOTES.md` — Ika protocol implementation notes
+- [x] `README.md` update — grant track section
+- [x] Homepage/vault banner — small non-invasive grant card
+- [x] TODO markers in relevant source files
 
-### Phase 2 — Scaffold New Program (PLANNED)
-- [ ] Install Rust + Solana CLI + Anchor CLI (or use Pinocchio for CU efficiency)
-- [ ] Initialize `programs/dwallet_guard/` directory
-- [ ] Define IDL: GuardConfig, GuardRequest, initialize_guard, request_sign, approve_sign, reject_sign, update_limits
-- [ ] Implement PDA derivation and state accounts
-- [ ] Implement `request_sign` with HumanRail capability reads
-- [ ] Implement `approve_sign` with Ika CPI call
+### Phase 2 — Scaffold New Program (COMPLETE)
+- [x] Framework chosen: **Anchor 0.30.1** (aligns with existing HumanRail IDL spec version)
+- [x] Directory created: `programs/humanrail-dwallet-guard/`
+- [x] Program implemented: `humanrail_dwallet_guard`
+  - `initialize_guarded_dwallet` — create policy account with owner-checked HumanRail references
+  - `freeze_guarded_dwallet` / `unfreeze_guarded_dwallet` — principal-only emergency controls
+  - `approve_guarded_message` — policy checks + GuardSigningRequest creation + Ika CPI placeholder
+- [x] State accounts: `GuardedDwallet`, `GuardSigningRequest`
+- [x] PDA helpers: CPI authority, GuardedDwallet, GuardSigningRequest
+- [x] Policy checks: chain, asset, recipient, amount, per-tx/daily/total limits, expiry, freeze, daily reset
+- [x] Rejection recording: every failed request creates a rejected `GuardSigningRequest` with error code
+- [x] Ika CPI placeholder in `ika_cpi.rs` — documented as needing official `ika-dwallet-*` crate
+- [x] TypeScript SDK updates: constants, PDA helpers, types, parser skeletons
+- [x] `docs/DWALLET_GUARD_PROGRAM.md` — full program documentation
+- [ ] **Toolchain blocker:** No Rust/Solana/Anchor CLI in environment → program not compiled locally
+- [ ] **Ika crate blocker:** Official `ika-dwallet-*` crate not available → CPI uses placeholder hand-rolled bytes
 
 ### Phase 3 — Frontend Integration (PLANNED)
 - [ ] Add `/vault/dwallets` route

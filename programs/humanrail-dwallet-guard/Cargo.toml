@@ -1,0 +1,20 @@
+[package]
+name = "humanrail-dwallet-guard"
+version = "0.1.0"
+description = "HumanRail dWallet Guard — policy controller for Ika cross-chain signing"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "humanrail_dwallet_guard"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.30.1"
+solana-program = "1.18.0"
