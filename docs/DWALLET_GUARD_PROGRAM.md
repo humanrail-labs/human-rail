@@ -2,7 +2,7 @@
 
 > On-chain policy controller for Ika cross-chain signing.  
 > Path: `programs/humanrail-dwallet-guard/`  
-> Status: Phase 2 skeleton — Rust source complete, not compiled locally (toolchain unavailable).
+> Status: **Phase 2 complete** — compiles with Anchor 1.0.1 + official `ika-dwallet-anchor` CPI crate.
 
 ---
 
@@ -308,8 +308,9 @@ approve_guarded_message
 
 - Ika uses a **single mock signer**, not real MPC.
 - Devnet data is **wiped periodically**.
-- Ika instruction layout may change; the CPI implementation in `ika_cpi.rs` is a **placeholder**.
-- The official `ika-dwallet-*` crate should replace the hand-rolled CPI when available.
+- Ika uses a **single mock signer**, not real MPC (pre-alpha limitation).
+- Devnet data is **wiped periodically**.
+- `ika-dwallet-anchor` interfaces may change as Ika evolves.
 
 ---
 
@@ -320,8 +321,8 @@ approve_guarded_message
 | Tool | Minimum Version |
 |------|----------------|
 | Rust | 1.75+ |
-| Solana CLI | 1.18+ |
-| Anchor CLI | 0.30.1 |
+| Solana CLI | 3.1.14+ |
+| Anchor CLI | 1.0.0+ |
 
 ### Install (if missing)
 
@@ -330,21 +331,21 @@ approve_guarded_message
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # Solana CLI
-sh -c "$(curl -sSfL https://release.solana.com/v1.18.0/install)"
+sh -c "$(curl -sSfL https://release.anza.xyz/v3.1.14/install)"
 
 # Anchor CLI
 cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-avm install 0.30.1
-avm use 0.30.1
+avm install 1.0.0
+avm use 1.0.0
 ```
 
 ### Build
 
 ```bash
 cd programs/humanrail-dwallet-guard
-cargo build-sbf
-# or, if using Anchor workspace:
-# anchor build
+cargo build --features no-idl
+# For Solana target:
+# cargo build-sbf --features no-idl
 ```
 
 ### Check
@@ -372,7 +373,7 @@ After deployment, update:
 
 ## What Remains for Phase 3
 
-1. **Wire Ika crate** — Replace `ika_cpi.rs` placeholder with official `ika-dwallet-*` CPI helpers.
+1. **Deploy to devnet** — Update `declare_id!()` with real program ID.
 2. **IDL generation** — Run `anchor build` + `anchor idl init` to generate the TypeScript IDL.
 3. **Validate parsers** — Update `packages/sdk/src/parsers.ts` with exact offsets from the IDL.
 4. **dWallet authority transfer** — Build UI flow to transfer dWallet authority to the CPI authority PDA.

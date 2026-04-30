@@ -1,7 +1,7 @@
 # HumanRail Guarded dWallets — Ika Grant Submission Plan
 
 > Track: Guarded dWallets for Cross-Chain Autonomous Agents  
-> Status: Phase 0 Complete · Phase 1 In Progress  
+> Status: Phase 0–2 Complete · Phase 3 Planned  
 
 ---
 
@@ -232,22 +232,23 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Homepage/vault banner — small non-invasive grant card
 - [x] TODO markers in relevant source files
 
-### Phase 2 — Scaffold New Program (COMPLETE)
-- [x] Framework chosen: **Anchor 0.30.1** (aligns with existing HumanRail IDL spec version)
+### Phase 2 — Program Implementation & Compilation (COMPLETE)
+- [x] Framework chosen: **Anchor 1.0.1** (required by `ika-dwallet-anchor` dependency on `anchor-lang = "1"`)
 - [x] Directory created: `programs/humanrail-dwallet-guard/`
 - [x] Program implemented: `humanrail_dwallet_guard`
   - `initialize_guarded_dwallet` — create policy account with owner-checked HumanRail references
   - `freeze_guarded_dwallet` / `unfreeze_guarded_dwallet` — principal-only emergency controls
-  - `approve_guarded_message` — policy checks + GuardSigningRequest creation + Ika CPI placeholder
+  - `approve_guarded_message` — policy checks + GuardSigningRequest creation + Ika CPI via official crate
 - [x] State accounts: `GuardedDwallet`, `GuardSigningRequest`
 - [x] PDA helpers: CPI authority, GuardedDwallet, GuardSigningRequest
 - [x] Policy checks: chain, asset, recipient, amount, per-tx/daily/total limits, expiry, freeze, daily reset
 - [x] Rejection recording: every failed request creates a rejected `GuardSigningRequest` with error code
-- [x] Ika CPI placeholder in `ika_cpi.rs` — documented as needing official `ika-dwallet-*` crate
+- [x] **Official Ika CPI:** `ika_cpi.rs` uses `ika_dwallet_anchor::DWalletContext::approve_message`
 - [x] TypeScript SDK updates: constants, PDA helpers, types, parser skeletons
 - [x] `docs/DWALLET_GUARD_PROGRAM.md` — full program documentation
-- [ ] **Toolchain blocker:** No Rust/Solana/Anchor CLI in environment → program not compiled locally
-- [ ] **Ika crate blocker:** Official `ika-dwallet-*` crate not available → CPI uses placeholder hand-rolled bytes
+- [x] **Toolchain installed:** Rust 1.95.0, Solana CLI 3.1.14, Anchor CLI 1.0.0
+- [x] **Compiles successfully:** `cargo build --features no-idl` (0 errors, 20 deprecation warnings)
+- [x] **Anchor 1 macro workaround:** `#[derive(Accounts)]` structs moved to crate root because `ctx_accounts_ident()` extracts only the first path segment
 
 ### Phase 3 — Frontend Integration (PLANNED)
 - [ ] Add `/vault/dwallets` route
