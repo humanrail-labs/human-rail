@@ -1,81 +1,8 @@
 use anchor_lang::prelude::*;
 use crate::state::{GuardedDwallet, GuardSigningRequest};
 use crate::error::GuardError;
-use crate::ika_cpi;
-
-pub const HUMANRAIL_AGENT_REGISTRY_PROGRAM_ID: Pubkey = pubkey!("GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ");
-
-#[derive(Accounts)]
-#[instruction(
-    request_id: [u8; 32],
-    message_digest: [u8; 32],
-    message_metadata_digest: [u8; 32],
-    destination_chain_id: u32,
-    asset_hash: [u8; 32],
-    recipient_hash: [u8; 32],
-    amount: u64,
-    user_pubkey: [u8; 32],
-    signature_scheme: u16,
-    message_approval_bump: u8,
-)]
-pub struct ApproveGuardedMessage<'info> {
-    #[account(mut)]
-    pub requester: Signer<'info>,
-
-    #[account(
-        mut,
-        seeds = [
-            b"guarded_dwallet",
-            guarded_dwallet.principal.as_ref(),
-            guarded_dwallet.agent.as_ref(),
-            guarded_dwallet.dwallet.as_ref(),
-        ],
-        bump = guarded_dwallet.bump,
-    )]
-    pub guarded_dwallet: Account<'info, GuardedDwallet>,
-
-    #[account(
-        init,
-        payer = requester,
-        space = 8 + GuardSigningRequest::LEN,
-        seeds = [
-            b"guard_signing_request",
-            guarded_dwallet.key().as_ref(),
-            &request_id,
-        ],
-        bump,
-    )]
-    pub guard_signing_request: Account<'info, GuardSigningRequest>,
-
-    /// CHECK: Verified against GuardedDwallet.dwallet in handler
-    pub dwallet: AccountInfo<'info>,
-
-    /// CHECK: Optional Agent Registry account for agent signer verification
-    pub agent_registry_account: Option<AccountInfo<'info>>,
-
-    /// CHECK: CPI authority PDA (owned by this program, derived with Ika seed)
-    #[account(
-        seeds = [b"__ika_cpi_authority"],
-        bump,
-    )]
-    pub cpi_authority: AccountInfo<'info>,
-
-    /// CHECK: Ika program ID constraint
-    #[account(address = ika_cpi::IKA_PROGRAM_ID)]
-    pub ika_program: AccountInfo<'info>,
-
-    /// CHECK: Ika config account
-    pub ika_config: AccountInfo<'info>,
-
-    /// CHECK: Ika coordinator account (version-dependent)
-    pub ika_coordinator: AccountInfo<'info>,
-
-    /// CHECK: Message approval PDA — created by Ika inside CPI
-    #[account(mut)]
-    pub message_approval: AccountInfo<'info>,
-
-    pub system_program: Program<'info, System>,
-}
+use crate::ApproveGuardedMessage;
+use crate::HUMANRAIL_AGENT_REGISTRY_PROGRAM_ID;
 
 pub fn handler(
     ctx: Context<ApproveGuardedMessage>,
@@ -86,9 +13,9 @@ pub fn handler(
     asset_hash: [u8; 32],
     recipient_hash: [u8; 32],
     amount: u64,
-    _user_pubkey: [u8; 32],
+    user_pubkey: [u8; 32],
     signature_scheme: u16,
-    _message_approval_bump: u8,
+    message_approval_bump: u8,
 ) -> Result<()> {
     let guarded = &mut ctx.accounts.guarded_dwallet;
     let request = &mut ctx.accounts.guard_signing_request;
@@ -221,8 +148,8 @@ pub fn handler(
             &Pubkey::default(),
         )?;
         msg!(
-            "Rejected signing request {} with code {}",
-            hex::encode(request_id),
+            "Rejected signing request {:?} with code {}",
+            request_id,
             rejection_code
         );
         return Ok(());
@@ -261,26 +188,31 @@ pub fn handler(
     )?;
 
     // ------------------------------------------------------------------
-    // 6. CPI to Ika approve_message
+    // 6. CPI to Ika via official ika-dwallet-anchor crate
     // ------------------------------------------------------------------
-    let cpi_authority_seeds: &[&[&[u8]]] = &[&[b"__ika_cpi_authority", &[ctx.bumps.cpi_authority][..]]];
+    let dwallet_ctx = crate::ika_cpi::DWalletContext {
+        dwallet_program: ctx.accounts.dwallet_program.clone(),
+        cpi_authority: ctx.accounts.cpi_authority.clone(),
+        caller_program: ctx.accounts.program.clone(),
+        cpi_authority_bump: ctx.bumps.cpi_authority,
+    };
 
-    ika_cpi::approve_message(
-        &ctx.accounts.dwallet,
+    dwallet_ctx.approve_message(
+        &ctx.accounts.coordinator,
         &ctx.accounts.message_approval,
-        &ctx.accounts.cpi_authority,
-        &ctx.accounts.ika_config,
-        &ctx.accounts.ika_coordinator,
+        &ctx.accounts.dwallet,
+        &ctx.accounts.requester.to_account_info(),
         &ctx.accounts.system_program.to_account_info(),
         message_digest,
-        signature_scheme,
         message_metadata_digest,
-        cpi_authority_seeds,
+        user_pubkey,
+        signature_scheme,
+        message_approval_bump,
     )?;
 
     msg!(
-        "Approved signing request {} and CPI'd Ika approve_message",
-        hex::encode(request_id)
+        "Approved signing request {:?} and CPI'd Ika approve_message via official crate",
+        request_id
     );
 
     Ok(())
@@ -291,7 +223,7 @@ pub fn handler(
 // ------------------------------------------------------------------
 fn init_request(
     request: &mut Account<GuardSigningRequest>,
-    guarded: &GuardedDwallet,
+    guarded: &Account<GuardedDwallet>,
     request_id: [u8; 32],
     message_digest: [u8; 32],
     message_metadata_digest: [u8; 32],
