@@ -6,6 +6,57 @@ HumanRail is an open protocol for **verified human identity**, **delegated agent
 
 ---
 
+## Grant Track: HumanRail Guarded dWallets with Ika
+
+> **Decentralized guardrails for autonomous agents holding assets across chains.**
+
+HumanRail provides the **policy layer** — identity, delegation, spending limits, freeze, and receipts — already deployed as 7 programs on Solana devnet.
+
+**Ika** provides the **cross-chain signing layer** — 2PC-MPC dWallets that can produce signatures for Bitcoin, Ethereum, and other chains.
+
+Together, they enable a verified human principal to deploy an AI agent that can sign cross-chain transactions — but only within programmable limits that live entirely on Solana.
+
+### Architecture
+
+```
+Human Principal
+       │
+       ▼
+┌─────────────────────┐     ┌─────────────────────┐
+│  HumanRail Policy   │────▶│ HumanRail dWallet   │
+│  (7 programs)       │     │ Guard (new program) │
+│  · Identity         │     │                     │
+│  · Delegation       │     │ Checks limits,      │
+│  · Capabilities     │     │ CPI-calls Ika       │
+│  · Freeze           │     │ approve_message     │
+│  · Receipts         │     │                     │
+└─────────────────────┘     └─────────────────────┘
+                                    │
+                                    ▼
+                           ┌─────────────────────┐
+                           │   Ika Protocol      │
+                           │  · dWallet          │
+                           │  · approve_message  │
+                           │  · gRPC Sign        │
+                           └─────────────────────┘
+```
+
+### Grant Demo Scope
+
+The grant demo focuses on the HumanRail programs that form the policy core:
+- **Human Registry** — Verified identity before any agent action
+- **Agent Registry** — KYA lifecycle management
+- **Delegation / Capabilities** — Programmable scopes and spending limits
+- **Receipts** — Immutable audit trail for every policy check and Ika approval
+
+A new **HumanRail dWallet Guard** program will be built to act as the CPI controller between HumanRail policies and Ika signing.
+
+> **Pre-alpha disclaimer:** Ika is currently pre-alpha with a single mock signer. All demo interactions use devnet only. This is not production MPC custody.
+
+See [`docs/GRANT_IKA_SUBMISSION_PLAN.md`](docs/GRANT_IKA_SUBMISSION_PLAN.md) for the full submission plan and [`docs/IKA_TECHNICAL_NOTES.md`](docs/IKA_TECHNICAL_NOTES.md) for implementation details.
+
+---
+
 ## Live Demo
 
 **Dashboard:** [Open App](/dashboard)  

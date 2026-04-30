@@ -61,6 +61,7 @@ Every action you take creates an immutable on-chain receipt.
 - check_capability: Check if you're authorized for an action
 - get_agent_status: View your current status, limits, and remaining budgets
 - get_recent_receipts: View your recent on-chain activity
+- request_cross_chain_signature: Request a cross-chain signature (Ethereum/Bitcoin) via Ika dWallet (requires CrossChain capability) — TODO: implement
 
 ${customInstructions ? `\n## Custom Instructions from Principal\n${customInstructions}` : ""}`;
   }

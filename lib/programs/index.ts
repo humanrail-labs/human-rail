@@ -13,6 +13,7 @@ import receiptsIdl from "@/lib/idl/receipts.json";
 // ============================================================================
 // CORRECT DEVNET PROGRAM IDs (verified with `solana program show`)
 // ============================================================================
+// TODO: add HumanRail dWallet Guard program ID once deployed
 const PROGRAM_IDS: Record<Cluster, Record<string, string>> = {
   devnet: {
     humanRegistry: "GB35h1zNh8WK5c72yVXu6gk6U7eUMFiTTymrXk2dfHHo",

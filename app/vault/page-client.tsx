@@ -124,6 +124,26 @@ export default function VaultHomePage() {
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
+      {/* Grant Banner */}
+      <motion.div variants={fadeUp}>
+        <Card className="border-sky-500/15 bg-sky-500/[0.02]">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500/10 ring-1 ring-sky-500/20">
+                <Shield className="h-6 w-6 text-sky-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-sky-200">New: Guarded dWallets</p>
+                <p className="text-xs text-sky-400/60">Cross-chain AI agent custody with Ika MPC signing and HumanRail policy guardrails.</p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" className="gap-1.5 border-sky-500/20 text-sky-400 hover:bg-sky-500/5 hover:text-sky-300" disabled>
+              Coming Soon <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Identity Status */}
       <motion.div variants={fadeUp}>
         {profileLoading ? (
@@ -177,6 +197,7 @@ export default function VaultHomePage() {
       </motion.div>
 
       {/* Quick Stats */}
+      {/* TODO: add /vault/dwallets UI for dWallet management and cross-chain signing requests */}
       <motion.div variants={fadeUp} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="border-white/[0.06] bg-white/[0.02]">
           <CardContent className="flex items-center gap-4 p-5">

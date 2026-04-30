@@ -107,4 +107,7 @@ export const HUMANRAIL_TOOLS: ToolDefinition[] = [
       required: [],
     },
   },
+  // TODO: add request_cross_chain_signature tool
+  // Parameters: chain ("ethereum" | "bitcoin"), message (hex or plaintext), signature_scheme
+  // Flow: check_capability → create GuardRequest → principal approves → CPI to Ika approve_message → gRPC Sign
 ];
