@@ -1,7 +1,8 @@
 # HumanRail Guarded dWallets — Ika Grant Submission Plan
 
 > Track: Guarded dWallets for Cross-Chain Autonomous Agents  
-> Status: Phase 0–2 Complete · Phase 3 Planned  
+> Status: Phase 0–2C Complete · Phase 3 Planned  
+> Phase 2C: SBF build + IDL generated + program ID assigned. Deployment blocked by devnet airdrop rate limit.  
 
 ---
 
@@ -250,6 +251,15 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] **Compiles successfully:** `cargo build --features no-idl` (0 errors, 20 deprecation warnings)
 - [x] **Anchor 1 macro workaround:** `#[derive(Accounts)]` structs moved to crate root because `ctx_accounts_ident()` extracts only the first path segment
 
+### Phase 2C — SBF Build & Deploy Preparation (COMPLETE)
+- [x] **SBF build:** `cargo build-sbf` and `anchor build` both succeed (225,680 bytes `.so`)
+- [x] **IDL generated:** `anchor build` produces `target/idl/humanrail_dwallet_guard.json` (17,226 bytes)
+- [x] **Program ID assigned:** `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF` (auto-generated keypair)
+- [x] **Repo references updated:** `declare_id!`, `lib/programs/index.ts`, `packages/sdk/src/constants.ts`, `.env.example`, `Anchor.toml`
+- [x] **IDL copied to frontend:** `lib/idl/humanrail_dwallet_guard.json`
+- [x] **Check script:** `scripts/check-dwallet-guard.sh` + `package.json` script
+- [ ] **Devnet deployment:** Blocked — airdrop faucet rate-limited (0 SOL in deployer wallet)
+
 ### Phase 3 — Frontend Integration (PLANNED)
 - [ ] Add `/vault/dwallets` route
 - [ ] UI for creating/linking a dWallet
@@ -284,7 +294,8 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [ ] Demo video or screenshots
 - [ ] Working devnet deployment of HumanRail programs (7/7 deployed)
 - [ ] Architecture diagram
-- [ ] Source code for new dWallet Guard program (Phase 2+)
+- [x] Source code for new dWallet Guard program (Phase 2+)
+- [ ] Devnet deployment of dWallet Guard program (Phase 2C+)
 - [ ] Frontend integration for dWallet management (Phase 3+)
 - [ ] Agent runtime cross-chain signing demo (Phase 4+)
 

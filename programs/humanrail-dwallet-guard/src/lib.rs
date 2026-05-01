@@ -13,7 +13,7 @@ pub const HUMANRAIL_AGENT_REGISTRY_PROGRAM_ID: Pubkey =
 pub const HUMANRAIL_DELEGATION_PROGRAM_ID: Pubkey =
     pubkey!("DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT");
 
-declare_id!("DwGuaRDhS915dvfSwzb5hMmA7nBq1AjWJYfAnP6xvXPy");
+declare_id!("G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF");
 
 // ------------------------------------------------------------------
 // Account structs MUST be defined at crate root for Anchor 1's

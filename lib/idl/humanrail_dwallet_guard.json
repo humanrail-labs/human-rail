@@ -1,0 +1,812 @@
+{
+  "address": "G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF",
+  "metadata": {
+    "name": "humanrail_dwallet_guard",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "HumanRail dWallet Guard — policy controller for Ika cross-chain signing"
+  },
+  "instructions": [
+    {
+      "name": "approve_guarded_message",
+      "discriminator": [
+        161,
+        49,
+        124,
+        159,
+        1,
+        54,
+        243,
+        30
+      ],
+      "accounts": [
+        {
+          "name": "requester",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "guarded_dwallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  100,
+                  101,
+                  100,
+                  95,
+                  100,
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet.principal",
+                "account": "GuardedDwallet"
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet.agent",
+                "account": "GuardedDwallet"
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet.dwallet",
+                "account": "GuardedDwallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "guard_signing_request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  100,
+                  95,
+                  115,
+                  105,
+                  103,
+                  110,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  113,
+                  117,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet"
+              },
+              {
+                "kind": "arg",
+                "path": "request_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dwallet"
+        },
+        {
+          "name": "agent_registry_account",
+          "optional": true
+        },
+        {
+          "name": "cpi_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  105,
+                  107,
+                  97,
+                  95,
+                  99,
+                  112,
+                  105,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program",
+          "address": "G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF"
+        },
+        {
+          "name": "dwallet_program",
+          "address": "87W54kGYFQ1rgWqMeu4XTPHWXWmXSQCcjm8vCTfiq1oY"
+        },
+        {
+          "name": "coordinator"
+        },
+        {
+          "name": "message_approval",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "request_id",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "message_digest",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "message_metadata_digest",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "destination_chain_id",
+          "type": "u32"
+        },
+        {
+          "name": "asset_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "recipient_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "user_pubkey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "signature_scheme",
+          "type": "u16"
+        },
+        {
+          "name": "message_approval_bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "freeze_guarded_dwallet",
+      "discriminator": [
+        151,
+        57,
+        89,
+        252,
+        123,
+        234,
+        123,
+        61
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "signer": true
+        },
+        {
+          "name": "guarded_dwallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  100,
+                  101,
+                  100,
+                  95,
+                  100,
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet.principal",
+                "account": "GuardedDwallet"
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet.agent",
+                "account": "GuardedDwallet"
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet.dwallet",
+                "account": "GuardedDwallet"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_guarded_dwallet",
+      "discriminator": [
+        2,
+        46,
+        207,
+        0,
+        11,
+        158,
+        206,
+        141
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "guarded_dwallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  100,
+                  101,
+                  100,
+                  95,
+                  100,
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "account",
+                "path": "agent"
+              },
+              {
+                "kind": "account",
+                "path": "dwallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "human_profile"
+        },
+        {
+          "name": "agent"
+        },
+        {
+          "name": "humanrail_capability"
+        },
+        {
+          "name": "dwallet"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "allowed_chain_id",
+          "type": "u32"
+        },
+        {
+          "name": "allowed_asset_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "allowed_recipient_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "per_tx_limit",
+          "type": "u64"
+        },
+        {
+          "name": "daily_limit",
+          "type": "u64"
+        },
+        {
+          "name": "total_limit",
+          "type": "u64"
+        },
+        {
+          "name": "expires_at",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "unfreeze_guarded_dwallet",
+      "discriminator": [
+        223,
+        101,
+        174,
+        85,
+        26,
+        221,
+        221,
+        194
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "signer": true
+        },
+        {
+          "name": "guarded_dwallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  100,
+                  101,
+                  100,
+                  95,
+                  100,
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet.principal",
+                "account": "GuardedDwallet"
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet.agent",
+                "account": "GuardedDwallet"
+              },
+              {
+                "kind": "account",
+                "path": "guarded_dwallet.dwallet",
+                "account": "GuardedDwallet"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "GuardSigningRequest",
+      "discriminator": [
+        114,
+        10,
+        219,
+        237,
+        226,
+        180,
+        54,
+        33
+      ]
+    },
+    {
+      "name": "GuardedDwallet",
+      "discriminator": [
+        12,
+        125,
+        217,
+        8,
+        251,
+        154,
+        190,
+        73
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6001,
+      "name": "Frozen",
+      "msg": "Guarded dWallet is frozen"
+    },
+    {
+      "code": 6002,
+      "name": "Expired",
+      "msg": "Guarded dWallet policy has expired"
+    },
+    {
+      "code": 6003,
+      "name": "ChainNotAllowed",
+      "msg": "Destination chain not allowed"
+    },
+    {
+      "code": 6004,
+      "name": "AssetNotAllowed",
+      "msg": "Asset not allowed"
+    },
+    {
+      "code": 6005,
+      "name": "RecipientNotAllowed",
+      "msg": "Recipient not allowed"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidAmount",
+      "msg": "Invalid amount"
+    },
+    {
+      "code": 6007,
+      "name": "PerTxLimitExceeded",
+      "msg": "Per-transaction limit exceeded"
+    },
+    {
+      "code": 6008,
+      "name": "DailyLimitExceeded",
+      "msg": "Daily limit exceeded"
+    },
+    {
+      "code": 6009,
+      "name": "TotalLimitExceeded",
+      "msg": "Total limit exceeded"
+    },
+    {
+      "code": 6010,
+      "name": "DwalletMismatch",
+      "msg": "dWallet mismatch"
+    },
+    {
+      "code": 6011,
+      "name": "UnauthorizedPrincipal",
+      "msg": "Unauthorized principal or agent signer"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidLimitConfig",
+      "msg": "Invalid limit configuration"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidExpiry",
+      "msg": "Expiry must be in the future"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidHumanProfile",
+      "msg": "Human profile owner mismatch"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidAgent",
+      "msg": "Agent owner mismatch"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidCapability",
+      "msg": "Capability owner mismatch"
+    },
+    {
+      "code": 6017,
+      "name": "IkaCpiFailed",
+      "msg": "Ika CPI failed — replace with official ika-dwallet crate"
+    },
+    {
+      "code": 6018,
+      "name": "MissingAgentRegistryAccount",
+      "msg": "Invalid request — missing agent registry account for agent signer"
+    }
+  ],
+  "types": [
+    {
+      "name": "GuardSigningRequest",
+      "docs": [
+        "GuardSigningRequest records a single cross-chain signing attempt.",
+        "Created by approve_guarded_message. Status indicates approved or rejected."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "request_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "guarded_dwallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "dwallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "message_digest",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "message_metadata_digest",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "destination_chain_id",
+            "type": "u32"
+          },
+          {
+            "name": "asset_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "recipient_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "signature_scheme",
+            "type": "u16"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "rejection_code",
+            "type": "u16"
+          },
+          {
+            "name": "ika_message_approval",
+            "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GuardedDwallet",
+      "docs": [
+        "GuardedDwallet stores the policy for a single dWallet + agent pair.",
+        "It is owned by the HumanRail dWallet Guard program."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "principal",
+            "type": "pubkey"
+          },
+          {
+            "name": "human_profile",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "humanrail_capability",
+            "type": "pubkey"
+          },
+          {
+            "name": "dwallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "allowed_chain_id",
+            "type": "u32"
+          },
+          {
+            "name": "allowed_asset_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "allowed_recipient_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "per_tx_limit",
+            "type": "u64"
+          },
+          {
+            "name": "daily_limit",
+            "type": "u64"
+          },
+          {
+            "name": "total_limit",
+            "type": "u64"
+          },
+          {
+            "name": "daily_spent",
+            "type": "u64"
+          },
+          {
+            "name": "total_spent",
+            "type": "u64"
+          },
+          {
+            "name": "last_spend_day",
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "frozen",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

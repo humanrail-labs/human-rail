@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:dwallet-guard": "bash scripts/check-dwallet-guard.sh"
   },
   "dependencies": {
     "@humanrail/sdk": "file:packages/sdk",

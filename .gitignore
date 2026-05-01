@@ -41,3 +41,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Rust / Solana build artifacts
+/target/
+**/target/
+**/target/deploy/*-keypair.json
+**/*-keypair.json
+.anchor/
+Anchor.toml.local
+test-ledger/

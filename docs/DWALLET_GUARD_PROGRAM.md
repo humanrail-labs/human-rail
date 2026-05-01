@@ -2,7 +2,9 @@
 
 > On-chain policy controller for Ika cross-chain signing.  
 > Path: `programs/humanrail-dwallet-guard/`  
-> Status: **Phase 2 complete** — compiles with Anchor 1.0.1 + official `ika-dwallet-anchor` CPI crate.
+> Status: **Phase 2C complete** — SBF-buildable, IDL generated, program ID assigned.  
+**Deployment:** Blocked — devnet airdrop faucet rate-limited (0 SOL in deployer wallet).  
+**Program ID:** `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF`
 
 ---
 
@@ -357,24 +359,35 @@ cargo clippy
 
 ### Deploy (devnet)
 
+**Current blocker:** Deployer wallet `5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y` has 0 SOL.  
+Devnet airdrop faucet returned `429` rate-limit error repeatedly.
+
 ```bash
 solana config set --url devnet
-solana program deploy target/deploy/humanrail_dwallet_guard.so
+solana program deploy target/deploy/humanrail_dwallet_guard.so \
+  --program-id target/deploy/humanrail_dwallet_guard-keypair.json
+```
+
+After deployment succeeds, verify:
+```bash
+solana program show G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF --url devnet
 ```
 
 ### Update Frontend/SDK
 
-After deployment, update:
-1. `packages/sdk/src/constants.ts` — `HUMANRAIL_DWALLET_GUARD_PROGRAM_ID_DEVNET`
-2. `lib/programs/index.ts` — `PROGRAM_IDS.devnet.dwalletGuard`
-3. `programs/humanrail-dwallet-guard/src/lib.rs` — `declare_id!()` with deployed ID
+After deployment, verify these are already updated (done in Phase 2C):
+1. ✅ `packages/sdk/src/constants.ts` — `HUMANRAIL_DWALLET_GUARD_PROGRAM_ID_DEVNET`
+2. ✅ `lib/programs/index.ts` — `PROGRAM_IDS.devnet.dwalletGuard`
+3. ✅ `programs/humanrail-dwallet-guard/src/lib.rs` — `declare_id!()`
+4. ✅ `lib/idl/humanrail_dwallet_guard.json` — IDL copied from `target/idl/`
+5. ✅ `Anchor.toml` — `[programs.devnet]` entry
 
 ---
 
 ## What Remains for Phase 3
 
-1. **Deploy to devnet** — Update `declare_id!()` with real program ID.
-2. **IDL generation** — Run `anchor build` + `anchor idl init` to generate the TypeScript IDL.
+1. **Fund deployer wallet** — Devnet airdrop or faucet to get ≥2 SOL for program deployment.
+2. **Deploy to devnet** — Run `anchor deploy --provider.cluster devnet` or `solana program deploy`.
 3. **Validate parsers** — Update `packages/sdk/src/parsers.ts` with exact offsets from the IDL.
 4. **dWallet authority transfer** — Build UI flow to transfer dWallet authority to the CPI authority PDA.
 5. **gRPC client** — Implement `lib/ika/client.ts` for off-chain signing request submission.
