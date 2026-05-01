@@ -7,11 +7,13 @@
  *
  * Usage:
  *   npm run devnet:inspect-ika
+ *   IKA_DEBUG_RAW=1 npm run devnet:inspect-ika
  *
  * Optional environment variables:
  *   IKA_DWALLET_PUBLIC_KEY  — base58 public key of an existing dWallet
  *   IKA_DWALLET_CURVE       — curve enum value (0=Secp256k1, 1=Secp256r1, 2=Curve25519, 3=Ristretto)
  *   IKA_MESSAGE_APPROVAL    — base58 pubkey of a MessageApproval account
+ *   IKA_DEBUG_RAW           — if set, prints raw account hex dump and offset diagnostics
  */
 
 import { Connection, PublicKey } from "@solana/web3.js";
@@ -20,6 +22,15 @@ import {
   IKA_GRPC_ENDPOINT_DEVNET,
   IKA_SOLANA_RPC_DEVNET,
   IKA_CPI_AUTHORITY_SEED,
+  IKA_DW_OFFSET_CURVE,
+  IKA_DW_OFFSET_STATE,
+  IKA_DW_OFFSET_PUBLIC_KEY_LEN,
+  IKA_DW_OFFSET_PUBLIC_KEY,
+  IKA_DW_OFFSET_AUTHORITY,
+  IKA_DW_OFFSET_CREATED_EPOCH,
+  IKA_DW_OFFSET_NOA_PUBLIC_KEY,
+  IKA_DW_OFFSET_IS_IMPORTED,
+  IKA_DW_OFFSET_BUMP,
 } from "../lib/ika/constants";
 import {
   DWalletCurve,
@@ -36,22 +47,57 @@ import {
   parseIkaDwalletAccount,
   parseIkaMessageApprovalAccount,
 } from "../lib/ika/parsers";
-// import { getProgramId } from "../lib/programs";
 
 // ── Active HumanRail Guard program ID ──
 const HUMANRAIL_GUARD_PROGRAM_ID = new PublicKey(
   "Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2"
 );
 
+const DEBUG_RAW = process.env.IKA_DEBUG_RAW === "1";
+
 // ── Explorer links ──
 function solanaFmLink(pubkey: PublicKey, path: "address" | "tx" = "address"): string {
   return `https://solana.fm/${path}/${pubkey.toBase58()}?cluster=devnet-alpha`;
+}
+
+// ── Raw debug dump ──
+function printRawDwalletDebug(data: Buffer) {
+  console.log("\n─── Raw Account Debug Dump ───");
+  console.log(`Account data length: ${data.length}`);
+  console.log(`First 160 bytes hex:`);
+  const hex = Buffer.from(data.slice(0, Math.min(160, data.length))).toString("hex");
+  for (let i = 0; i < hex.length; i += 32) {
+    const chunk = hex.slice(i, i + 32);
+    const offset = i / 2;
+    const bytes: string[] = [];
+    for (let j = 0; j < chunk.length; j += 2) {
+      bytes.push(chunk.slice(j, j + 2));
+    }
+    console.log(`  ${offset.toString().padStart(3)}: ${bytes.join(" ")}`);
+  }
+
+  console.log(`\nParsed fields at corrected offsets:`);
+  console.log(`  discriminator:        ${data[0]}`);
+  console.log(`  version:              ${data[1]}`);
+  console.log(`  authority:            ${new PublicKey(data.slice(IKA_DW_OFFSET_AUTHORITY, IKA_DW_OFFSET_AUTHORITY + 32)).toBase58()}`);
+  console.log(`  curve (u16 LE@34):    ${data.readUInt16LE(IKA_DW_OFFSET_CURVE)}`);
+  console.log(`  state (@36):          ${data[IKA_DW_OFFSET_STATE]} (${DWalletState[data[IKA_DW_OFFSET_STATE]] ?? "?"})`);
+  console.log(`  public_key_len (@37): ${data[IKA_DW_OFFSET_PUBLIC_KEY_LEN]}`);
+  const pkLen = data[IKA_DW_OFFSET_PUBLIC_KEY_LEN];
+  console.log(`  public_key (@38):     ${Buffer.from(data.slice(IKA_DW_OFFSET_PUBLIC_KEY, IKA_DW_OFFSET_PUBLIC_KEY + Math.min(pkLen, 65))).toString("hex")}`);
+  console.log(`  created_epoch (@103): ${data.readBigUInt64LE(IKA_DW_OFFSET_CREATED_EPOCH).toString()}`);
+  console.log(`  noa_pubkey (@111):    ${new PublicKey(data.slice(IKA_DW_OFFSET_NOA_PUBLIC_KEY, IKA_DW_OFFSET_NOA_PUBLIC_KEY + 32)).toBase58()}`);
+  console.log(`  is_imported (@143):   ${data[IKA_DW_OFFSET_IS_IMPORTED]}`);
+  console.log(`  bump (@144):          ${data[IKA_DW_OFFSET_BUMP]}`);
+  console.log(`  bytes 34..38:         ${Buffer.from(data.slice(34, 38)).toString("hex")}`);
+  console.log("─── End Raw Debug Dump ───\n");
 }
 
 // ── Main ──
 async function main() {
   console.log("═══════════════════════════════════════════════════════════");
   console.log("  Ika Devnet Inspector — Phase 5A Read-Only Helpers");
+  if (DEBUG_RAW) console.log("  [DEBUG RAW MODE ENABLED]");
   console.log("═══════════════════════════════════════════════════════════\n");
 
   // 1. Print active HumanRail Guard program ID
@@ -179,6 +225,9 @@ async function main() {
     try {
       const info = await connection.getAccountInfo(dwalletPda);
       if (info) {
+        if (DEBUG_RAW) {
+          printRawDwalletDebug(info.data as Buffer);
+        }
         const parsed = parseIkaDwalletAccount(info.data as Buffer);
         if (parsed) {
           console.log(`\nParsed dWallet account:`);
@@ -229,6 +278,21 @@ async function main() {
     try {
       const info = await connection.getAccountInfo(maPubkey);
       if (info) {
+        if (DEBUG_RAW) {
+          console.log("\n─── Raw MessageApproval Debug Dump ───");
+          console.log(`Account data length: ${info.data.length}`);
+          const hex = Buffer.from(info.data.slice(0, Math.min(160, info.data.length))).toString("hex");
+          for (let i = 0; i < hex.length; i += 32) {
+            const chunk = hex.slice(i, i + 32);
+            const offset = i / 2;
+            const bytes: string[] = [];
+            for (let j = 0; j < chunk.length; j += 2) {
+              bytes.push(chunk.slice(j, j + 2));
+            }
+            console.log(`  ${offset.toString().padStart(3)}: ${bytes.join(" ")}`);
+          }
+          console.log("─── End Raw Debug Dump ───\n");
+        }
         const parsed = parseIkaMessageApprovalAccount(info.data as Buffer);
         if (parsed) {
           console.log(`\nParsed MessageApproval account:`);
@@ -236,11 +300,14 @@ async function main() {
           console.log(`  Version:            ${parsed.version}`);
           console.log(`  dWallet:            ${parsed.dwallet.toBase58()}`);
           console.log(`  Message digest:     ${Buffer.from(parsed.messageDigest).toString("hex")}`);
+          console.log(`  Message metadata:   ${Buffer.from(parsed.messageMetadataDigest).toString("hex")}`);
           console.log(`  Approver:           ${parsed.approver.toBase58()}`);
           console.log(`  User pubkey:        ${parsed.userPubkey.toBase58()}`);
           console.log(`  Signature scheme:   ${IkaSignatureScheme[parsed.signatureScheme]} (${parsed.signatureScheme})`);
+          console.log(`  Epoch:              ${parsed.epoch}`);
           console.log(`  Status:             ${MessageApprovalStatus[parsed.status]} (${parsed.status})`);
           console.log(`  Signature len:      ${parsed.signatureLen}`);
+          console.log(`  Bump:               ${parsed.bump}`);
           if (parsed.signatureLen > 0) {
             console.log(`  Signature (hex):    ${Buffer.from(parsed.signature).toString("hex")}`);
           }
@@ -265,7 +332,7 @@ async function main() {
   console.log(`Ika program executable:   ${ikaExecutable ? "YES" : "NO / UNKNOWN"}`);
   console.log(`Guard CPI authority:      ${guardCpiAuthority.toBase58()}`);
   console.log(`Coordinator PDA:          ${coordinatorPda.toBase58()}`);
-  if (!envDwalletPubkey) {
+  if (!envDwalletPubkey && !artifactDwallet?.dwallet_pda) {
     console.log(`\nTo inspect a dWallet, set:`);
     console.log(`  IKA_DWALLET_PUBLIC_KEY=<base58_pubkey> IKA_DWALLET_CURVE=2 npm run devnet:inspect-ika`);
   }

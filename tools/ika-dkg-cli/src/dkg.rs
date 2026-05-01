@@ -26,18 +26,30 @@ const DISC_DWALLET: u8 = 2;
 
 const COORDINATOR_LEN: usize = 116;
 const NEK_LEN: usize = 164;
-const DWALLET_LEN: usize = 2 + 690;
+const DWALLET_LEN: usize = 153;
 
-// ── dWallet offsets (after 2-byte header) ──
+// ── dWallet offsets (verified against real 153-byte devnet accounts) ──
+//   0      discriminator (1)
+//   1      version (1)
+//   2..34  authority (32)
+//   34..36 curve u16 LE (2)
+//   36     state (1)
+//   37     public_key_len (1)
+//   38..103 public_key (65 bytes padded)
+//   103..111 created_epoch u64 LE (8)
+//   111..143 noa_public_key (32)
+//   143    is_imported (1)
+//   144    bump (1)
+//   145..153 reserved (8)
 const DW_AUTHORITY: usize = 2;
 const DW_CURVE: usize = 34;
-const DW_STATE: usize = 35;
-const DW_PUBLIC_KEY_LEN: usize = 36;
-const DW_PUBLIC_KEY: usize = 37;
-const DW_CREATED_EPOCH: usize = 102;
-const DW_NOA_PUBLIC_KEY: usize = 110;
-const DW_IS_IMPORTED: usize = 142;
-const DW_BUMP: usize = 659;
+const DW_STATE: usize = 36;
+const DW_PUBLIC_KEY_LEN: usize = 37;
+const DW_PUBLIC_KEY: usize = 38;
+const DW_CREATED_EPOCH: usize = 103;
+const DW_NOA_PUBLIC_KEY: usize = 111;
+const DW_IS_IMPORTED: usize = 143;
+const DW_BUMP: usize = 144;
 
 /// Full DKG flow: gRPC DKG → poll on-chain → parse → artifact.
 pub async fn create_dwallet_via_dkg(
@@ -164,7 +176,10 @@ pub async fn create_dwallet_via_dkg(
             .try_into()
             .unwrap(),
     );
-    let curve_byte = dwallet_data[DW_CURVE];
+    let curve_u16_le = u16::from_le_bytes([
+        dwallet_data[DW_CURVE],
+        dwallet_data[DW_CURVE + 1],
+    ]);
     let state_byte = dwallet_data[DW_STATE];
     let public_key_len = dwallet_data[DW_PUBLIC_KEY_LEN] as usize;
     let onchain_public_key = &dwallet_data[DW_PUBLIC_KEY..DW_PUBLIC_KEY + public_key_len.min(65)];
@@ -182,7 +197,7 @@ pub async fn create_dwallet_via_dkg(
     let bump = dwallet_data[DW_BUMP];
 
     println!("      Authority:          {}", authority);
-    println!("      Curve (on-chain):   {}", curve_byte);
+    println!("      Curve (on-chain):   {} (u16 LE)", curve_u16_le);
     println!("      State (on-chain):   {}", state_byte);
     println!("      Public key len:     {}", public_key_len);
     println!("      Public key match:   {}", onchain_public_key == public_key.as_slice());
@@ -206,14 +221,6 @@ pub async fn create_dwallet_via_dkg(
         0 => "DKGInProgress",
         1 => "Active",
         2 => "Frozen",
-        _ => "Unknown",
-    };
-
-    let _curve_name = match curve_byte {
-        0 => "Secp256k1",
-        1 => "Secp256r1",
-        2 => "Curve25519",
-        3 => "Ristretto",
         _ => "Unknown",
     };
 

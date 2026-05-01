@@ -12,6 +12,7 @@
     "verify:dwallet-guard": "bash scripts/verify-dwallet-guard-deploy.sh",
     "devnet:create-guarded-dwallet": "tsx scripts/devnet-create-guarded-dwallet.ts",
     "devnet:inspect-ika": "tsx scripts/devnet-inspect-ika.ts",
+    "devnet:inspect-ika:debug": "IKA_DEBUG_RAW=1 npm run devnet:inspect-ika",
     "ika:create-dwallet": "bash scripts/ika-create-dwallet.sh",
     "ika:dkg-check": "PROTOC=/home/codespace/.local/protoc/bin/protoc cargo check --manifest-path tools/ika-dkg-cli/Cargo.toml"
   },

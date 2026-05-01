@@ -492,15 +492,16 @@ npm run devnet:create-guarded-dwallet
   - `deriveIkaCpiAuthorityPda(callerProgramId)` — CPI authority for program-controlled signing
   - `deriveHumanRailGuardCpiAuthority(guardProgramId)` — HumanRail Guard's CPI authority
 - **`lib/ika/parsers.ts`** — Raw account parsers:
-  - `parseIkaDwalletAccount(data)` — authority, curve, state, public key, epoch, NOA pubkey, bump
-  - `parseIkaMessageApprovalAccount(data)` — dwallet, message digest, approver, status @ 172, signature len @ 173, signature @ 175
+  - `parseIkaDwalletAccount(data)` — authority, curve u16 LE@34, state@36, public_key_len@37, public_key@38, epoch@103, NOA pubkey@111, bump@144
+  - `parseIkaMessageApprovalAccount(data)` — dwallet, message_digest@34, message_metadata_digest@66, approver@98, user_pubkey@130, signature_scheme u16 LE@162, epoch@164, status@172, signature_len@173, signature@175, bump@303
 - **`lib/ika/client.ts`** — Honest `IkaClient` class:
   - ✅ `fetchDwallet()`, `fetchMessageApproval()`, `waitForMessageApprovalSigned()`, `isDwalletProgramExecutable()`
   - 🚧 `createDwalletViaDkg()`, `transferDwalletAuthority()`, `signApprovedMessage()` — throw `IkaNotImplementedError`
 - **`scripts/devnet-inspect-ika.ts`** — Read-only devnet inspector:
   - Verifies Ika program executable status
   - Derives and prints Guard CPI authority, coordinator PDA
-  - Optional env-var driven dWallet / MessageApproval fetching
+  - Auto-detects `.local-ika/dwallet.json` artifact
+  - `IKA_DEBUG_RAW=1` mode prints raw hex dump + offset diagnostics
   - Run: `npm run devnet:inspect-ika`
 - **`docs/IKA_INTEGRATION_RUNBOOK.md`** — Full technical note with lifecycle, offsets, open questions, crate inventory.
 
@@ -509,6 +510,16 @@ All offsets and seed logic are sourced from the compiled Ika pre-alpha crates (r
 - `ika-dwallet-anchor` CPI SDK
 - `chains/solana/examples/_shared/ika-setup.ts`
 - `chains/solana/examples/voting/e2e-rust/src/main.rs`
+
+**Parser offset correction (2026-05-01):** The initial Phase 5A parser assumed `curve` was 1 byte, causing all subsequent offsets to be shifted by 1 byte. After creating a real dWallet on devnet, the correct 153-byte layout was verified:
+- curve = u16 LE at offset 34 (was read as single byte at 34)
+- state = offset 36 (was 35)
+- public_key_len = offset 37 (was 36)
+- public_key = offset 38 (was 37)
+- created_epoch = offset 103 (was 102)
+- noa_public_key = offset 111 (was 110)
+- is_imported = offset 143 (was 142)
+- bump = offset 144 (was 659, based on litesvm test layout)
 
 ### dWallet PDA derivation logic
 ```
@@ -527,8 +538,8 @@ seeds = ["dwallet", chunks..., "message_approval", u16LE(scheme), message_digest
 
 | Phase | Goal | Status |
 |-------|------|--------|
-| **5B** | Create real Ika dWallet via gRPC DKG | Planned — needs BCS serialization + gRPC client |
-| **5C** | Transfer authority + real `approve_guarded_message` CPI | Planned — needs 5B dWallet + authority transfer tx |
+| **5B** | Create real Ika dWallet via gRPC DKG | ✅ COMPLETE — DKG succeeded, parser offsets fixed |
+| **5C** | Transfer authority + real `approve_guarded_message` CPI | NEXT — needs authority transfer tx |
 | **5D** | gRPC Sign + signature on-chain verification | Planned — needs presign + ApprovalProof construction |
 | **5E** | Agent runtime `request_cross_chain_signature` tool | Planned — needs 5B–5D complete |
 

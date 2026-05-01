@@ -103,29 +103,59 @@ Ika is currently in **pre-alpha**. All of the following applies to the pre-alpha
 
 ---
 
-## Phase 5B — Create Real Ika dWallet via gRPC/DKG (NEXT)
+## Phase 5B — Create Real Ika dWallet via gRPC/DKG (COMPLETE)
 
 **Goal:** Execute a real DKG flow and create an on-chain dWallet.
 
-**Blockers/Questions:**
-1. **gRPC request construction** — Need to BCS-serialize `SignedRequestData { request: DWalletRequest::DKG { ... } }`
-2. **User signature** — The gRPC request requires an Ed25519 user signature over the BCS payload. In pre-alpha, the mock accepts zeroed signatures, but we need to confirm this for the live devnet.
-3. **CommitDWallet** — After DKG, the mock should commit the dWallet on-chain automatically. Need to verify the polling logic.
+**Status:** ✅ COMPLETE — DKG succeeded, parser offset bug fixed, dWallet verified Active.
 
-**Implementation plan:**
-- Add `createDwalletViaDkg()` to `IkaClient`
-- Use `@mysten/bcs` for serialization (already used in ika-setup.ts)
-- Build `UserSignedRequest` with Ed25519 signature
-- Poll for dWallet PDA after DKG response
+**What was accomplished:**
+- Built Rust CLI (`tools/ika-dkg-cli/`) using official `ika-grpc` + `ika-dwallet-types` crates
+- Submitted `DWalletRequest::DKG` via gRPC to pre-alpha devnet
+- Received `NetworkSignedAttestation` with dWallet public key
+- Derived dWallet PDA using `curve_u16_le || public_key` chunked into 32-byte seeds
+- On-chain account confirmed: **153 bytes**, owned by Ika program
+
+**Parser offset bug discovered and fixed:**
+- Old parser read `state@35`, `public_key_len@36`, `public_key@37` — **shifted by 1 byte**
+- Corrected offsets: `state@36`, `public_key_len@37`, `public_key@38`
+- Curve is u16 LE at offset 34 (not a single byte)
+- Root cause: old offsets assumed curve was 1 byte, but it's 2 bytes (u16 LE)
+
+**Verified dWallet (devnet):**
+| Field | Value |
+|-------|-------|
+| PDA | `A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp` |
+| Authority | `5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y` |
+| Curve | Secp256k1 (0) |
+| State | **Active (1)** |
+| Public key len | **33** |
+| Public key | `02e2d5f5...7cb0aa5d` |
+| Bump | 255 |
+
+**Artifact:** `.local-ika/dwallet.json` (gitignored)
+
+**Commands:**
+```bash
+npm run ika:create-dwallet              # Run DKG
+npm run ika:create-dwallet -- --skip-poll  # Skip on-chain polling
+npm run devnet:inspect-ika              # Inspect artifact dWallet
+npm run devnet:inspect-ika:debug        # Raw hex dump + offset diagnostics
+```
 
 ---
 
-## Phase 5C — Transfer Authority + Real Signing Request
+## Phase 5C — Transfer Authority + Real Signing Request (NEXT)
 
 **Goal:** Transfer dWallet authority to Guard CPI PDA, then execute a real `approve_guarded_message` that passes policy and CPI-calls Ika.
 
+**Prerequisites (now met):**
+1. ✅ Real dWallet created via gRPC DKG
+2. ✅ dWallet state confirmed `Active(1)` on-chain
+3. ✅ Parser offsets corrected and verified against real 153-byte account
+
 **Blockers/Questions:**
-1. **Authority transfer transaction** — Simple Solana tx with TransferOwnership instruction. Needs current authority (payer) to sign.
+1. **Authority transfer transaction** — Simple Solana tx with `TransferOwnership` instruction (discriminator 24). Needs current authority (payer) to sign. New authority = HumanRail Guard CPI PDA `FCHUWJRV33HxGrNqFxKCeqZQkqNUzKBqD1EgqpmeVqd`.
 2. **MessageApproval PDA derivation** — Verified from e2e-rust: hierarchical seeds with dWallet prefix + scheme + message digest.
 3. **Coordinator account** — Need to pass the DWalletCoordinator PDA to approve_message. Derivation: `["dwallet_coordinator"]`.
 
@@ -165,6 +195,46 @@ Ika is currently in **pre-alpha**. All of the following applies to the pre-alpha
 - The TypeScript example uses `@grpc/grpc-js` with `@grpc/proto-loader`
 - Both approaches work; JS is better for frontend integration, Rust for scripts
 
+### dWallet Account Layout (153 bytes)
+Corrected offsets verified against real devnet accounts:
+
+| Field | Offset | Size | Type |
+|-------|--------|------|------|
+| discriminator | 0 | 1 | u8 |
+| version | 1 | 1 | u8 |
+| authority | 2 | 32 | Pubkey |
+| curve | 34 | 2 | u16 LE |
+| state | 36 | 1 | u8 |
+| public_key_len | 37 | 1 | u8 |
+| public_key | 38 | 65 | bytes (padded) |
+| created_epoch | 103 | 8 | u64 LE |
+| noa_public_key | 111 | 32 | Pubkey |
+| is_imported | 143 | 1 | u8 |
+| bump | 144 | 1 | u8 |
+| reserved | 145 | 8 | — |
+| **Total** | | **153** | |
+
+### MessageApproval Account Layout (312 bytes)
+Updated layout with `message_metadata_digest` field:
+
+| Field | Offset | Size | Type |
+|-------|--------|------|------|
+| discriminator | 0 | 1 | u8 |
+| version | 1 | 1 | u8 |
+| dwallet | 2 | 32 | Pubkey |
+| message_digest | 34 | 32 | bytes |
+| message_metadata_digest | 66 | 32 | bytes |
+| approver | 98 | 32 | Pubkey |
+| user_pubkey | 130 | 32 | Pubkey |
+| signature_scheme | 162 | 2 | u16 LE |
+| epoch | 164 | 8 | u64 LE |
+| status | 172 | 1 | u8 |
+| signature_len | 173 | 2 | u16 LE |
+| signature | 175 | 128 | bytes (padded) |
+| bump | 303 | 1 | u8 |
+| reserved | 304 | 8 | — |
+| **Total** | | **312** | |
+
 ### DWalletCoordinator / SystemState PDA
 - Derivation: `["dwallet_coordinator"]` under the Ika program ID
 - Must be present and active before any approve_message CPI
@@ -181,8 +251,8 @@ Ika is currently in **pre-alpha**. All of the following applies to the pre-alpha
 - `slot` can be 0 in pre-alpha (mock doesn't verify it strictly)
 
 ### Gas Deposit Requirements
-- dWallet account creation requires rent exemption (~0.005 SOL for 692 bytes)
-- MessageApproval creation requires rent exemption (~0.003 SOL for ~287 bytes)
+- dWallet account creation requires rent exemption (~0.00114 SOL for 153 bytes)
+- MessageApproval creation requires rent exemption (~0.00223 SOL for 312 bytes)
 - The Guard program's `approve_guarded_message` pays for MessageApproval creation via CPI
 - No additional gas deposit mechanism is currently documented for pre-alpha
 

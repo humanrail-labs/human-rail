@@ -77,20 +77,26 @@ export interface IkaMessageApproval {
   version: number;
   /** The dWallet this approval is for. */
   dwallet: PublicKey;
-  /** The message hash (keccak256) that was approved. */
+  /** The message digest (keccak256) that was approved. */
   messageDigest: Uint8Array;
+  /** The message metadata digest (keccak256). */
+  messageMetadataDigest: Uint8Array;
   /** The approver pubkey (usually CPI authority PDA). */
   approver: PublicKey;
   /** The user pubkey associated with this approval. */
   userPubkey: PublicKey;
   /** Signature scheme used. */
   signatureScheme: IkaSignatureScheme;
+  /** Epoch when the approval was created. */
+  epoch: bigint;
   /** Current status. */
   status: MessageApprovalStatus;
   /** Length of the committed signature (0 if pending). */
   signatureLen: number;
   /** The committed signature bytes. */
   signature: Uint8Array;
+  /** PDA bump. */
+  bump: number;
 }
 
 // ── gRPC Types (honest stubs — not faked) ──

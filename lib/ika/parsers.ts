@@ -5,18 +5,14 @@
  * into typed field accessors.
  *
  * Layouts verified from:
+ * - Real 153-byte devnet dWallet accounts (Phase 5B)
  * - chains/solana/examples/voting/e2e-rust/src/main.rs (MessageApproval offsets)
- * - chains/solana/examples/voting/pinocchio/tests/litesvm.rs (DWallet offsets)
- *
- * Note: The litesvm test uses a simplified DWallet layout for mock testing.
- * The e2e-rust examples confirm the MessageApproval offsets against the
- * real on-chain Ika program. DWallet offsets are the best available source
- * and should be re-verified when a real on-chain dWallet is inspected.
  */
 
 import { PublicKey } from "@solana/web3.js";
 import {
   IKA_DWALLET_LEN,
+  IKA_MESSAGE_APPROVAL_LEN,
   IKA_DISC_DWALLET,
   IKA_DISC_MESSAGE_APPROVAL,
   IKA_DW_OFFSET_AUTHORITY,
@@ -29,13 +25,16 @@ import {
   IKA_DW_OFFSET_IS_IMPORTED,
   IKA_DW_OFFSET_BUMP,
   IKA_MA_OFFSET_DWALLET,
-  IKA_MA_OFFSET_MESSAGE_HASH,
+  IKA_MA_OFFSET_MESSAGE_DIGEST,
+  IKA_MA_OFFSET_MESSAGE_METADATA_DIGEST,
   IKA_MA_OFFSET_APPROVER,
   IKA_MA_OFFSET_USER_PUBKEY,
   IKA_MA_OFFSET_SIGNATURE_SCHEME,
+  IKA_MA_OFFSET_EPOCH,
   IKA_MA_OFFSET_STATUS,
   IKA_MA_OFFSET_SIGNATURE_LEN,
   IKA_MA_OFFSET_SIGNATURE,
+  IKA_MA_OFFSET_BUMP,
 } from "./constants";
 import {
   DWalletCurve,
@@ -61,6 +60,20 @@ export function isZero32(bytes: Uint8Array): boolean {
 /**
  * Parse raw Ika dWallet account data.
  *
+ * Layout (153 bytes):
+ *   0      discriminator (1)
+ *   1      version (1)
+ *   2..34  authority (32)
+ *   34..36 curve u16 LE (2)
+ *   36     state (1)
+ *   37     public_key_len (1)
+ *   38..103 public_key (65 bytes padded)
+ *   103..111 created_epoch u64 LE (8)
+ *   111..143 noa_public_key (32)
+ *   143    is_imported (1)
+ *   144    bump (1)
+ *   145..153 reserved (8)
+ *
  * @param data - Raw account data from Solana RPC.
  * @returns Parsed IkaDwallet or null if data is invalid/too short.
  * @throws IkaAccountParseError if data is malformed in an unexpected way.
@@ -79,8 +92,6 @@ export function parseIkaDwalletAccount(data: Buffer | Uint8Array): IkaDwallet | 
 
   const version = buf[1];
   if (version !== 1) {
-    // Version mismatch — may indicate a different Ika program revision.
-    // We still attempt to parse but warn.
     console.warn(
       `[parseIkaDwalletAccount] Unexpected version ${version} (expected 1). ` +
         `Ika program revision may have changed.`
@@ -92,7 +103,8 @@ export function parseIkaDwalletAccount(data: Buffer | Uint8Array): IkaDwallet | 
       buf.slice(IKA_DW_OFFSET_AUTHORITY, IKA_DW_OFFSET_AUTHORITY + 32)
     );
 
-    const curveRaw = buf[IKA_DW_OFFSET_CURVE];
+    // Curve is stored as u16 LE (2 bytes). All current curve values fit in the low byte.
+    const curveRaw = buf.readUInt16LE(IKA_DW_OFFSET_CURVE);
     const curve = Object.values(DWalletCurve).includes(curveRaw)
       ? (curveRaw as DWalletCurve)
       : DWalletCurve.Secp256k1;
@@ -117,7 +129,7 @@ export function parseIkaDwalletAccount(data: Buffer | Uint8Array): IkaDwallet | 
     );
 
     const isImported = buf[IKA_DW_OFFSET_IS_IMPORTED] === 1;
-    const bump = buf.length > IKA_DW_OFFSET_BUMP ? buf[IKA_DW_OFFSET_BUMP] : undefined;
+    const bump = buf[IKA_DW_OFFSET_BUMP];
 
     return {
       discriminator,
@@ -144,7 +156,21 @@ export function parseIkaDwalletAccount(data: Buffer | Uint8Array): IkaDwallet | 
 /**
  * Parse raw Ika MessageApproval account data.
  *
- * Offsets verified from e2e-rust examples (voting + multisig).
+ * Layout (312 bytes):
+ *   0      discriminator (1)
+ *   1      version (1)
+ *   2..34  dwallet (32)
+ *   34..66 message_digest (32)
+ *   66..98 message_metadata_digest (32)
+ *   98..130 approver (32)
+ *   130..162 user_pubkey (32)
+ *   162..164 signature_scheme u16 LE (2)
+ *   164..172 epoch u64 LE (8)
+ *   172    status (1)
+ *   173..175 signature_len u16 LE (2)
+ *   175..303 signature (128 bytes padded)
+ *   303    bump (1)
+ *   304..312 reserved (8)
  *
  * @param data - Raw account data from Solana RPC.
  * @returns Parsed IkaMessageApproval or null if data is invalid/too short.
@@ -155,10 +181,8 @@ export function parseIkaMessageApprovalAccount(
 ): IkaMessageApproval | null {
   const buf = Buffer.isBuffer(data) ? data : Buffer.from(data);
 
-  // Minimum size: header(2) + dwallet(32) + message_hash(32) + approver(32) +
-  //               user_pubkey(32) + signature_scheme(?) + status(1) = ~131
-  // But we need at least up to the status byte (172) + signature_len (2) = 174
-  if (buf.length < 174) {
+  // Need at least up to the bump byte (303) + 1 = 304, or the full 312 bytes
+  if (buf.length < IKA_MESSAGE_APPROVAL_LEN) {
     return null;
   }
 
@@ -181,7 +205,11 @@ export function parseIkaMessageApprovalAccount(
     );
 
     const messageDigest = new Uint8Array(
-      buf.slice(IKA_MA_OFFSET_MESSAGE_HASH, IKA_MA_OFFSET_MESSAGE_HASH + 32)
+      buf.slice(IKA_MA_OFFSET_MESSAGE_DIGEST, IKA_MA_OFFSET_MESSAGE_DIGEST + 32)
+    );
+
+    const messageMetadataDigest = new Uint8Array(
+      buf.slice(IKA_MA_OFFSET_MESSAGE_METADATA_DIGEST, IKA_MA_OFFSET_MESSAGE_METADATA_DIGEST + 32)
     );
 
     const approver = new PublicKey(
@@ -192,14 +220,13 @@ export function parseIkaMessageApprovalAccount(
       buf.slice(IKA_MA_OFFSET_USER_PUBKEY, IKA_MA_OFFSET_USER_PUBKEY + 32)
     );
 
-    // signature_scheme is stored as a single byte in the current pre-alpha
-    // layout (e2e-rust reads ma_data[MA_SIGNATURE_SCHEME] as a single byte).
-    // The Anchor CPI passes it as u16 in instruction data, but the account
-    // stores only the low byte. This may change in future Ika revisions.
-    const schemeRaw = buf[IKA_MA_OFFSET_SIGNATURE_SCHEME];
+    // signature_scheme is stored as u16 LE in the account data
+    const schemeRaw = buf.readUInt16LE(IKA_MA_OFFSET_SIGNATURE_SCHEME);
     const signatureScheme = Object.values(IkaSignatureScheme).includes(schemeRaw)
       ? (schemeRaw as IkaSignatureScheme)
       : IkaSignatureScheme.EcdsaKeccak256;
+
+    const epoch = buf.readBigUInt64LE(IKA_MA_OFFSET_EPOCH);
 
     const statusRaw = buf[IKA_MA_OFFSET_STATUS];
     const status =
@@ -221,17 +248,22 @@ export function parseIkaMessageApprovalAccount(
       buf.slice(IKA_MA_OFFSET_SIGNATURE, sigEnd)
     );
 
+    const bump = buf[IKA_MA_OFFSET_BUMP];
+
     return {
       discriminator,
       version,
       dwallet,
       messageDigest,
+      messageMetadataDigest,
       approver,
       userPubkey,
       signatureScheme,
+      epoch,
       status,
       signatureLen,
       signature,
+      bump,
     };
   } catch (err) {
     if (err instanceof IkaAccountParseError) throw err;

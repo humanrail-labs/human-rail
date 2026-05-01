@@ -99,7 +99,6 @@ export function deriveIkaMessageApprovalPda(
  * when a program calls approve_message via CPI.
  *
  * @param callerProgramId - The program that will invoke Ika via CPI.
- * @param dwalletProgramId - Ika dWallet program ID (defaults to devnet).
  */
 export function deriveIkaCpiAuthorityPda(
   callerProgramId: PublicKey
@@ -132,5 +131,5 @@ export function deriveIkaCoordinatorPda(
 export function deriveHumanRailGuardCpiAuthority(
   guardProgramId: PublicKey
 ): [PublicKey, number] {
-  return deriveIkaCpiAuthorityPda(guardProgramId, IKA_DWALLET_PROGRAM_ID_DEVNET);
+  return deriveIkaCpiAuthorityPda(guardProgramId);
 }

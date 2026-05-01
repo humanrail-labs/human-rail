@@ -54,7 +54,10 @@ export const IKA_DISC_NEK = 3;
 // ── Account sizes ──
 
 /** DWallet account total size (discriminator + version + data). */
-export const IKA_DWALLET_LEN = 153; // actual devnet account size (pre-alpha mock may vary)
+export const IKA_DWALLET_LEN = 153;
+
+/** MessageApproval account total size. */
+export const IKA_MESSAGE_APPROVAL_LEN = 312;
 
 /** DWalletCoordinator account total size. */
 export const IKA_COORDINATOR_LEN = 116;
@@ -63,51 +66,89 @@ export const IKA_COORDINATOR_LEN = 116;
 export const IKA_NEK_LEN = 164;
 
 // ── dWallet field offsets (after 2-byte header) ──
+// Layout verified against real 153-byte devnet dWallet accounts.
+//
+// DWallet (153 bytes):
+//   0      discriminator (1)
+//   1      version (1)
+//   2..34  authority (32)
+//   34..36 curve u16 LE (2)
+//   36     state (1)
+//   37     public_key_len (1)
+//   38..103 public_key (65 bytes padded)
+//   103..111 created_epoch u64 LE (8)
+//   111..143 noa_public_key (32)
+//   143    is_imported (1)
+//   144    bump (1)
+//   145..153 reserved (8)
 
 /** authority pubkey offset in dWallet account data. */
 export const IKA_DW_OFFSET_AUTHORITY = 2;
 
-/** curve byte offset in dWallet account data. */
+/** curve u16 LE offset in dWallet account data. */
 export const IKA_DW_OFFSET_CURVE = 34;
 
 /** state byte offset in dWallet account data. */
-export const IKA_DW_OFFSET_STATE = 35;
+export const IKA_DW_OFFSET_STATE = 36;
 
 /** public_key_len byte offset in dWallet account data. */
-export const IKA_DW_OFFSET_PUBLIC_KEY_LEN = 36;
+export const IKA_DW_OFFSET_PUBLIC_KEY_LEN = 37;
 
 /** public_key bytes offset in dWallet account data. */
-export const IKA_DW_OFFSET_PUBLIC_KEY = 37;
+export const IKA_DW_OFFSET_PUBLIC_KEY = 38;
 
 /** created_epoch u64 offset in dWallet account data. */
-export const IKA_DW_OFFSET_CREATED_EPOCH = 102;
+export const IKA_DW_OFFSET_CREATED_EPOCH = 103;
 
 /** noa_public_key pubkey offset in dWallet account data. */
-export const IKA_DW_OFFSET_NOA_PUBLIC_KEY = 110;
+export const IKA_DW_OFFSET_NOA_PUBLIC_KEY = 111;
 
 /** is_imported byte offset in dWallet account data. */
-export const IKA_DW_OFFSET_IS_IMPORTED = 142;
+export const IKA_DW_OFFSET_IS_IMPORTED = 143;
 
 /** bump byte offset in dWallet account data. */
-export const IKA_DW_OFFSET_BUMP = 659;
+export const IKA_DW_OFFSET_BUMP = 144;
 
 // ── MessageApproval field offsets (after 2-byte header) ──
-// Verified from e2e-rust examples (voting + multisig).
+// Layout verified from e2e-rust examples (voting + multisig).
+// Includes message_metadata_digest field present in newer Ika revisions.
+//
+// MessageApproval (312 bytes):
+//   0      discriminator (1)
+//   1      version (1)
+//   2..34  dwallet (32)
+//   34..66 message_digest (32)
+//   66..98 message_metadata_digest (32)
+//   98..130 approver (32)
+//   130..162 user_pubkey (32)
+//   162..164 signature_scheme u16 LE (2)
+//   164..172 epoch u64 LE (8)
+//   172    status (1)
+//   173..175 signature_len u16 LE (2)
+//   175..303 signature (128 bytes padded)
+//   303    bump (1)
+//   304..312 reserved (8)
 
 /** dwallet pubkey offset in MessageApproval account data. */
 export const IKA_MA_OFFSET_DWALLET = 2;
 
-/** message_hash / message_digest offset in MessageApproval account data. */
-export const IKA_MA_OFFSET_MESSAGE_HASH = 34;
+/** message_digest offset in MessageApproval account data. */
+export const IKA_MA_OFFSET_MESSAGE_DIGEST = 34;
+
+/** message_metadata_digest offset in MessageApproval account data. */
+export const IKA_MA_OFFSET_MESSAGE_METADATA_DIGEST = 66;
 
 /** approver pubkey offset in MessageApproval account data. */
-export const IKA_MA_OFFSET_APPROVER = 66;
+export const IKA_MA_OFFSET_APPROVER = 98;
 
 /** user_pubkey offset in MessageApproval account data. */
-export const IKA_MA_OFFSET_USER_PUBKEY = 98;
+export const IKA_MA_OFFSET_USER_PUBKEY = 130;
 
-/** signature_scheme offset in MessageApproval account data. */
-export const IKA_MA_OFFSET_SIGNATURE_SCHEME = 130;
+/** signature_scheme u16 LE offset in MessageApproval account data. */
+export const IKA_MA_OFFSET_SIGNATURE_SCHEME = 162;
+
+/** epoch u64 LE offset in MessageApproval account data. */
+export const IKA_MA_OFFSET_EPOCH = 164;
 
 /** status byte offset in MessageApproval account data. */
 export const IKA_MA_OFFSET_STATUS = 172;
@@ -117,6 +158,9 @@ export const IKA_MA_OFFSET_SIGNATURE_LEN = 173;
 
 /** signature bytes offset in MessageApproval account data. */
 export const IKA_MA_OFFSET_SIGNATURE = 175;
+
+/** bump byte offset in MessageApproval account data. */
+export const IKA_MA_OFFSET_BUMP = 303;
 
 // ── Instruction discriminators ──
 
