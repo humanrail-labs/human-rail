@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction, TransactionInstruction, SystemProgram } from "@solana/web3.js";
 import { motion } from "framer-motion";
@@ -229,6 +229,22 @@ export default function DwalletGuardPageClient() {
   const [realIkaDwallet, setRealIkaDwallet] = useState<IkaDwallet | null>(null);
   const [realGuardedDwallet, setRealGuardedDwallet] = useState<GuardedDwallet | null>(null);
 
+  // Phase 5D approved signing request state
+  const [phase5dArtifact, setPhase5dArtifact] = useState<{
+    preimage: string;
+    messageDigestHex: string;
+    signatureScheme: string;
+    guardSigningRequestPda: string;
+    ikaMessageApprovalPda: string;
+    approveGuardedMessageSignature: string;
+    amount: string;
+    destinationChainId: number;
+    status: string;
+  } | null>(null);
+  const [phase5dGuardSigningRequest, setPhase5dGuardSigningRequest] = useState<GuardSigningRequest | null>(null);
+  const [phase5dMessageApproval, setPhase5dMessageApproval] = useState<IkaMessageApproval | null>(null);
+  const [phase5dLoading, setPhase5dLoading] = useState<string | null>(null);
+
   // Phase 4B known demo addresses
   const PHASE4B = useMemo(() => {
     if (!guardProgramId) return null;
@@ -276,6 +292,63 @@ export default function DwalletGuardPageClient() {
     const data = await fetchGuardSigningRequest(PHASE4B.guardSigningRequest);
     setFetchedRequest(data);
   }, [PHASE4B, fetchGuardSigningRequest]);
+
+  // -----------------------------------------------------------------------
+  // Phase 5D helpers
+  // -----------------------------------------------------------------------
+  const handleLoadPhase5dArtifact = useCallback((jsonString: string) => {
+    try {
+      const parsed = JSON.parse(jsonString);
+      setPhase5dArtifact(parsed);
+      localStorage.setItem("hr_phase5d_artifact", jsonString);
+    } catch (err) {
+      console.error("Failed to parse Phase 5D artifact:", err);
+    }
+  }, []);
+
+  const handleFetchPhase5dGuardSigningRequest = useCallback(async () => {
+    if (!phase5dArtifact?.guardSigningRequestPda) return;
+    setPhase5dLoading("Fetching GuardSigningRequest");
+    try {
+      const data = await fetchGuardSigningRequest(new PublicKey(phase5dArtifact.guardSigningRequestPda));
+      setPhase5dGuardSigningRequest(data);
+    } catch (err) {
+      console.error("Fetch Phase 5D GSR failed:", err);
+    } finally {
+      setPhase5dLoading(null);
+    }
+  }, [phase5dArtifact, fetchGuardSigningRequest]);
+
+  const handleFetchPhase5dMessageApproval = useCallback(async () => {
+    if (!phase5dArtifact?.ikaMessageApprovalPda) return;
+    setPhase5dLoading("Fetching MessageApproval");
+    try {
+      const info = await connection.getAccountInfo(new PublicKey(phase5dArtifact.ikaMessageApprovalPda));
+      if (info) {
+        const parsed = parseIkaMessageApprovalAccount(info.data as Buffer);
+        setPhase5dMessageApproval(parsed);
+      } else {
+        setPhase5dMessageApproval(null);
+      }
+    } catch (err) {
+      console.error("Fetch Phase 5D MA failed:", err);
+      setPhase5dMessageApproval(null);
+    } finally {
+      setPhase5dLoading(null);
+    }
+  }, [phase5dArtifact, connection]);
+
+  // Load artifact from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("hr_phase5d_artifact");
+      if (saved) {
+        setPhase5dArtifact(JSON.parse(saved));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // -----------------------------------------------------------------------
   // Demo transaction helpers
@@ -1236,6 +1309,192 @@ export default function DwalletGuardPageClient() {
                     <code className="truncate text-neutral-400">{realGuardedDwallet.bump}</code>
                   </div>
                 </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Phase 5D Approved Signing Request Card */}
+          <Card className="border-white/[0.06] bg-neutral-900/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base text-white">
+                <FileKey className="h-4 w-4 text-emerald-400" />
+                Approved Signing Request — Phase 5D
+              </CardTitle>
+              <CardDescription className="text-neutral-500">
+                Real approve_guarded_message via Guard CPI to Ika approve_message
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!phase5dArtifact ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-neutral-400">
+                    Paste the contents of <code>.local-ika/signing-request.json</code> after running{" "}
+                    <code>npm run ika:approve-message</code>:
+                  </p>
+                  <textarea
+                    className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-xs text-neutral-300 placeholder:text-neutral-600 outline-none focus:border-emerald-500/30"
+                    rows={4}
+                    placeholder={`{"guardSigningRequestPda":"...","ikaMessageApprovalPda":"..."}`}
+                    onChange={(e) => {
+                      if (e.target.value.trim()) {
+                        handleLoadPhase5dArtifact(e.target.value.trim());
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-start gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-emerald-200">Artifact loaded ✅</p>
+                      <p className="text-[11px] text-emerald-200/60">
+                        {phase5dMessageApproval?.status === 0
+                          ? "MessageApproval status = Pending"
+                          : phase5dMessageApproval?.status === 1
+                          ? "MessageApproval status = Signed"
+                          : "Fetch on-chain state to verify."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <span className="text-xs text-neutral-500">Preimage</span>
+                      <code className="block truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
+                        {phase5dArtifact.preimage}
+                      </code>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-neutral-500">Message Digest</span>
+                      <code className="block truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
+                        {phase5dArtifact.messageDigestHex}
+                      </code>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="text-neutral-500">Signature Scheme</div>
+                      <code className="truncate text-neutral-400">{phase5dArtifact.signatureScheme}</code>
+                      <div className="text-neutral-500">Amount</div>
+                      <code className="truncate text-neutral-400">{phase5dArtifact.amount}</code>
+                      <div className="text-neutral-500">Destination Chain</div>
+                      <code className="truncate text-neutral-400">{phase5dArtifact.destinationChainId}</code>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-neutral-500">GuardSigningRequest PDA</span>
+                      <div className="flex items-center gap-2">
+                        <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
+                          {phase5dArtifact.guardSigningRequestPda}
+                        </code>
+                        <button onClick={() => copyToClipboard(phase5dArtifact.guardSigningRequestPda)} className="text-neutral-500 hover:text-neutral-300">
+                          <Copy className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-neutral-500">Ika MessageApproval PDA</span>
+                      <div className="flex items-center gap-2">
+                        <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
+                          {phase5dArtifact.ikaMessageApprovalPda}
+                        </code>
+                        <button onClick={() => copyToClipboard(phase5dArtifact.ikaMessageApprovalPda)} className="text-neutral-500 hover:text-neutral-300">
+                          <Copy className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-neutral-500">Approve Transaction</span>
+                      <div className="flex items-center gap-2">
+                        <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
+                          {phase5dArtifact.approveGuardedMessageSignature.slice(0, 24)}…
+                        </code>
+                        <a href={`https://solana.fm/tx/${phase5dArtifact.approveGuardedMessageSignature}?cluster=devnet-alpha`} target="_blank" rel="noreferrer" className="text-neutral-500 hover:text-neutral-300">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleFetchPhase5dGuardSigningRequest}
+                      disabled={phase5dLoading !== null}
+                      className="text-xs"
+                    >
+                      <Search className="mr-1.5 h-3.5 w-3.5" />
+                      Fetch Approved Request
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleFetchPhase5dMessageApproval}
+                      disabled={phase5dLoading !== null}
+                      className="text-xs"
+                    >
+                      <Search className="mr-1.5 h-3.5 w-3.5" />
+                      Fetch MessageApproval
+                    </Button>
+                  </div>
+
+                  {phase5dLoading && (
+                    <div className="flex items-center gap-2 text-xs text-neutral-400">
+                      <Clock className="h-3.5 w-3.5 animate-spin" />
+                      {phase5dLoading}…
+                    </div>
+                  )}
+
+                  {phase5dGuardSigningRequest && (
+                    <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                      <p className="text-xs font-medium text-neutral-400">GuardSigningRequest on-chain</p>
+                      <div className="grid grid-cols-2 gap-2 text-[11px]">
+                        <div className="text-neutral-500">Status</div>
+                        <code className="truncate text-neutral-400">
+                          {phase5dGuardSigningRequest.status === 1 ? "approved" : phase5dGuardSigningRequest.status === 2 ? "rejected" : "unknown"} ({phase5dGuardSigningRequest.status})
+                        </code>
+                        <div className="text-neutral-500">Rejection code</div>
+                        <code className="truncate text-neutral-400">{phase5dGuardSigningRequest.rejectionCode}</code>
+                        <div className="text-neutral-500">IkaMessageApproval</div>
+                        <code className="truncate text-neutral-400">{phase5dGuardSigningRequest.ikaMessageApproval.toBase58().slice(0, 16)}…</code>
+                      </div>
+                    </div>
+                  )}
+
+                  {phase5dMessageApproval && (
+                    <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                      <p className="text-xs font-medium text-neutral-400">Ika MessageApproval on-chain</p>
+                      <div className="grid grid-cols-2 gap-2 text-[11px]">
+                        <div className="text-neutral-500">Status</div>
+                        <code className="truncate text-neutral-400">
+                          {phase5dMessageApproval.status === 0 ? "Pending" : phase5dMessageApproval.status === 1 ? "Signed" : "?"} ({phase5dMessageApproval.status})
+                        </code>
+                        <div className="text-neutral-500">Signature len</div>
+                        <code className="truncate text-neutral-400">{phase5dMessageApproval.signatureLen}</code>
+                        <div className="text-neutral-500">dWallet</div>
+                        <code className="truncate text-neutral-400">{phase5dMessageApproval.dwallet.toBase58().slice(0, 16)}…</code>
+                      </div>
+                      {phase5dMessageApproval.status === 0 && (
+                        <div className="mt-2 rounded border border-purple-500/20 bg-purple-500/10 p-2 text-[11px] text-purple-200/80">
+                          Pending Ika signature. Ready for Phase 5E gRPC Sign.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setPhase5dArtifact(null);
+                      setPhase5dGuardSigningRequest(null);
+                      setPhase5dMessageApproval(null);
+                      localStorage.removeItem("hr_phase5d_artifact");
+                    }}
+                    className="text-xs text-neutral-500 hover:text-neutral-300"
+                  >
+                    Clear Artifact
+                  </Button>
+                </>
               )}
             </CardContent>
           </Card>

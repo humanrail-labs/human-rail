@@ -194,19 +194,39 @@ Source: `chains/solana/examples/voting/e2e-rust/src/main.rs` (lines 375-389)
 
 ---
 
-## Phase 5D — gRPC Sign + Signature Verification (NEXT)
+## Phase 5D — Real approve_guarded_message + Ika MessageApproval (COMPLETE)
 
-**Goal:** Execute a real `approve_guarded_message` that passes policy and CPI-calls Ika `approve_message`, then submit `DWalletRequest::Sign` via gRPC and verify the signature is committed on-chain.
+**Goal:** Execute a real `approve_guarded_message` that passes policy and CPI-calls Ika `approve_message`, creating a real `MessageApproval` PDA with status=Pending.
 
-**Prerequisites (now met):**
-1. ✅ Real dWallet with authority = Guard CPI PDA
-2. ✅ GuardedDwallet policy linked to real dWallet
-3. ✅ MessageApproval PDA derivation verified (with optional metadata digest seed)
+**Status:** ✅ COMPLETE — Guard CPI to Ika succeeded, MessageApproval created and verified on-chain.
 
-**Step 1: approve_guarded_message (HumanRail Guard CPI)**
-The Guard program checks policy, then CPI-calls Ika `approve_message`:
+**What was accomplished:**
+1. **Fixed critical bug in `buildApproveGuardedMessageIx`** — The TypeScript instruction builder was missing the `user_pubkey(32)` serialization, causing `signature_scheme` and `message_approval_bump` to be written at incorrect offsets. This caused Ika CPI to fail with incorrect bump. Fixed by adding sequential serialization of all IDL fields.
+2. **Sent `approve_guarded_message`** — Principal signed the instruction. Guard program passed all policy checks (chain=84532, asset=USDC:BASE_SEPOLIA, recipient=0x1111..., amount=42M ≤ per_tx_limit=100M).
+3. **Ika CPI succeeded** — Guard program invoked Ika `approve_message` via `invoke_signed`. Ika program created the `MessageApproval` PDA.
+4. **On-chain verification** — Both `GuardSigningRequest` and `MessageApproval` accounts verified.
+
+**Verified devnet state:**
+| Field | Value |
+|-------|-------|
+| Preimage | `HumanRail Mandara demo approved request: Base Sepolia USDC transfer 42` |
+| Message digest | `5c125f25f32ea5fa95ade18eabba8299fb1497f53fcac4799e4b5eefa7fdf46b` |
+| Request ID | `f655534b535015853069dde66e0a501d9eb96869c778d69259b4846056b121da` |
+| GuardSigningRequest PDA | `CmqCpm4zPRZudGhuKkdrXoF6KPKB8vWjzeAysneDSHk5` |
+| Ika MessageApproval PDA | `Csrk5KVNrsBzgA7GE9CN1vMEFqzcNsVNoVZ9DBGgZ1MM` |
+| Approve tx signature | `4M59d1AmXZinNKfkHxc5qf6YfqWG1xLnkxKRDhGDQFLkZYpFH3PMnpi8LmZaFGErWz4MgzNAHmVwzokqgX7jn7tt` |
+| GuardSigningRequest status | **approved (1)** |
+| Rejection code | **0** |
+| MessageApproval status | **Pending (0)** |
+| MessageApproval approver | `FCHUWJRV33HxGrNqFxKCeqZQkqNUzKBqD1EgqpmeVqd` (Guard CPI PDA) |
+
+**Instruction layout (approve_guarded_message → Ika CPI):**
 ```
-CPI data:    [8, bump, message_digest(32), message_metadata_digest(32), user_pubkey(32), signature_scheme(2)] = 100 bytes
+Guard IX data: [disc(8), request_id(32), message_digest(32), message_metadata_digest(32),
+                destination_chain_id(4), asset_hash(32), recipient_hash(32),
+                amount(8), user_pubkey(32), signature_scheme(2), message_approval_bump(1)] = 215 bytes
+
+CPI data: [8, bump, message_digest(32), message_metadata_digest(32), user_pubkey(32), signature_scheme(2)] = 100 bytes
 CPI accounts:
   0. coordinator      (readonly)   -- DWalletCoordinator PDA
   1. message_approval (writable)   -- empty PDA to create
@@ -217,7 +237,24 @@ CPI accounts:
   6. system_program   (readonly)   -- System program
 ```
 
-**Step 2: Presign allocation (gRPC)**
+**Commands:**
+```bash
+npm run ika:approve-message            # Submit approved signing request
+npm run devnet:inspect-ika             # Inspect resulting MessageApproval
+```
+
+---
+
+## Phase 5E — gRPC Sign + Signature Verification (NEXT)
+
+**Goal:** Submit `DWalletRequest::Sign` via gRPC and verify the signature is committed on-chain.
+
+**Prerequisites (now met):**
+1. ✅ Real dWallet with authority = Guard CPI PDA
+2. ✅ GuardedDwallet policy linked to real dWallet
+3. ✅ MessageApproval PDA created with status=Pending
+
+**Step 1: Presign allocation (gRPC)**
 Before signing, allocate a presign. Two options:
 - **Global presign** (`DWalletRequest::Presign`): usable with any non-imported dWallet for the same `signature_algorithm`
 - **dWallet-specific presign** (`DWalletRequest::PresignForDWallet`): required for imported ECDSA keys
@@ -231,7 +268,7 @@ DWalletRequest::Presign {
 ```
 Response: `TransactionResponseData::Attestation(NetworkSignedAttestation)` with `VersionedPresignDataAttestation`
 
-**Step 3: gRPC Sign**
+**Step 2: gRPC Sign**
 ```rust
 DWalletRequest::Sign {
     message: message_bytes,
@@ -248,7 +285,7 @@ DWalletRequest::Sign {
 Note: `curve` and `signature_scheme` are NO LONGER fields on `Sign`. Validators derive them from on-chain `MessageApproval` and `dwallet_attestation`.
 Response: `TransactionResponseData::Signature { signature: Vec<u8> }` (always 64 bytes)
 
-**Step 4: Poll for signature on-chain**
+**Step 3: Poll for signature on-chain**
 ```rust
 let status = data[172];
 if status == 1 {
@@ -261,7 +298,6 @@ if status == 1 {
 1. **Presign availability** — Need to confirm whether global presigns are pre-allocated on devnet or must be requested per-sign.
 2. **message_centralized_signature** — Need to understand how the user's partial signature is computed client-side.
 3. **GasDeposit** — The PDF documents a GasDeposit PDA (discriminator 4, 139 bytes) that holds IKA/SOL balance for fees. The E2E examples work without explicit gas deposits, but this may become required.
-4. **MessageApproval PDA seeds with metadata** — The `message_metadata_digest` seed is only included when non-zero. Our derivation helper now supports this.
 
 ---
 

@@ -82,14 +82,20 @@ npm run ika:create-guarded-policy
 
 # Verify dWallet + GuardedDwallet lifecycle (Phase 5C)
 npm run ika:verify-lifecycle
+
+# Submit approved signing request through Guard CPI (Phase 5D)
+npm run ika:approve-message
 ```
 
-**Phase 5C Devnet Artifacts:**
+**Phase 5D Devnet Artifacts:**
 | Artifact | Address |
 |----------|---------|
 | Ika dWallet PDA | `A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp` |
 | Guard CPI Authority | `FCHUWJRV33HxGrNqFxKCeqZQkqNUzKBqD1EgqpmeVqd` |
 | GuardedDwallet PDA | `C4kAideEcvxk2xgfepFkejUJywNusMQNEnC5qSi2Ycup` |
+| GuardSigningRequest PDA | `CmqCpm4zPRZudGhuKkdrXoF6KPKB8vWjzeAysneDSHk5` |
+| Ika MessageApproval PDA | `Csrk5KVNrsBzgA7GE9CN1vMEFqzcNsVNoVZ9DBGgZ1MM` |
+| Approve Guarded Message Tx | `4M59d1AmXZinNKfkHxc5qf6YfqWG1xLnkxKRDhGDQFLkZYpFH3PMnpi8LmZaFGErWz4MgzNAHmVwzokqgX7jn7tt` |
 
 ---
 

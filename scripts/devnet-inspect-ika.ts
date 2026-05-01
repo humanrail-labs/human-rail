@@ -56,8 +56,9 @@ const HUMANRAIL_GUARD_PROGRAM_ID = new PublicKey(
 const DEBUG_RAW = process.env.IKA_DEBUG_RAW === "1";
 
 // ── Explorer links ──
-function solanaFmLink(pubkey: PublicKey, path: "address" | "tx" = "address"): string {
-  return `https://solana.fm/${path}/${pubkey.toBase58()}?cluster=devnet-alpha`;
+function solanaFmLink(pubkey: PublicKey | string, path: "address" | "tx" = "address"): string {
+  const key = typeof pubkey === "string" ? pubkey : pubkey.toBase58();
+  return `https://solana.fm/${path}/${key}?cluster=devnet-alpha`;
 }
 
 // ── Raw debug dump ──
@@ -359,7 +360,7 @@ async function main() {
       if (gsrInfo) {
         const gsrData = gsrInfo.data as Buffer;
         // Skip discriminator + version + request_id + guarded_dwallet + principal + agent + dwallet + message_digest + message_metadata_digest + destination_chain_id + asset_hash + recipient_hash + amount + signature_scheme
-        let off = 8 + 1 + 32 + 32 + 32 + 32 + 32 + 32 + 32 + 4 + 32 + 32 + 8 + 2;
+        const off = 8 + 1 + 32 + 32 + 32 + 32 + 32 + 32 + 32 + 4 + 32 + 32 + 8 + 2;
         const gsrStatus = gsrData[off];
         const gsrRejectionCode = gsrData.readUInt16LE(off + 1);
         const gsrIkaMa = new PublicKey(gsrData.slice(off + 3, off + 35));

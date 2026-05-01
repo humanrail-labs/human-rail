@@ -581,14 +581,70 @@ Tx: 33xoiwuXmu56hC5Ks18kn6zMota41PNMGHu1KkVdzyFRnRcXX1VCdtK64Jg1LzSku5HuTWkxU6jv
 
 ---
 
-## What Remains for Phase 5B–5E
+## Phase 5D — Real Approved Signing Request (COMPLETE)
+
+### What was accomplished
+
+- **`scripts/ika-approve-guarded-message.ts`** — Submits a policy-valid `approve_guarded_message` that CPI-calls Ika `approve_message`
+  - Reads `.local-ika/dwallet.json` and `.local-ika/guarded-dwallet.json` artifacts
+  - Verifies dWallet authority == Guard CPI PDA, GuardedDwallet not frozen
+  - Builds deterministic request with keccak256 digest
+  - Derives GuardSigningRequest PDA and Ika MessageApproval PDA (e2e-rust style)
+  - Sends transaction and verifies both accounts on-chain
+  - Writes `.local-ika/signing-request.json` artifact
+  - Run: `npm run ika:approve-message`
+
+- **Critical bugfix:** `buildApproveGuardedMessageIx` in `lib/dwallet-guard/instructions.ts` was missing the `user_pubkey(32)` field in instruction data serialization. This caused `signature_scheme` and `message_approval_bump` to be written at wrong offsets, making the Ika CPI fail. Fixed by adding correct sequential serialization.
+
+### Verified devnet state
+
+| Account | Address | Status |
+|---------|---------|--------|
+| GuardSigningRequest PDA | `CmqCpm4zPRZudGhuKkdrXoF6KPKB8vWjzeAysneDSHk5` | approved (1), rejection_code=0 |
+| Ika MessageApproval PDA | `Csrk5KVNrsBzgA7GE9CN1vMEFqzcNsVNoVZ9DBGgZ1MM` | Pending (0), approver = Guard CPI PDA |
+| Approve tx | `4M59d1AmXZinNKfkHxc5qf6YfqWG1xLnkxKRDhGDQFLkZYpFH3PMnpi8LmZaFGErWz4MgzNAHmVwzokqgX7jn7tt` | Confirmed |
+
+### Transaction details
+
+```
+Instruction: approve_guarded_message
+Program: HumanRail Guard (Bzxgv...)
+Accounts:
+  0. requester (5AXUd...) — signer, writable
+  1. guarded_dwallet (C4kAi...) — writable
+  2. guard_signing_request (CmqCp...) — writable, created
+  3. dwallet (A6hbi...) — readonly
+  4. agent_registry_account — None (principal signs directly)
+  5. cpi_authority (FCHUW...) — readonly
+  6. program (Bzxgv...) — readonly
+  7. dwallet_program (87W54...) — readonly
+  8. coordinator (V5giR...) — readonly
+  9. message_approval (Csrk5...) — writable, created by Ika CPI
+  10. system_program — readonly
+Data:
+  request_id: f655534b535015853069dde66e0a501d9eb96869c778d69259b4846056b121da
+  message_digest: 5c125f25f32ea5fa95ade18eabba8299fb1497f53fcac4799e4b5eefa7fdf46b
+  message_metadata_digest: 0000000000000000000000000000000000000000000000000000000000000000
+  destination_chain_id: 84532
+  asset_hash: d077eb814e4c6cbcfd7be7a842579801e25a2e7966242efb0497d724b4707593
+  recipient_hash: efda2c2822100aaf94fb77c3765831ce37fc3c02cbc11603dd6ffa9c0d25ec55
+  amount: 42000000
+  user_pubkey: 5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y
+  signature_scheme: 0 (EcdsaKeccak256)
+  message_approval_bump: 244
+```
+
+---
+
+## What Remains for Phase 5E
 
 | Phase | Goal | Status |
 |-------|------|--------|
-| **5B** | Create real Ika dWallet via gRPC DKG | ✅ COMPLETE — DKG succeeded, parser offsets fixed |
-| **5C** | Transfer authority + real policy creation | ✅ COMPLETE — authority transferred, policy created |
-| **5D** | gRPC Sign + signature on-chain verification | Planned — needs presign + ApprovalProof construction |
-| **5E** | Agent runtime `request_cross_chain_signature` tool | Planned — needs 5B–5D complete |
+| **5B** | Create real Ika dWallet via gRPC DKG | ✅ COMPLETE |
+| **5C** | Transfer authority + real policy creation | ✅ COMPLETE |
+| **5D** | Real approve_guarded_message + Ika MessageApproval | ✅ COMPLETE |
+| **5E** | gRPC Sign + signature on-chain verification | Planned — needs presign + ApprovalProof construction |
+| **5F** | Agent runtime `request_cross_chain_signature` tool | Planned — needs 5E complete |
 
 > ⚠️ **Preserve the keypair:** `target/deploy/humanrail_dwallet_guard-keypair.json` is required for any future upgrades. It is already `.gitignore`d.
 

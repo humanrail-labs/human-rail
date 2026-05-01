@@ -242,10 +242,14 @@ export function buildApproveGuardedMessageIx(
   offset += 32;
   Buffer.from(params.recipientHash).copy(data, offset);
   offset += 32;
-  const view = new DataView(data.buffer, data.byteOffset + offset, 11);
-  view.setBigUint64(0, params.amount, true);
-  view.setUint16(8, params.signatureScheme, true);
-  view.setUint8(10, params.messageApprovalBump);
+  const amountView = new DataView(data.buffer, data.byteOffset + offset, 8);
+  amountView.setBigUint64(0, params.amount, true);
+  offset += 8;
+  Buffer.from(params.userPubkey).copy(data, offset);
+  offset += 32;
+  data.writeUInt16LE(params.signatureScheme, offset);
+  offset += 2;
+  data.writeUInt8(params.messageApprovalBump, offset);
 
   const keys = [
     { pubkey: params.requester, isSigner: true, isWritable: true },

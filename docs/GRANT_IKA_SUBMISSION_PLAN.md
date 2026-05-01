@@ -315,13 +315,16 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Added `npm run ika:transfer-authority` and `npm run ika:create-guarded-policy` scripts
 - [x] Added `/vault/dwallets` Real Ika dWallet + Real Ika Policy cards
 
-### Phase 5D — Real approve_guarded_message CPI + gRPC Sign (NEXT)
-- [ ] Submit approve_guarded_message that passes policy and CPI-calls Ika approve_message
-- [ ] Verify MessageApproval PDA created with status=Pending
-- [ ] Allocate presign via gRPC
-- [ ] Submit DWalletRequest::Sign with ApprovalProof
-- [ ] Poll MessageApproval until status=Signed
-- [ ] Read and verify signature bytes
+### Phase 5D — Real approve_guarded_message CPI + Ika MessageApproval (COMPLETE)
+- [x] Submit approve_guarded_message that passes policy and CPI-calls Ika approve_message
+- [x] Verify MessageApproval PDA created with status=Pending
+- [x] Fixed critical bug: `buildApproveGuardedMessageIx` missing `user_pubkey` serialization
+- [x] GuardSigningRequest created with status=approved, rejection_code=0
+- [x] MessageApproval verified on-chain: approver=Guard CPI PDA, status=Pending
+- [ ] Allocate presign via gRPC (Phase 5E)
+- [ ] Submit DWalletRequest::Sign with ApprovalProof (Phase 5E)
+- [ ] Poll MessageApproval until status=Signed (Phase 5E)
+- [ ] Read and verify signature bytes (Phase 5E)
 
 ### Phase 5E — Agent Runtime Integration (PLANNED)
 - [ ] Add `request_cross_chain_signature` tool to agent runtime
@@ -354,8 +357,8 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Frontend integration for dWallet management (Phase 3)
 - [x] Deploy/verify scripts and build readiness (Phase 4A)
 - [x] Devnet deployment of dWallet Guard program (slot 459328504)
-- [ ] Agent runtime cross-chain signing demo (Phase 5+)
-- [ ] Agent runtime cross-chain signing demo (Phase 4+)
+- [x] Real approve_guarded_message + Ika MessageApproval (Phase 5D)
+- [ ] Agent runtime cross-chain signing demo (Phase 5E+)
 
 ---
 
