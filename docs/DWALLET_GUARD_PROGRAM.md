@@ -2,9 +2,10 @@
 
 > On-chain policy controller for Ika cross-chain signing.  
 > Path: `programs/humanrail-dwallet-guard/`  
-> Status: **Phase 2C complete** — SBF-buildable, IDL generated, program ID assigned.  
-**Deployment:** Blocked — devnet airdrop faucet rate-limited (0 SOL in deployer wallet).  
-**Program ID:** `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF`
+> Status: **Phase 4A complete** — Deployed and executable on Solana devnet.  
+> **Program ID:** `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF`  
+> **Last Deployed Slot:** `459322057`  
+> **ProgramData:** `o7BzTT76DmPjMKfa2rd3SmDovn5Nmf8xs3Va6L8RyFh`
 
 ---
 
@@ -417,7 +418,7 @@ Implemented as raw instruction builders using exact IDL discriminators and accou
 - **Deployer wallet:** `5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y`
 - **Deployed:** ✅ **2026-05-01** on devnet
 - **ProgramData Address:** `o7BzTT76DmPjMKfa2rd3SmDovn5Nmf8xs3Va6L8RyFh`
-- **Last Deployed In Slot:** `459316480`
+- **Last Deployed In Slot:** `459322057`
 - **Data Length:** `225680` bytes
 - **Balance:** `1.57193688 SOL`
 
@@ -432,10 +433,11 @@ npm run verify:dwallet-guard
 solana program show G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF --url devnet
 ```
 
-### `/vault/dwallets` UI Update
-Once the program is deployed and `connection.getAccountInfo(guardProgramId)` returns `executable: true`, the `/vault/dwallets` page will:
-- Show **"Guard program is live on devnet"** banner
-- **Enable** the `Initialize Guard` and `Submit Guarded Request` buttons
+### `/vault/dwallets` UI Status
+The program is now deployed. `connection.getAccountInfo(guardProgramId)` returns `executable: true`, so the `/vault/dwallets` page:
+- Shows **"Guard program is live on devnet"** banner (green)
+- **Enables** the `Initialize Guard` and `Submit Guarded Request` buttons
+- `isDeployed === true` in `useDwalletGuard` hook
 
 > ⚠️ **Preserve the keypair:** `target/deploy/humanrail_dwallet_guard-keypair.json` is required for any future upgrades. It is already `.gitignore`d.
 

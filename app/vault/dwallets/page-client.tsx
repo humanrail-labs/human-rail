@@ -85,8 +85,8 @@ export default function DwalletGuardPageClient() {
   } | null>(null);
 
   const computePolicyHashes = useCallback(async () => {
-    const assetHash = await hashPolicyInput(assetInput);
-    const recipientHash = await hashPolicyInput(recipientInput || "any");
+    const assetHash = hashPolicyInput(assetInput);
+    const recipientHash = hashPolicyInput(recipientInput || "any");
     setPolicyHashes({
       assetHash: Buffer.from(assetHash).toString("hex"),
       recipientHash: Buffer.from(recipientHash).toString("hex"),
@@ -110,7 +110,7 @@ export default function DwalletGuardPageClient() {
 
   const computeMessageDigest = useCallback(async () => {
     if (!messageInput) return;
-    const digest = await keccak256(messageInput);
+    const digest = keccak256(messageInput);
     setMessageDigest(Buffer.from(digest).toString("hex"));
   }, [messageInput]);
 

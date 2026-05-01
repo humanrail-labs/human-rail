@@ -61,7 +61,7 @@ See [`docs/GRANT_IKA_SUBMISSION_PLAN.md`](docs/GRANT_IKA_SUBMISSION_PLAN.md) for
 
 **Dashboard:** [Open App](/dashboard)  
 **Network:** Solana Devnet  
-**Status:** 7/7 Programs Deployed
+**Status:** 8/8 Programs Deployed
 
 ---
 
@@ -89,7 +89,7 @@ Four layers. Seven programs. One unified trust stack.
 | DataBlink | `GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX` |
 | Document Registry | `8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28` |
 | Receipts | `EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM` |
-| HumanRail dWallet Guard | `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF` *(SBF built, deploy pending devnet SOL)* |
+| HumanRail dWallet Guard | `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF` *(Deployed on devnet)* |
 
 ---
 

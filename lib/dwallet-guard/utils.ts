@@ -1,6 +1,7 @@
 "use client";
 
 import { PublicKey } from "@solana/web3.js";
+import { keccak_256 } from "@noble/hashes/sha3.js";
 
 // ---------------------------------------------------------------------------
 // Ika Signature Schemes (pre-alpha values — subject to change)
@@ -32,23 +33,9 @@ export function signatureSchemeName(scheme: IkaSignatureScheme): string {
 // ---------------------------------------------------------------------------
 // keccak256 — used by Ika for message digests
 // ---------------------------------------------------------------------------
-let keccak256Impl: ((data: Uint8Array) => Uint8Array) | null = null;
-
-async function loadKeccak256(): Promise<(data: Uint8Array) => Uint8Array> {
-  if (keccak256Impl) return keccak256Impl;
-  try {
-    const mod = await import("@noble/hashes/sha3");
-    keccak256Impl = mod.keccak_256 as (data: Uint8Array) => Uint8Array;
-    return keccak256Impl;
-  } catch {
-    throw new Error("@noble/hashes/keccak256 not available. Install with: npm i @noble/hashes");
-  }
-}
-
-export async function keccak256(data: Uint8Array | string): Promise<Uint8Array> {
-  const hash = await loadKeccak256();
+export function keccak256(data: Uint8Array | string): Uint8Array {
   const bytes = typeof data === "string" ? new TextEncoder().encode(data) : data;
-  return hash(bytes);
+  return keccak_256(bytes);
 }
 
 // ---------------------------------------------------------------------------
@@ -56,10 +43,9 @@ export async function keccak256(data: Uint8Array | string): Promise<Uint8Array> 
 // These are labeled as demo utilities — they hash a string or pubkey into
 // a fixed [u8;32] for use as policy constraints.
 // ---------------------------------------------------------------------------
-export async function hashPolicyInput(input: string | PublicKey): Promise<Uint8Array> {
-  const hash = await loadKeccak256();
+export function hashPolicyInput(input: string | PublicKey): Uint8Array {
   const bytes = input instanceof PublicKey ? input.toBytes() : new TextEncoder().encode(input);
-  return hash(bytes);
+  return keccak_256(bytes);
 }
 
 // ---------------------------------------------------------------------------

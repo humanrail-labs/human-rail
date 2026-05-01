@@ -277,7 +277,14 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Deploy script: `scripts/deploy-dwallet-guard.sh`
 - [x] Verify script: `scripts/verify-dwallet-guard-deploy.sh`
 - [x] Deployed to devnet: `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF`
-- [x] On-chain deployment confirmed (slot 459316480, executable)
+- [x] On-chain deployment confirmed (slot 459322057, executable)
+
+### Phase 4B — Create First GuardedDwallet Policy Account (NEXT)
+- [ ] Connect wallet on `/vault/dwallets`
+- [ ] Select an agent and enter a dWallet pubkey
+- [ ] Submit `initialize_guarded_dwallet` transaction
+- [ ] Verify `GuardedDwallet` PDA created on devnet
+- [ ] Test freeze/unfreeze flow
 
 ### Phase 4 — Agent Runtime Integration (PLANNED)
 - [ ] Add `request_cross_chain_signature` tool to agent runtime
@@ -309,7 +316,7 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Source code for new dWallet Guard program (Phase 2+)
 - [x] Frontend integration for dWallet management (Phase 3)
 - [x] Deploy/verify scripts and build readiness (Phase 4A)
-- [x] Devnet deployment of dWallet Guard program (slot 459316480)
+- [x] Devnet deployment of dWallet Guard program (slot 459322057)
 - [ ] Agent runtime cross-chain signing demo (Phase 5+)
 - [ ] Agent runtime cross-chain signing demo (Phase 4+)
 
