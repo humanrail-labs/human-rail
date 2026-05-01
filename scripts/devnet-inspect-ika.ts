@@ -388,6 +388,13 @@ async function main() {
             console.log(`  Status:         ${parsed.status === 0 ? "Pending" : parsed.status === 1 ? "Signed" : "?"} (${parsed.status})`);
             console.log(`  Signature len:  ${parsed.signatureLen}`);
             console.log(`  Signature available: ${parsed.signatureLen > 0 ? "YES" : "NO"}`);
+            if (parsed.signatureLen > 0) {
+              console.log(`  Signature (hex): ${Buffer.from(parsed.signature).toString("hex")}`);
+              console.log(`  Signature (b64): ${Buffer.from(parsed.signature).toString("base64")}`);
+              console.log(`  \n  ✅ Phase 5E COMPLETE — Ika signature committed on-chain`);
+            } else {
+              console.log(`  \n  ⏳ Phase 5E PENDING — Run: npm run ika:sign-approved-message`);
+            }
             console.log(`  Explorer:       ${solanaFmLink(maPubkey.toBase58())}`);
           } else {
             console.log("\nMessageApproval exists but could not be parsed.");
@@ -420,6 +427,10 @@ async function main() {
   if (!artifactSigningRequest?.guardSigningRequestPda) {
     console.log(`To create a signing request, run:`);
     console.log(`  npm run ika:approve-message`);
+  }
+  if (artifactSigningRequest?.status === "PendingIkaSignature") {
+    console.log(`To sign the approved message, run:`);
+    console.log(`  npm run ika:sign-approved-message`);
   }
   console.log();
 }

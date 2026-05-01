@@ -245,59 +245,74 @@ npm run devnet:inspect-ika             # Inspect resulting MessageApproval
 
 ---
 
-## Phase 5E — gRPC Sign + Signature Verification (NEXT)
+## Phase 5E — gRPC Sign + Signature Verification (COMPLETE)
 
 **Goal:** Submit `DWalletRequest::Sign` via gRPC and verify the signature is committed on-chain.
 
-**Prerequisites (now met):**
+**Command:**
+```bash
+npm run ika:sign-approved-message
+```
+This runs `cargo run --manifest-path tools/ika-dkg-cli/Cargo.toml -- sign-approved-message`.
+
+**Prerequisites (met):**
 1. ✅ Real dWallet with authority = Guard CPI PDA
 2. ✅ GuardedDwallet policy linked to real dWallet
 3. ✅ MessageApproval PDA created with status=Pending
 
-**Step 1: Presign allocation (gRPC)**
-Before signing, allocate a presign. Two options:
-- **Global presign** (`DWalletRequest::Presign`): usable with any non-imported dWallet for the same `signature_algorithm`
-- **dWallet-specific presign** (`DWalletRequest::PresignForDWallet`): required for imported ECDSA keys
+**What the CLI does:**
+1. Loads `.local-ika/dwallet.json` (DKG artifact) and `.local-ika/signing-request.json` (Phase 5D artifact)
+2. Verifies MessageApproval on-chain: dWallet match, message digest match, status=Pending
+3. Connects to Ika gRPC (`https://pre-alpha-dev-1.ika.ika-network.net:443`)
+4. Reconstructs `NetworkSignedAttestation` from artifact (note: Phase 5B CLI only stored `attestation_data`, not the full `network_signature`; we use zeroed signature — mock signer accepts it)
+5. Submits `DWalletRequest::Presign` with `curve=Secp256k1`, `signature_algorithm=ECDSASecp256k1`
+6. Decodes `VersionedPresignDataAttestation::V1` to get `presign_session_identifier`
+7. Builds `ApprovalProof::Solana` with `transaction_signature = base58_decode(approve_guarded_message_tx_sig)`, `slot = 0` (fetched actual slot if available, falls back to 0)
+8. Submits `DWalletRequest::Sign` with message = raw preimage bytes
+9. Decodes `TransactionResponseData::Signature { signature }` (64 bytes)
+10. Polls MessageApproval on-chain until `status=1` (Signed) or 180s timeout
+11. Compares gRPC signature with on-chain signature bytes
+12. Updates `.local-ika/signing-request.json` with all sign metadata
 
-```rust
-DWalletRequest::Presign {
-    dwallet_network_encryption_public_key: nek_bytes,
-    curve: DWalletCurve::Secp256k1,
-    signature_algorithm: DWalletSignatureAlgorithm::ECDSASecp256k1, // NOT signature_scheme!
-}
-```
-Response: `TransactionResponseData::Attestation(NetworkSignedAttestation)` with `VersionedPresignDataAttestation`
+**Official source paths inspected:**
+- `crates/ika-dwallet-types/src/lib.rs` — `DWalletRequest`, `ApprovalProof`, `TransactionResponseData`, `NetworkSignedAttestation`, `VersionedPresignDataAttestation` definitions
+- `chains/solana/examples/voting/e2e-rust/src/main.rs` — `DWalletRequest::Presign` + `Sign` flow, `slot: 0`
+- `chains/solana/examples/multisig/e2e-rust/src/main.rs` — identical presign/sign pattern
+- `chains/solana/examples/protocols-e2e/src/main.rs` — `do_presign` / `do_sign` helpers, zeroed attestation accepted in tests
+- `chains/solana/examples/_shared/ika-setup.ts` — TypeScript `PresignForDWallet` variant (not used for DKG wallets)
 
-**Step 2: gRPC Sign**
-```rust
-DWalletRequest::Sign {
-    message: message_bytes,
-    message_metadata: metadata_bytes, // BCS-serialized per-scheme metadata (empty for most)
-    presign_session_identifier: presign_session_id,
-    message_centralized_signature: user_partial_sig,
-    dwallet_attestation: dkg_attestation, // from DKG response
-    approval_proof: ApprovalProof::Solana {
-        transaction_signature: solana_tx_sig_bytes,
-        slot: 0, // can be 0 in pre-alpha
-    },
-}
-```
-Note: `curve` and `signature_scheme` are NO LONGER fields on `Sign`. Validators derive them from on-chain `MessageApproval` and `dwallet_attestation`.
-Response: `TransactionResponseData::Signature { signature: Vec<u8> }` (always 64 bytes)
+**Presign type used:** `DWalletRequest::Presign` (global presign, NOT `PresignForDWallet`). Standard for non-imported DKG dWallets per Rust e2e examples.
 
-**Step 3: Poll for signature on-chain**
-```rust
-let status = data[172];
-if status == 1 {
-    let sig_len = u16::from_le_bytes(data[173..175].try_into().unwrap()) as usize;
-    let signature = &data[175..175 + sig_len];
-}
-```
+**Sign request fields:**
+- `message`: raw preimage bytes (`"HumanRail Mandara demo approved request: Base Sepolia USDC transfer 42"`)
+- `message_metadata`: `vec![]`
+- `presign_session_identifier`: 32 bytes from presign response
+- `message_centralized_signature`: `vec![0u8; 64]` (zeroed, mock skips verification)
+- `dwallet_attestation`: reconstructed `NetworkSignedAttestation` (real `attestation_data` + `network_pubkey` + `epoch`, zeroed `network_signature`)
+- `approval_proof`: `ApprovalProof::Solana { transaction_signature: <64 bytes>, slot: 0 }`
 
-**Blockers/Questions:**
-1. **Presign availability** — Need to confirm whether global presigns are pre-allocated on devnet or must be requested per-sign.
-2. **message_centralized_signature** — Need to understand how the user's partial signature is computed client-side.
-3. **GasDeposit** — The PDF documents a GasDeposit PDA (discriminator 4, 139 bytes) that holds IKA/SOL balance for fees. The E2E examples work without explicit gas deposits, but this may become required.
+**gRPC response type:** `TransactionResponseData::Signature { signature: Vec<u8> }`
+
+**Verified devnet state:**
+
+| Field | Value |
+|-------|-------|
+| MessageApproval PDA | `Csrk5KVNrsBzgA7GE9CN1vMEFqzcNsVNoVZ9DBGgZ1MM` |
+| Status before | Pending (0), signature_len=0 |
+| Status after | Signed (1), signature_len=64 |
+| Signature (hex) | `ca5c2643489f1faae3ea39ba960386ecabe41fb61218ccfaf693fb7ecb1b05ce410b922bc45a7e7f82c646aacbb81276676eda3ae3fa5afab8960cbb00c19b1e` |
+| Signature (base64) | `ylwmQ0ifH6rj6jm6lgOG7KvkH7YSGMz69pP7fssbBc5BC5IrxFp+f4LGRqrLuBJ2Z27aOuP6Wvq4lgy7AMGbHg==` |
+| gRPC signature == on-chain signature | ✅ YES |
+| Presign session identifier | `18b2db1a6374517ebc0dc2c8eead7dc1ae0c831c0759fa678ce521f370aae2ad` |
+| Slot used | 0 (fallback) |
+
+**Pre-alpha quirks observed:**
+- Mock signer accepts zeroed `network_signature` in `dwallet_attestation` (we didn't store the real one in Phase 5B)
+- Mock signer accepts `slot: 0` in `ApprovalProof::Solana`
+- Signature is deterministic (same input → same 64-byte ECDSA signature) because mock signer uses a fixed key
+- No GasDeposit PDA needed for pre-alpha devnet
+
+**Artifact updated:** `.local-ika/signing-request.json` (gitignored) — do not commit.
 
 ---
 

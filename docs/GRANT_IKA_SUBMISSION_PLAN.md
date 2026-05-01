@@ -321,10 +321,14 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Fixed critical bug: `buildApproveGuardedMessageIx` missing `user_pubkey` serialization
 - [x] GuardSigningRequest created with status=approved, rejection_code=0
 - [x] MessageApproval verified on-chain: approver=Guard CPI PDA, status=Pending
-- [ ] Allocate presign via gRPC (Phase 5E)
-- [ ] Submit DWalletRequest::Sign with ApprovalProof (Phase 5E)
-- [ ] Poll MessageApproval until status=Signed (Phase 5E)
-- [ ] Read and verify signature bytes (Phase 5E)
+
+### Phase 5E — gRPC Sign + On-Chain Signature Verification (COMPLETE)
+- [x] Extend `ika-dkg-cli` with `sign-approved-message` subcommand
+- [x] Submit `DWalletRequest::Presign` (global presign for Secp256k1)
+- [x] Submit `DWalletRequest::Sign` with `ApprovalProof::Solana`
+- [x] Poll MessageApproval until status=Signed
+- [x] Verify signature bytes on-chain match gRPC response
+- [x] Update `.local-ika/signing-request.json` with sign metadata
 
 ### Phase 5E — Agent Runtime Integration (PLANNED)
 - [ ] Add `request_cross_chain_signature` tool to agent runtime
@@ -358,7 +362,8 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Deploy/verify scripts and build readiness (Phase 4A)
 - [x] Devnet deployment of dWallet Guard program (slot 459328504)
 - [x] Real approve_guarded_message + Ika MessageApproval (Phase 5D)
-- [ ] Agent runtime cross-chain signing demo (Phase 5E+)
+- [x] gRPC Sign + on-chain signature verification (Phase 5E)
+- [ ] Agent runtime cross-chain signing demo (Phase 5F+)
 
 ---
 

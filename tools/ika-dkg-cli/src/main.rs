@@ -26,9 +26,11 @@ use tokio;
 mod config;
 mod dkg;
 mod output;
+mod sign;
 
 use config::CliConfig;
 use dkg::create_dwallet_via_dkg;
+use sign::sign_approved_message;
 // DwalletArtifact is used via dkg::create_dwallet_via_dkg return type
 
 /// Ika dWallet DKG CLI — HumanRail Phase 5B
@@ -72,6 +74,29 @@ enum Commands {
         /// Skip on-chain polling and write artifact immediately after DKG attestation
         #[arg(long)]
         skip_poll: bool,
+    },
+
+    /// Sign an approved MessageApproval via Ika gRPC (presign → sign → poll on-chain)
+    SignApprovedMessage {
+        /// Path to Solana keypair JSON file
+        #[arg(long, default_value = "~/.config/solana/id.json")]
+        keypair: PathBuf,
+
+        /// Solana RPC URL
+        #[arg(long, default_value = "https://api.devnet.solana.com")]
+        rpc_url: String,
+
+        /// Ika gRPC endpoint
+        #[arg(long, default_value = "https://pre-alpha-dev-1.ika.ika-network.net:443")]
+        grpc_url: String,
+
+        /// Path to dWallet artifact JSON (from Phase 5B)
+        #[arg(long, default_value = ".local-ika/dwallet.json")]
+        dwallet_artifact: PathBuf,
+
+        /// Path to signing request artifact JSON (from Phase 5D)
+        #[arg(long, default_value = ".local-ika/signing-request.json")]
+        request_artifact: PathBuf,
     },
 }
 
@@ -120,7 +145,46 @@ async fn main() -> Result<()> {
             };
             run_create_dwallet(config).await
         }
+        Commands::SignApprovedMessage {
+            keypair,
+            rpc_url,
+            grpc_url,
+            dwallet_artifact,
+            request_artifact,
+        } => {
+            let config = CliConfig {
+                curve: ika_dwallet_types::DWalletCurve::Secp256k1, // not used for signing
+                keypair_path: expand_tilde(&keypair),
+                rpc_url,
+                grpc_url,
+                output_path: expand_tilde(&request_artifact),
+                poll_timeout: Duration::from_secs(180),
+                skip_poll: false,
+            };
+            run_sign_approved_message(config, &expand_tilde(&dwallet_artifact), &expand_tilde(&request_artifact)).await
+        }
     }
+}
+
+async fn run_sign_approved_message(
+    config: CliConfig,
+    dwallet_artifact_path: &PathBuf,
+    request_artifact_path: &PathBuf,
+) -> Result<()> {
+    let payer = load_keypair(&config.keypair_path)
+        .with_context(|| format!("Failed to load keypair from {:?}", config.keypair_path))?;
+
+    let solana_client =
+        RpcClient::new_with_commitment(&config.rpc_url, CommitmentConfig::confirmed());
+    let balance = solana_client.get_balance(&payer.pubkey()).unwrap_or(0);
+    println!("Deployer / Payer: {}", payer.pubkey());
+    println!("Solana balance: {:.6} SOL", balance as f64 / 1e9);
+    if balance < 1_000_000 {
+        println!("WARNING: Low balance. Transactions may fail.");
+    }
+    println!();
+
+    sign_approved_message(&config, &payer, &solana_client, dwallet_artifact_path, request_artifact_path).await
 }
 
 async fn run_create_dwallet(config: CliConfig) -> Result<()> {

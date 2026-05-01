@@ -85,9 +85,12 @@ npm run ika:verify-lifecycle
 
 # Submit approved signing request through Guard CPI (Phase 5D)
 npm run ika:approve-message
+
+# Sign the approved message via Ika gRPC (Phase 5E)
+npm run ika:sign-approved-message
 ```
 
-**Phase 5D Devnet Artifacts:**
+**Phase 5D/5E Devnet Artifacts:**
 | Artifact | Address |
 |----------|---------|
 | Ika dWallet PDA | `A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp` |
@@ -96,6 +99,8 @@ npm run ika:approve-message
 | GuardSigningRequest PDA | `CmqCpm4zPRZudGhuKkdrXoF6KPKB8vWjzeAysneDSHk5` |
 | Ika MessageApproval PDA | `Csrk5KVNrsBzgA7GE9CN1vMEFqzcNsVNoVZ9DBGgZ1MM` |
 | Approve Guarded Message Tx | `4M59d1AmXZinNKfkHxc5qf6YfqWG1xLnkxKRDhGDQFLkZYpFH3PMnpi8LmZaFGErWz4MgzNAHmVwzokqgX7jn7tt` |
+| Ika Signature (hex) | `ca5c2643489f1faae3ea39ba960386ecabe41fb61218ccfaf693fb7ecb1b05ce410b922bc45a7e7f82c646aacbb81276676eda3ae3fa5afab8960cbb00c19b1e` |
+| Ika Signature (base64) | `ylwmQ0ifH6rj6jm6lgOG7KvkH7YSGMz69pP7fssbBc5BC5IrxFp+f4LGRqrLuBJ2Z27aOuP6Wvq4lgy7AMGbHg==` |
 
 ---
 

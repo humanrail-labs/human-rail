@@ -229,7 +229,7 @@ export default function DwalletGuardPageClient() {
   const [realIkaDwallet, setRealIkaDwallet] = useState<IkaDwallet | null>(null);
   const [realGuardedDwallet, setRealGuardedDwallet] = useState<GuardedDwallet | null>(null);
 
-  // Phase 5D approved signing request state
+  // Phase 5D/5E approved signing request state
   const [phase5dArtifact, setPhase5dArtifact] = useState<{
     preimage: string;
     messageDigestHex: string;
@@ -240,6 +240,12 @@ export default function DwalletGuardPageClient() {
     amount: string;
     destinationChainId: number;
     status: string;
+    // Phase 5E optional fields
+    ikaSignatureHex?: string;
+    ikaSignatureBase64?: string;
+    signatureLen?: number;
+    onChainSignatureHex?: string;
+    signedAt?: string;
   } | null>(null);
   const [phase5dGuardSigningRequest, setPhase5dGuardSigningRequest] = useState<GuardSigningRequest | null>(null);
   const [phase5dMessageApproval, setPhase5dMessageApproval] = useState<IkaMessageApproval | null>(null);
@@ -1318,7 +1324,7 @@ export default function DwalletGuardPageClient() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <FileKey className="h-4 w-4 text-emerald-400" />
-                Approved Signing Request — Phase 5D
+                Approved Signing Request — Phase 5D/5E
               </CardTitle>
               <CardDescription className="text-neutral-500">
                 Real approve_guarded_message via Guard CPI to Ika approve_message
@@ -1349,10 +1355,10 @@ export default function DwalletGuardPageClient() {
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-emerald-200">Artifact loaded ✅</p>
                       <p className="text-[11px] text-emerald-200/60">
-                        {phase5dMessageApproval?.status === 0
-                          ? "MessageApproval status = Pending"
-                          : phase5dMessageApproval?.status === 1
-                          ? "MessageApproval status = Signed"
+                        {phase5dMessageApproval?.status === 1 || phase5dArtifact.ikaSignatureHex
+                          ? "Phase 5E complete — Ika signature committed on-chain"
+                          : phase5dMessageApproval?.status === 0
+                          ? "MessageApproval status = Pending — ready for gRPC Sign"
                           : "Fetch on-chain state to verify."}
                       </p>
                     </div>
@@ -1475,7 +1481,26 @@ export default function DwalletGuardPageClient() {
                       </div>
                       {phase5dMessageApproval.status === 0 && (
                         <div className="mt-2 rounded border border-purple-500/20 bg-purple-500/10 p-2 text-[11px] text-purple-200/80">
-                          Pending Ika signature. Ready for Phase 5E gRPC Sign.
+                          Pending Ika signature. Run: npm run ika:sign-approved-message
+                        </div>
+                      )}
+                      {phase5dMessageApproval.status === 1 && phase5dMessageApproval.signatureLen > 0 && (
+                        <div className="mt-2 space-y-1">
+                          <div className="rounded border border-emerald-500/20 bg-emerald-500/10 p-2 text-[11px] text-emerald-200/80">
+                            ✅ Phase 5E complete — Ika signature committed on-chain
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-[11px] text-neutral-500">Signature (hex)</span>
+                            <code className="block truncate rounded bg-black/30 px-2 py-1 text-[10px] text-neutral-300">
+                              {Buffer.from(phase5dMessageApproval.signature).toString("hex")}
+                            </code>
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-[11px] text-neutral-500">Signature (base64)</span>
+                            <code className="block truncate rounded bg-black/30 px-2 py-1 text-[10px] text-neutral-300">
+                              {Buffer.from(phase5dMessageApproval.signature).toString("base64")}
+                            </code>
+                          </div>
                         </div>
                       )}
                     </div>

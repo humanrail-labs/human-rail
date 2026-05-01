@@ -18,7 +18,9 @@
     "ika:transfer-authority": "tsx scripts/ika-transfer-authority.ts",
     "ika:create-guarded-policy": "tsx scripts/devnet-create-guarded-dwallet.ts --real-ika",
     "ika:verify-lifecycle": "tsx scripts/ika-verify-lifecycle.ts",
-    "ika:approve-message": "tsx scripts/ika-approve-guarded-message.ts"
+    "ika:approve-message": "tsx scripts/ika-approve-guarded-message.ts",
+    "ika:sign-approved-message": "cargo run --manifest-path tools/ika-dkg-cli/Cargo.toml -- sign-approved-message --dwallet-artifact .local-ika/dwallet.json --request-artifact .local-ika/signing-request.json",
+    "ika:verify-message-approval": "cargo run --manifest-path tools/ika-dkg-cli/Cargo.toml -- sign-approved-message --dwallet-artifact .local-ika/dwallet.json --request-artifact .local-ika/signing-request.json"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

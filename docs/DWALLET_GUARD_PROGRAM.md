@@ -636,14 +636,46 @@ Data:
 
 ---
 
-## What Remains for Phase 5E
+## Phase 5E — gRPC Sign + On-Chain Signature Verification (COMPLETE)
+
+### What was accomplished
+
+- **`tools/ika-dkg-cli/src/sign.rs`** — New Rust module extending the DKG CLI with `sign-approved-message` subcommand
+  - Loads `.local-ika/dwallet.json` and `.local-ika/signing-request.json`
+  - Verifies MessageApproval on-chain (dWallet match, digest match, status check)
+  - Reconstructs `NetworkSignedAttestation` from Phase 5B artifact (zeroed `network_signature` — mock accepts it)
+  - Submits `DWalletRequest::Presign` → decodes `VersionedPresignDataAttestation::V1`
+  - Builds `ApprovalProof::Solana` with base58-decoded tx signature
+  - Submits `DWalletRequest::Sign` → decodes `TransactionResponseData::Signature { signature }`
+  - Polls MessageApproval on-chain until `status=Signed` (180s timeout)
+  - Compares gRPC signature with on-chain signature bytes
+  - Updates `.local-ika/signing-request.json` with sign metadata
+  - Run: `npm run ika:sign-approved-message`
+
+### Verified devnet state
+
+| Account | Address | Status |
+|---------|---------|--------|
+| MessageApproval PDA | `Csrk5KVNrsBzgA7GE9CN1vMEFqzcNsVNoVZ9DBGgZ1MM` | **Signed (1)**, signature_len=64 |
+| Signature (hex) | `ca5c2643489f1faae3ea39ba960386ecabe41fb61218ccfaf693fb7ecb1b05ce410b922bc45a7e7f82c646aacbb81276676eda3ae3fa5afab8960cbb00c19b1e` | 64-byte ECDSA |
+| gRPC signature == on-chain | ✅ YES | Exact match |
+
+### Official Ika source references
+
+- `crates/ika-dwallet-types/src/lib.rs` — type definitions
+- `chains/solana/examples/voting/e2e-rust/src/main.rs` — presign + sign flow
+- `chains/solana/examples/protocols-e2e/src/main.rs` — `do_presign` / `do_sign` helpers
+
+---
+
+## What Remains
 
 | Phase | Goal | Status |
 |-------|------|--------|
 | **5B** | Create real Ika dWallet via gRPC DKG | ✅ COMPLETE |
 | **5C** | Transfer authority + real policy creation | ✅ COMPLETE |
 | **5D** | Real approve_guarded_message + Ika MessageApproval | ✅ COMPLETE |
-| **5E** | gRPC Sign + signature on-chain verification | Planned — needs presign + ApprovalProof construction |
+| **5E** | gRPC Sign + signature on-chain verification | ✅ COMPLETE |
 | **5F** | Agent runtime `request_cross_chain_signature` tool | Planned — needs 5E complete |
 
 > ⚠️ **Preserve the keypair:** `target/deploy/humanrail_dwallet_guard-keypair.json` is required for any future upgrades. It is already `.gitignore`d.
@@ -653,6 +685,9 @@ Data:
 ## How to Inspect Ika State
 
 ```bash
+# Sign the approved message (Phase 5E)
+npm run ika:sign-approved-message
+
 # Basic inspection (no env vars required)
 npm run devnet:inspect-ika
 
