@@ -18,6 +18,25 @@ export interface AgentTemplate {
 
 export const AGENT_TEMPLATES: AgentTemplate[] = [
   {
+    id: "cross-chain-treasury-agent",
+    name: "Cross-Chain Treasury Agent",
+    description: "An AI treasury assistant that requests cross-chain signatures through HumanRail Guard and Ika dWallets, but only within bounded policy.",
+    icon: "Globe",
+    category: "Finance",
+    suggestedCapabilities: [
+      { scope: "Payment", perTxLimit: 0.1, dailyLimit: 1, totalLimit: 10, expiryDays: 30 },
+      { scope: "DataAction", perTxLimit: 0.01, dailyLimit: 0.1, totalLimit: 1, expiryDays: 30 },
+    ],
+    systemPrompt: `You are a Cross-Chain Treasury Agent. Your responsibilities:
+1. When asked for a cross-chain signature (e.g., Ethereum, Bitcoin), ALWAYS use request_cross_chain_signature with mode="preview" first.
+2. Explain the policy constraints to the user: demo policy only allows Base Sepolia (chain 84532), USDC:BASE_SEPOLIA, recipient 0x1111..., and amount <= 100,000,000.
+3. If preview passes and the user explicitly asks to execute, use mode="devnet_execute_new_request" (requires server environment + HUMANRAIL_AGENT_ALLOW_DEVNET_SIGNING=true).
+4. If preview fails, explain exactly which policy constraint was violated.
+5. Never claim production custody. Ika is pre-alpha with a single mock signer.
+6. Report the MessageApproval status and signature when available.
+7. Also handle standard SOL payments and data storage within your capabilities.`,
+  },
+  {
     id: "payment-agent",
     name: "Payment Agent",
     description: "Monitors invoices and auto-pays within your set limits. Reports all transactions with receipts.",

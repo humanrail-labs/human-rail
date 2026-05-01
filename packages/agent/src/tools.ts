@@ -107,7 +107,46 @@ export const HUMANRAIL_TOOLS: ToolDefinition[] = [
       required: [],
     },
   },
-  // TODO: add request_cross_chain_signature tool
-  // Parameters: chain ("ethereum" | "bitcoin"), message (hex or plaintext), signature_scheme
-  // Flow: check_capability → create GuardRequest → principal approves → CPI to Ika approve_message → gRPC Sign
+  {
+    name: "request_cross_chain_signature",
+    description:
+      "Request a policy-governed cross-chain signature using HumanRail Guard and Ika dWallets. " +
+      "Use preview mode by default to evaluate policy compatibility. " +
+      "Devnet execution is restricted to the known demo policy (Base Sepolia USDC). " +
+      "Never attempt arbitrary chain/recipient signing.",
+    parameters: {
+      type: "object",
+      properties: {
+        destination_chain_id: {
+          type: "number",
+          description: "Target chain ID (e.g., 84532 for Base Sepolia)",
+        },
+        asset: {
+          type: "string",
+          description: 'Asset identifier (e.g., "USDC:BASE_SEPOLIA")',
+        },
+        recipient: {
+          type: "string",
+          description: "Recipient address (e.g., Ethereum address)",
+        },
+        amount: {
+          type: "string",
+          description: "Amount as integer string (e.g., '42000000' for 42 USDC with 6 decimals)",
+        },
+        message: {
+          type: "string",
+          description: "Human-readable message describing the signing request",
+        },
+        mode: {
+          type: "string",
+          enum: ["preview", "devnet_existing_artifact", "devnet_execute_new_request"],
+          description:
+            "preview = policy check only; " +
+            "devnet_existing_artifact = read current signed lifecycle state (server-side only); " +
+            "devnet_execute_new_request = submit approval + sign via Ika gRPC (server-side only, requires HUMANRAIL_AGENT_ALLOW_DEVNET_SIGNING=true)",
+        },
+      },
+      required: ["destination_chain_id", "asset", "recipient", "amount", "message", "mode"],
+    },
+  },
 ];

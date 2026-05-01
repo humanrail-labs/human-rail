@@ -316,14 +316,75 @@ This runs `cargo run --manifest-path tools/ika-dkg-cli/Cargo.toml -- sign-approv
 
 ---
 
-## Phase 5E — Agent Runtime Integration
+## Phase 6 — Agent Runtime Integration (COMPLETE)
 
-**Goal:** Add `request_cross_chain_signature` tool to the agent runtime.
+**Goal:** Add `request_cross_chain_signature` tool to the HumanRail agent runtime so AI agents can request policy-governed cross-chain signatures.
 
-**Blockers/Questions:**
-1. **Agent capability check** — Verify the agent has an active HumanRail capability before creating a GuardSigningRequest.
-2. **Message formatting** — Convert user intent ("send 0.005 ETH to 0xABC...") into keccak256 message digest.
-3. **Receipt emission** — Emit HumanRail Receipts on approve/reject.
+**Command:**
+```bash
+npm run test:agent-cross-chain-tool
+```
+
+**What was implemented:**
+
+1. **`packages/agent/src/crossChainPolicy.ts`** — Shared policy utility
+   - `DEMO_POLICY` constants matching the devnet demo (chain 84532, USDC:BASE_SEPOLIA, recipient 0x1111..., per-tx limit 100M)
+   - `evaluateDemoPolicy()` — hashes inputs with keccak256 and compares against policy
+   - `computeMessageDigest()` — keccak256 of message preimage
+   - `computePolicyHashes()` — returns asset/recipient hashes for verification
+
+2. **`packages/agent/src/ikaArtifactReader.ts`** — Sanitized artifact reader
+   - Reads `.local-ika/dwallet.json`, `.local-ika/guarded-dwallet.json`, `.local-ika/signing-request.json`
+   - Returns only public fields (PDAs, tx signatures, signature hex/base64, status)
+   - No secrets, no paths, no raw attestation data
+   - Gracefully degrades in browser environments
+
+3. **`packages/agent/src/tools.ts`** — Tool definition added
+   - `request_cross_chain_signature` with JSON Schema parameters
+   - `mode` enum: `preview` | `devnet_existing_artifact` | `devnet_execute_new_request`
+
+4. **`packages/agent/src/executor.ts`** — Executor handler
+   - **preview mode:** Always evaluates policy. Returns `allowedPreview`, `reason`, `messageDigest`, `nextStep`.
+   - **devnet_existing_artifact mode:** Reads sanitized artifacts. Returns policy result + artifact state.
+   - **devnet_execute_new_request mode:** Three safety gates:
+     1. Policy must pass (arbitrary chain/recipient signing is blocked)
+     2. `HUMANRAIL_AGENT_ALLOW_DEVNET_SIGNING=true` env var required
+     3. Node.js environment required (no browser execution)
+     - If all gates pass, spawns `npm run ika:approve-message` then `npm run ika:sign-approved-message` with fixed commands (no user input interpolation)
+     - Returns exit codes, stdout/stderr, and updated artifact state
+
+5. **`packages/agent/src/runtime.ts`** — System prompt updated
+   - Added cross-chain signing rules to system prompt
+   - Mandates preview mode first
+   - Requires explicit explanation of Ika pre-alpha/mock signer nature
+   - Policy constraints documented for LLM
+
+6. **`packages/agent/src/templates.ts`** — New template
+   - `cross-chain-treasury-agent` — AI treasury assistant with cross-chain signing capability
+   - Suggested capabilities: Payment + DataAction
+   - System prompt instructs preview-first flow and policy constraints
+
+7. **`scripts/test-agent-cross-chain-tool.ts`** — Test script
+   - Test A: preview allowed request (passes policy)
+   - Test B: preview rejected request (amount too high)
+   - Test C: devnet_existing_artifact (reads signed lifecycle)
+   - Test D: devnet_execute with env disabled (safety gate test)
+   - Test E: policy hash verification (matches Phase 5D artifact)
+
+8. **UI** — `app/vault/dwallets/page-client.tsx`
+   - Added "Agent Runtime Tool — Phase 6" card in Config tab
+   - Shows tool name, modes, example prompt
+   - Indicates Phase 5E signature availability for agent reading
+
+**Safety gates implemented:**
+- Policy evaluation is always the first step, regardless of mode
+- `devnet_execute_new_request` requires exact demo policy match
+- Env var gate prevents accidental execution
+- Browser environments cannot spawn processes
+- Fixed npm script commands only — no shell interpolation of user input
+- 5-minute timeout on spawned processes
+
+**Pre-alpha disclaimer:** Ika uses a single mock signer. The agent must never claim production custody.
 
 ---
 

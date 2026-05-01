@@ -330,10 +330,15 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Verify signature bytes on-chain match gRPC response
 - [x] Update `.local-ika/signing-request.json` with sign metadata
 
-### Phase 5E — Agent Runtime Integration (PLANNED)
-- [ ] Add `request_cross_chain_signature` tool to agent runtime
-- [ ] Add Ika gRPC client to agent executor
-- [ ] End-to-end demo: agent requests Bitcoin or Ethereum signature within policy limits
+### Phase 6 — Agent Runtime Integration (COMPLETE)
+- [x] Add `request_cross_chain_signature` tool to agent runtime
+- [x] Implement preview / devnet_existing_artifact / devnet_execute_new_request modes
+- [x] Policy evaluation with keccak256 hashing (matches Guard program)
+- [x] Sanitized artifact reader (no secrets exposed to browser)
+- [x] Safety gates: policy check + env var + Node.js only
+- [x] Update system prompt with cross-chain signing rules
+- [x] Add `cross-chain-treasury-agent` template
+- [x] Test script covering all modes and safety gates
 
 ---
 
@@ -363,7 +368,7 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Devnet deployment of dWallet Guard program (slot 459328504)
 - [x] Real approve_guarded_message + Ika MessageApproval (Phase 5D)
 - [x] gRPC Sign + on-chain signature verification (Phase 5E)
-- [ ] Agent runtime cross-chain signing demo (Phase 5F+)
+- [x] Agent runtime cross-chain signing tool (Phase 6)
 
 ---
 

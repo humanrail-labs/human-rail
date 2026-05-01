@@ -1523,6 +1523,62 @@ export default function DwalletGuardPageClient() {
               )}
             </CardContent>
           </Card>
+
+          {/* Phase 6 Agent Runtime Tool Card */}
+          <Card className="border-white/[0.06] bg-neutral-900/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base text-white">
+                <Globe className="h-4 w-4 text-purple-400" />
+                Agent Runtime Tool — Phase 6
+              </CardTitle>
+              <CardDescription className="text-neutral-500">
+                request_cross_chain_signature for autonomous AI agents
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-start gap-3 rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-purple-400" />
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-purple-200">Tool Registered ✅</p>
+                  <p className="text-[11px] text-purple-200/60">
+                    Agents can request policy-governed cross-chain signatures via Ika dWallets.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-xs text-neutral-400">
+                <div className="grid grid-cols-[100px_1fr] gap-2 text-[11px]">
+                  <span className="text-neutral-500">Tool name</span>
+                  <code className="text-neutral-300">request_cross_chain_signature</code>
+                  <span className="text-neutral-500">Mode: preview</span>
+                  <span>Policy check only — always safe</span>
+                  <span className="text-neutral-500">Mode: devnet_existing_artifact</span>
+                  <span>Read signed lifecycle state (server-side only)</span>
+                  <span className="text-neutral-500">Mode: devnet_execute_new_request</span>
+                  <span>Submit approval + sign — requires env var + policy match</span>
+                </div>
+              </div>
+
+              <div className="rounded border border-white/[0.06] bg-black/20 p-2 text-[11px] text-neutral-400">
+                <span className="text-neutral-500">Example agent prompt:</span>
+                <p className="mt-1 text-neutral-300">
+                  &ldquo;Request a Base Sepolia USDC signature for 42,000,000 units to 0x1111...&rdquo;
+                </p>
+              </div>
+
+              {phase5dArtifact?.ikaSignatureHex && (
+                <div className="rounded border border-emerald-500/20 bg-emerald-500/10 p-2 text-[11px] text-emerald-200/80">
+                  ✅ Phase 5E artifact is signed — agent can read signature via devnet_existing_artifact mode
+                </div>
+              )}
+
+              <div className="text-[11px] text-neutral-500">
+                Safety: devnet execution is guarded by{" "}
+                <code className="text-neutral-400">HUMANRAIL_AGENT_ALLOW_DEVNET_SIGNING=true</code>{" "}
+                and constrained to the demo policy.
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Policy Creation tab */}

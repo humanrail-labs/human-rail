@@ -88,9 +88,12 @@ npm run ika:approve-message
 
 # Sign the approved message via Ika gRPC (Phase 5E)
 npm run ika:sign-approved-message
+
+# Test the agent cross-chain signature tool (Phase 6)
+npm run test:agent-cross-chain-tool
 ```
 
-**Phase 5D/5E Devnet Artifacts:**
+**Phase 5D/5E/6 Devnet Artifacts:**
 | Artifact | Address |
 |----------|---------|
 | Ika dWallet PDA | `A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp` |
