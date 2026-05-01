@@ -1,5 +1,5 @@
 {
-  "address": "G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF",
+  "address": "Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2",
   "metadata": {
     "name": "humanrail_dwallet_guard",
     "version": "0.1.0",
@@ -150,7 +150,7 @@
         },
         {
           "name": "program",
-          "address": "G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF"
+          "address": "Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2"
         },
         {
           "name": "dwallet_program",
@@ -315,6 +315,126 @@
         158,
         206,
         141
+      ],
+      "accounts": [
+        {
+          "name": "principal",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "guarded_dwallet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  117,
+                  97,
+                  114,
+                  100,
+                  101,
+                  100,
+                  95,
+                  100,
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "principal"
+              },
+              {
+                "kind": "account",
+                "path": "agent"
+              },
+              {
+                "kind": "account",
+                "path": "dwallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "human_profile"
+        },
+        {
+          "name": "agent"
+        },
+        {
+          "name": "humanrail_capability"
+        },
+        {
+          "name": "dwallet"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "allowed_chain_id",
+          "type": "u32"
+        },
+        {
+          "name": "allowed_asset_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "allowed_recipient_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "per_tx_limit",
+          "type": "u64"
+        },
+        {
+          "name": "daily_limit",
+          "type": "u64"
+        },
+        {
+          "name": "total_limit",
+          "type": "u64"
+        },
+        {
+          "name": "expires_at",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_guarded_dwallet_demo",
+      "docs": [
+        "Devnet-only initializer that skips HumanRail owner checks.",
+        "Use this for testing when real HumanRail attestations are unavailable."
+      ],
+      "discriminator": [
+        119,
+        131,
+        122,
+        191,
+        76,
+        83,
+        31,
+        246
       ],
       "accounts": [
         {

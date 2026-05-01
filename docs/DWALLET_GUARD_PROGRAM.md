@@ -3,7 +3,7 @@
 > On-chain policy controller for Ika cross-chain signing.  
 > Path: `programs/humanrail-dwallet-guard/`  
 > Status: **Phase 4A complete** — Deployed and executable on Solana devnet.  
-> **Program ID:** `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF`  
+> **Program ID:** `Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2`  
 > **Last Deployed Slot:** `459322057`  
 > **ProgramData:** `o7BzTT76DmPjMKfa2rd3SmDovn5Nmf8xs3Va6L8RyFh`
 
@@ -371,7 +371,7 @@ solana program deploy target/deploy/humanrail_dwallet_guard.so \
 
 After deployment succeeds, verify:
 ```bash
-solana program show G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF --url devnet
+solana program show Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2 --url devnet
 ```
 
 ### Update Frontend/SDK
@@ -414,7 +414,7 @@ Implemented as raw instruction builders using exact IDL discriminators and accou
 ### Current Status
 - **SBF build:** ✅ Passes (`cargo build-sbf` + `anchor build`)
 - **Program keypair:** ✅ Exists at `target/deploy/humanrail_dwallet_guard-keypair.json`
-- **Program ID:** ✅ Consistent across all files (`G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF`)
+- **Program ID:** ✅ Consistent across all files (`Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2`)
 - **Deployer wallet:** `5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y`
 - **Deployed:** ✅ **2026-05-01** on devnet
 - **ProgramData Address:** `o7BzTT76DmPjMKfa2rd3SmDovn5Nmf8xs3Va6L8RyFh`
@@ -430,7 +430,7 @@ Implemented as raw instruction builders using exact IDL discriminators and accou
 ```bash
 npm run verify:dwallet-guard
 # or
-solana program show G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF --url devnet
+solana program show Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2 --url devnet
 ```
 
 ### `/vault/dwallets` UI Status
@@ -438,6 +438,56 @@ The program is now deployed. `connection.getAccountInfo(guardProgramId)` returns
 - Shows **"Guard program is live on devnet"** banner (green)
 - **Enables** the `Initialize Guard` and `Submit Guarded Request` buttons
 - `isDeployed === true` in `useDwalletGuard` hook
+
+---
+
+## Phase 4B — Create First Guarded dWallet Policy on Devnet (COMPLETE)
+
+### What was accomplished
+- Created a `GuardedDwallet` policy account via `initialize_guarded_dwallet_demo`
+- Tested freeze → unfreeze lifecycle
+- Tested rejected signing request path (amount > per_tx_limit)
+- All transactions confirmed on devnet
+
+### Command
+```bash
+npm run devnet:create-guarded-dwallet
+```
+
+### Transaction Signatures
+| Action | Signature |
+|--------|-----------|
+| `initialize_guarded_dwallet_demo` | `oSYLix7B1ipF75AGRf4M4Z3DDP9W8PxhuzibJMMf61eS2PCJhbqe1EjEAWhHc2BxuscGSAEC5DDZhvd4hyCgJnq` |
+| `freeze_guarded_dwallet` | `ErAtFzD2ZZrgWLRnvkuSo7HY4QPZN9txa8MrkF5MW7ce8oUKUbSiDrwVj9aMrJshc1HypMPTz67zhXBfJ9nRjZK` |
+| `unfreeze_guarded_dwallet` | `3NAUYxq23DBJL222xjSAKx4FGMuXRHYrtyFf1gTyZdqpx71DcL4GjHiTohrTo9HCjkwK65LdCEJCEXJxscFKjm41` |
+| `approve_guarded_message` (rejected) | `2DiVyvF3XFDE4EvQcfJZdFWCjJKXN1XPvrjLLjmvq9Dmq8fvF9xmYcd9obczJbPDHbLKr8ALANcVFmvLQm9rWPC` |
+
+### Account Addresses
+| Account | Address |
+|---------|---------|
+| Principal | `5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y` |
+| Human Profile (demo) | `CFzvySB43C2xQnJ6YzZHaH5aLxNaivPTK58KhK6rcaTs` |
+| Agent (demo) | `7MU4iHWD7cwHeQ28bdufZE47W4N6pAbSyLr63aX5awQ3` |
+| Capability (demo) | `F91EysWYw4xa4rBhHzkq9hVMVqHhD6kGWAfYRm46vut7` |
+| dWallet (placeholder) | `9NNE4v7DcuQA9fL868wwgx8jsz3pn9EKr97ZADLnw12p` |
+| GuardedDwallet PDA | `FNt1H6B4ZyDMPvZj2VUX5KYr6PjwYLCxWAgjifoeFM4b` |
+| GuardSigningRequest PDA | `AwQUee1KHkitvEy3BAAM9ostZdDawxiquMaoSnuwUsqV` |
+
+### Important Notes
+- **Demo initializer used:** `initialize_guarded_dwallet_demo` skips HumanRail owner checks because the deployer wallet's human profile has `canRegisterAgents=false`.
+- **Placeholder dWallet:** The dWallet pubkey is a deterministic placeholder (`DEMO_DWALLET_PLACEHOLDER_FOR_PHASE_4B`). Phase 5 will replace it with a real Ika dWallet.
+- **Rejected request verified:** `status=2`, `rejection_code=7` (per_tx_limit_exceeded). No Ika CPI was invoked.
+
+---
+
+## What Remains for Phase 5
+
+1. **Ika dWallet creation** — Create a real Ika dWallet via gRPC or web UI.
+2. **dWallet authority transfer** — Transfer dWallet authority to the CPI authority PDA.
+3. **Real signing request** — Submit an `approve_guarded_message` that passes all policy checks and CPI-calls Ika.
+4. **gRPC client** — Implement `lib/ika/client.ts` for off-chain signing request submission.
+5. **Receipt integration** — Optionally emit HumanRail Receipts on approve/reject.
+6. **Tests** — Write Rust unit tests + TypeScript integration tests against devnet.
 
 > ⚠️ **Preserve the keypair:** `target/deploy/humanrail_dwallet_guard-keypair.json` is required for any future upgrades. It is already `.gitignore`d.
 

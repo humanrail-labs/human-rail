@@ -11,6 +11,7 @@ import {
 // ---------------------------------------------------------------------------
 const DISCRIMINATORS = {
   initializeGuardedDwallet: Buffer.from([2, 46, 207, 0, 11, 158, 206, 141]),
+  initializeGuardedDwalletDemo: Buffer.from([119, 131, 122, 191, 76, 83, 31, 246]),
   freezeGuardedDwallet: Buffer.from([151, 57, 89, 252, 123, 234, 123, 61]),
   unfreezeGuardedDwallet: Buffer.from([223, 101, 174, 85, 26, 221, 221, 194]),
   approveGuardedMessage: Buffer.from([161, 49, 124, 159, 1, 54, 243, 30]),
@@ -59,6 +60,60 @@ export function buildInitializeGuardedDwalletIx(
   const data = Buffer.alloc(8 + 4 + 32 + 32 + 8 + 8 + 8 + 8);
   let offset = 0;
   DISCRIMINATORS.initializeGuardedDwallet.copy(data, offset);
+  offset += 8;
+  data.writeUInt32LE(params.allowedChainId, offset);
+  offset += 4;
+  Buffer.from(params.allowedAssetHash).copy(data, offset);
+  offset += 32;
+  Buffer.from(params.allowedRecipientHash).copy(data, offset);
+  offset += 32;
+  const view = new DataView(data.buffer, data.byteOffset + offset, 32);
+  view.setBigUint64(0, params.perTxLimit, true);
+  view.setBigUint64(8, params.dailyLimit, true);
+  view.setBigUint64(16, params.totalLimit, true);
+  view.setBigInt64(24, params.expiresAt, true);
+
+  return new TransactionInstruction({
+    keys: [
+      { pubkey: params.principal, isSigner: true, isWritable: true },
+      { pubkey: params.guardedDwallet, isSigner: false, isWritable: true },
+      { pubkey: params.humanProfile, isSigner: false, isWritable: false },
+      { pubkey: params.agent, isSigner: false, isWritable: false },
+      { pubkey: params.humanrailCapability, isSigner: false, isWritable: false },
+      { pubkey: params.dwallet, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    programId: guardProgramId,
+    data,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Instruction: initialize_guarded_dwallet_demo
+// Devnet-only — skips HumanRail owner checks on human_profile/agent/capability.
+// Same args and accounts as initialize_guarded_dwallet, but without owner constraints.
+// ---------------------------------------------------------------------------
+export function buildInitializeGuardedDwalletDemoIx(
+  guardProgramId: PublicKey,
+  params: {
+    principal: PublicKey;
+    guardedDwallet: PublicKey;
+    humanProfile: PublicKey;
+    agent: PublicKey;
+    humanrailCapability: PublicKey;
+    dwallet: PublicKey;
+    allowedChainId: number;
+    allowedAssetHash: Uint8Array;
+    allowedRecipientHash: Uint8Array;
+    perTxLimit: bigint;
+    dailyLimit: bigint;
+    totalLimit: bigint;
+    expiresAt: bigint;
+  }
+): TransactionInstruction {
+  const data = Buffer.alloc(8 + 4 + 32 + 32 + 8 + 8 + 8 + 8);
+  let offset = 0;
+  DISCRIMINATORS.initializeGuardedDwalletDemo.copy(data, offset);
   offset += 8;
   data.writeUInt32LE(params.allowedChainId, offset);
   offset += 4;
@@ -197,20 +252,16 @@ export function buildApproveGuardedMessageIx(
     { pubkey: params.guardedDwallet, isSigner: false, isWritable: true },
     { pubkey: params.guardSigningRequest, isSigner: false, isWritable: true },
     { pubkey: params.dwallet, isSigner: false, isWritable: false },
-  ];
-
-  if (params.agentRegistryAccount) {
-    keys.push({ pubkey: params.agentRegistryAccount, isSigner: false, isWritable: false });
-  }
-
-  keys.push(
+    // Anchor Option<AccountInfo> requires a placeholder when None.
+    // Use the program ID as the None placeholder.
+    { pubkey: params.agentRegistryAccount ?? guardProgramId, isSigner: false, isWritable: false },
     { pubkey: params.cpiAuthority, isSigner: false, isWritable: false },
     { pubkey: guardProgramId, isSigner: false, isWritable: false },
     { pubkey: IKA_PROGRAM_ID, isSigner: false, isWritable: false },
     { pubkey: params.coordinator, isSigner: false, isWritable: false },
     { pubkey: params.messageApproval, isSigner: false, isWritable: true },
-    { pubkey: SystemProgram.programId, isSigner: false, isWritable: false }
-  );
+    { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+  ];
 
   return new TransactionInstruction({
     keys,

@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-humanrail_dwallet_guard = "G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF"
+humanrail_dwallet_guard = "Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2"
 
 [provider]
 cluster = "devnet"

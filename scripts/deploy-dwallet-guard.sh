@@ -4,7 +4,7 @@ set -euo pipefail
 # Ensure Solana/Anchor tools are discoverable
 export PATH="/home/codespace/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$PATH"
 
-EXPECTED_PROGRAM_ID="G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF"
+EXPECTED_PROGRAM_ID="Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2"
 KEYPAIR_FILE="target/deploy/humanrail_dwallet_guard-keypair.json"
 SO_FILE="target/deploy/humanrail_dwallet_guard.so"
 DEPLOYER_KEYPAIR="${HOME}/.config/solana/id.json"

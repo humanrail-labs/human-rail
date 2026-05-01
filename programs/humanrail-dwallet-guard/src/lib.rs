@@ -13,7 +13,7 @@ pub const HUMANRAIL_AGENT_REGISTRY_PROGRAM_ID: Pubkey =
 pub const HUMANRAIL_DELEGATION_PROGRAM_ID: Pubkey =
     pubkey!("DiNpgESa1iYxKkqmpCu8ULaXEmhqvD33ADGaaH3qP7XT");
 
-declare_id!("G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF");
+declare_id!("Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2");
 
 // ------------------------------------------------------------------
 // Account structs MUST be defined at crate root for Anchor 1's
@@ -59,6 +59,52 @@ pub struct InitializeGuardedDwallet<'info> {
 
     /// CHECK: Delegation capability account; owner verified below
     #[account(owner = HUMANRAIL_DELEGATION_PROGRAM_ID @ error::GuardError::InvalidCapability)]
+    pub humanrail_capability: AccountInfo<'info>,
+
+    /// CHECK: Ika dWallet pubkey — stored as reference only
+    pub dwallet: AccountInfo<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+/// Devnet-only account struct that skips HumanRail owner checks.
+/// Allows testing GuardedDwallet lifecycle without requiring
+/// canRegisterAgents=true on the human profile.
+#[derive(Accounts)]
+#[instruction(
+    allowed_chain_id: u32,
+    allowed_asset_hash: [u8; 32],
+    allowed_recipient_hash: [u8; 32],
+    per_tx_limit: u64,
+    daily_limit: u64,
+    total_limit: u64,
+    expires_at: i64,
+)]
+pub struct InitializeGuardedDwalletDemo<'info> {
+    #[account(mut)]
+    pub principal: Signer<'info>,
+
+    #[account(
+        init,
+        payer = principal,
+        space = 8 + state::GuardedDwallet::LEN,
+        seeds = [
+            b"guarded_dwallet",
+            principal.key().as_ref(),
+            agent.key.as_ref(),
+            dwallet.key.as_ref(),
+        ],
+        bump,
+    )]
+    pub guarded_dwallet: Account<'info, state::GuardedDwallet>,
+
+    /// CHECK: No owner check — demo mode allows any pubkey
+    pub human_profile: AccountInfo<'info>,
+
+    /// CHECK: No owner check — demo mode allows any pubkey
+    pub agent: AccountInfo<'info>,
+
+    /// CHECK: No owner check — demo mode allows any pubkey
     pub humanrail_capability: AccountInfo<'info>,
 
     /// CHECK: Ika dWallet pubkey — stored as reference only
@@ -191,6 +237,22 @@ pub mod humanrail_dwallet_guard {
         expires_at: i64,
     ) -> Result<()> {
         instructions::initialize::handler(ctx, allowed_chain_id, allowed_asset_hash,
+            allowed_recipient_hash, per_tx_limit, daily_limit, total_limit, expires_at)
+    }
+
+    /// Devnet-only initializer that skips HumanRail owner checks.
+    /// Use this for testing when real HumanRail attestations are unavailable.
+    pub fn initialize_guarded_dwallet_demo(
+        ctx: Context<InitializeGuardedDwalletDemo>,
+        allowed_chain_id: u32,
+        allowed_asset_hash: [u8; 32],
+        allowed_recipient_hash: [u8; 32],
+        per_tx_limit: u64,
+        daily_limit: u64,
+        total_limit: u64,
+        expires_at: i64,
+    ) -> Result<()> {
+        instructions::initialize_demo::handler(ctx, allowed_chain_id, allowed_asset_hash,
             allowed_recipient_hash, per_tx_limit, daily_limit, total_limit, expires_at)
     }
 

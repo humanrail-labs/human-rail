@@ -140,7 +140,7 @@ export const ACTION_RECEIPT_DISCRIMINATOR = ACCOUNT_DISCRIMINATORS.ActionReceipt
  *  Until then, all helpers that depend on this will throw or return null.
  */
 export const HUMANRAIL_DWALLET_GUARD_PROGRAM_ID_DEVNET: PublicKey | null =
-  new PublicKey("G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF");
+  new PublicKey("Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2");
 
 export function getDwalletGuardProgramId(): PublicKey {
   if (!HUMANRAIL_DWALLET_GUARD_PROGRAM_ID_DEVNET) {

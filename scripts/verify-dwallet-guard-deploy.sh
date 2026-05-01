@@ -4,7 +4,7 @@ set -euo pipefail
 # Ensure Solana tools are discoverable
 export PATH="/home/codespace/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$PATH"
 
-PROGRAM_ID="G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF"
+PROGRAM_ID="Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2"
 RPC_URL="https://api.devnet.solana.com"
 
 echo "========================================"

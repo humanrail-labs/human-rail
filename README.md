@@ -63,6 +63,12 @@ See [`docs/GRANT_IKA_SUBMISSION_PLAN.md`](docs/GRANT_IKA_SUBMISSION_PLAN.md) for
 **Network:** Solana Devnet  
 **Status:** 8/8 Programs Deployed
 
+**Devnet Demo:**
+```bash
+# Create a Guarded dWallet policy (Phase 4B)
+npm run devnet:create-guarded-dwallet
+```
+
 ---
 
 ## Protocol Architecture
@@ -89,7 +95,7 @@ Four layers. Seven programs. One unified trust stack.
 | DataBlink | `GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX` |
 | Document Registry | `8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28` |
 | Receipts | `EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM` |
-| HumanRail dWallet Guard | `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF` *(Deployed on devnet)* |
+| HumanRail dWallet Guard | `Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2` *(Deployed on devnet)* |
 
 ---
 

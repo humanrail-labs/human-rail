@@ -255,7 +255,7 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 ### Phase 2C — SBF Build & Deploy Preparation (COMPLETE)
 - [x] **SBF build:** `cargo build-sbf` and `anchor build` both succeed (225,680 bytes `.so`)
 - [x] **IDL generated:** `anchor build` produces `target/idl/humanrail_dwallet_guard.json` (17,226 bytes)
-- [x] **Program ID assigned:** `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF` (auto-generated keypair)
+- [x] **Program ID assigned:** `Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2` (auto-generated keypair)
 - [x] **Repo references updated:** `declare_id!`, `lib/programs/index.ts`, `packages/sdk/src/constants.ts`, `.env.example`, `Anchor.toml`
 - [x] **IDL copied to frontend:** `lib/idl/humanrail_dwallet_guard.json`
 - [x] **Check script:** `scripts/check-dwallet-guard.sh` + `package.json` script
@@ -276,15 +276,17 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Program keypair exists and matches expected ID
 - [x] Deploy script: `scripts/deploy-dwallet-guard.sh`
 - [x] Verify script: `scripts/verify-dwallet-guard-deploy.sh`
-- [x] Deployed to devnet: `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF`
+- [x] Deployed to devnet: `Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2`
 - [x] On-chain deployment confirmed (slot 459322057, executable)
 
-### Phase 4B — Create First GuardedDwallet Policy Account (NEXT)
-- [ ] Connect wallet on `/vault/dwallets`
-- [ ] Select an agent and enter a dWallet pubkey
-- [ ] Submit `initialize_guarded_dwallet` transaction
-- [ ] Verify `GuardedDwallet` PDA created on devnet
-- [ ] Test freeze/unfreeze flow
+### Phase 4B — Create First GuardedDwallet Policy Account (COMPLETE)
+- [x] Connect wallet on `/vault/dwallets`
+- [x] Select an agent and enter a dWallet pubkey
+- [x] Submit `initialize_guarded_dwallet_demo` transaction
+- [x] Verify `GuardedDwallet` PDA created on devnet
+- [x] Test freeze/unfreeze flow
+- [x] Test rejected signing request path (status=2, code=7)
+- [x] Added `npm run devnet:create-guarded-dwallet` script
 
 ### Phase 4 — Agent Runtime Integration (PLANNED)
 - [ ] Add `request_cross_chain_signature` tool to agent runtime
@@ -316,7 +318,7 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Source code for new dWallet Guard program (Phase 2+)
 - [x] Frontend integration for dWallet management (Phase 3)
 - [x] Deploy/verify scripts and build readiness (Phase 4A)
-- [x] Devnet deployment of dWallet Guard program (slot 459322057)
+- [x] Devnet deployment of dWallet Guard program (slot 459328504)
 - [ ] Agent runtime cross-chain signing demo (Phase 5+)
 - [ ] Agent runtime cross-chain signing demo (Phase 4+)
 
