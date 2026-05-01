@@ -271,13 +271,13 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Added to vault sidebar navigation
 - [ ] Integrate Ika gRPC client for `DWalletRequest::Sign` (Phase 5)
 
-### Phase 4A — Deploy to Devnet (BLOCKED)
+### Phase 4A — Deploy to Devnet (COMPLETE)
 - [x] Build passes (`anchor build` + `cargo build-sbf`)
 - [x] Program keypair exists and matches expected ID
 - [x] Deploy script: `scripts/deploy-dwallet-guard.sh`
 - [x] Verify script: `scripts/verify-dwallet-guard-deploy.sh`
-- [ ] **Blocker:** Deployer wallet `5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y` has 0 SOL. Devnet faucet rate-limited.
-- [ ] On-chain deployment confirmation
+- [x] Deployed to devnet: `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF`
+- [x] On-chain deployment confirmed (slot 459316480, executable)
 
 ### Phase 4 — Agent Runtime Integration (PLANNED)
 - [ ] Add `request_cross_chain_signature` tool to agent runtime
@@ -309,7 +309,7 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Source code for new dWallet Guard program (Phase 2+)
 - [x] Frontend integration for dWallet management (Phase 3)
 - [x] Deploy/verify scripts and build readiness (Phase 4A)
-- [ ] Devnet deployment of dWallet Guard program (blocked by faucet)
+- [x] Devnet deployment of dWallet Guard program (slot 459316480)
 - [ ] Agent runtime cross-chain signing demo (Phase 5+)
 - [ ] Agent runtime cross-chain signing demo (Phase 4+)
 

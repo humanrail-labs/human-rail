@@ -408,54 +408,43 @@ Implemented as raw instruction builders using exact IDL discriminators and accou
 
 ---
 
-## Phase 4A — Deploy to Devnet (BLOCKED)
+## Phase 4A — Deploy to Devnet (COMPLETE)
 
 ### Current Status
 - **SBF build:** ✅ Passes (`cargo build-sbf` + `anchor build`)
 - **Program keypair:** ✅ Exists at `target/deploy/humanrail_dwallet_guard-keypair.json`
 - **Program ID:** ✅ Consistent across all files (`G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF`)
 - **Deployer wallet:** `5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y`
-- **Deployer balance:** `0 SOL`
-- **Blocker:** Devnet airdrop faucet rate-limited. Repeated attempts (`solana airdrop 2/1/0.5`) all returned:
-  > "airdrop request failed. This can happen when the rate limit is reached."
+- **Deployed:** ✅ **2026-05-01** on devnet
+- **ProgramData Address:** `o7BzTT76DmPjMKfa2rd3SmDovn5Nmf8xs3Va6L8RyFh`
+- **Last Deployed In Slot:** `459316480`
+- **Data Length:** `225680` bytes
+- **Balance:** `1.57193688 SOL`
 
-### Deploy Scripts Added
+### Deploy Scripts
 - `scripts/deploy-dwallet-guard.sh` — Checks keypair, verifies program ID, checks balance, builds, deploys
 - `scripts/verify-dwallet-guard-deploy.sh` — Verifies on-chain executable status via RPC
 
-### Exact Commands to Deploy (once funded)
+### Verify Deployment
 ```bash
-# Option 1: Anchor deploy (preferred)
-anchor deploy --provider.cluster devnet
-
-# Option 2: Solana CLI fallback
-solana program deploy target/deploy/humanrail_dwallet_guard.so \
-  --url devnet \
-  --program-id target/deploy/humanrail_dwallet_guard-keypair.json
-
-# Verify
-solana program show G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF --url devnet
 npm run verify:dwallet-guard
+# or
+solana program show G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF --url devnet
 ```
 
-### Funding the Deployer
-```bash
-# Try CLI faucet
-solana airdrop 2 --url devnet
+### `/vault/dwallets` UI Update
+Once the program is deployed and `connection.getAccountInfo(guardProgramId)` returns `executable: true`, the `/vault/dwallets` page will:
+- Show **"Guard program is live on devnet"** banner
+- **Enable** the `Initialize Guard` and `Submit Guarded Request` buttons
 
-# Or web faucet
-open https://faucet.solana.com/?address=5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y
-```
-
-> ⚠️ **Preserve the keypair:** `target/deploy/humanrail_dwallet_guard-keypair.json` is required to deploy to this program ID. It is already `.gitignore`d. Do not lose it.
+> ⚠️ **Preserve the keypair:** `target/deploy/humanrail_dwallet_guard-keypair.json` is required for any future upgrades. It is already `.gitignore`d.
 
 ---
 
 ## What Remains for Phase 5
 
-1. **Deploy to devnet** — Run `npm run deploy:dwallet-guard` once wallet has ≥2 SOL.
-2. **Validate parsers** — Update `packages/sdk/src/parsers.ts` with exact offsets from the IDL.
-3. **dWallet authority transfer** — Build UI flow to transfer dWallet authority to the CPI authority PDA.
-4. **gRPC client** — Implement `lib/ika/client.ts` for off-chain signing request submission.
-5. **Receipt integration** — Optionally emit HumanRail Receipts on approve/reject.
-6. **Tests** — Write Rust unit tests + TypeScript integration tests against devnet.
+1. **Validate parsers** — Update `packages/sdk/src/parsers.ts` with exact offsets from the IDL.
+2. **dWallet authority transfer** — Build UI flow to transfer dWallet authority to the CPI authority PDA.
+3. **gRPC client** — Implement `lib/ika/client.ts` for off-chain signing request submission.
+4. **Receipt integration** — Optionally emit HumanRail Receipts on approve/reject.
+5. **Tests** — Write Rust unit tests + TypeScript integration tests against devnet.

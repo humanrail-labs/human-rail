@@ -44,7 +44,7 @@ echo "   Balance:  ${BALANCE} SOL"
 
 # Minimum ~1.5 SOL needed for program deployment
 REQUIRED_BALANCE="1.5"
-if (( $(echo "$BALANCE < $REQUIRED_BALANCE" | bc -l) )); then
+if [ "$(echo "$BALANCE < $REQUIRED_BALANCE" | bc -l 2>/dev/null || awk "BEGIN{print ($BALANCE < $REQUIRED_BALANCE)?1:0}")" = "1" ]; then
   echo ""
   echo "ERROR: Insufficient devnet SOL for deployment."
   echo "  Required: ≥${REQUIRED_BALANCE} SOL"
