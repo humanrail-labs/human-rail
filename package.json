@@ -21,7 +21,8 @@
     "ika:approve-message": "tsx scripts/ika-approve-guarded-message.ts",
     "ika:sign-approved-message": "cargo run --manifest-path tools/ika-dkg-cli/Cargo.toml -- sign-approved-message --dwallet-artifact .local-ika/dwallet.json --request-artifact .local-ika/signing-request.json",
     "ika:verify-message-approval": "cargo run --manifest-path tools/ika-dkg-cli/Cargo.toml -- sign-approved-message --dwallet-artifact .local-ika/dwallet.json --request-artifact .local-ika/signing-request.json",
-    "test:agent-cross-chain-tool": "tsx scripts/test-agent-cross-chain-tool.ts"
+    "test:agent-cross-chain-tool": "tsx scripts/test-agent-cross-chain-tool.ts",
+    "final:check": "bash scripts/final-submission-check.sh"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

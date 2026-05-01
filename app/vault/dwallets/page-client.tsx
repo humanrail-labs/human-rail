@@ -524,6 +524,34 @@ export default function DwalletGuardPageClient() {
         </div>
       </div>
 
+      {/* Mandara product branding */}
+      <div className="space-y-3 rounded-xl border border-white/[0.06] bg-neutral-900/50 p-4">
+        <div className="flex items-center gap-2">
+          <Globe className="h-5 w-5 text-purple-400" />
+          <h2 className="text-lg font-semibold text-white">Mandara by HumanRail</h2>
+          <Badge variant="outline" className="border-purple-500/30 text-purple-300 text-[10px]">
+            Ika Grant Demo
+          </Badge>
+        </div>
+        <p className="text-sm text-neutral-400">
+          Programmable mandates for cross-chain AI agents, powered by Ika dWallets.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-1.5 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200/80">
+            <CheckCircle2 className="h-3 w-3" />
+            1. Guard policy
+          </div>
+          <div className="flex items-center gap-1.5 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200/80">
+            <CheckCircle2 className="h-3 w-3" />
+            2. Ika approval
+          </div>
+          <div className="flex items-center gap-1.5 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200/80">
+            <CheckCircle2 className="h-3 w-3" />
+            3. Signed MessageApproval
+          </div>
+        </div>
+      </div>
+
       {/* Main content tabs */}
       <Tabs defaultValue="config" className="w-full">
         <TabsList className="grid w-full grid-cols-3 bg-neutral-900">
