@@ -62,14 +62,19 @@ export function deriveIkaDwalletPda(
  * Derive the Ika MessageApproval PDA address.
  *
  * The seeds are hierarchical: they reuse the dWallet PDA seed prefix,
- * then append "message_approval", the scheme as u16 LE, and the message digest.
+ * then append "message_approval", the scheme as u16 LE, the message digest,
+ * and optionally the message_metadata_digest (only included when non-zero).
  *
- * Seeds: ["dwallet", chunks(curve_u16_le || pk), "message_approval", scheme_u16_le, message_digest]
+ * Seeds: ["dwallet", chunks(curve_u16_le || pk), "message_approval", scheme_u16_le, message_digest, [message_metadata_digest]]
+ *
+ * Per the Ika docs, the message_metadata_digest seed is only included when
+ * it is non-zero. Using the wrong seeds will produce a PDA mismatch.
  *
  * @param curve - The dWallet curve.
  * @param publicKey - The raw dWallet public key bytes.
  * @param signatureScheme - The signature scheme (u16 LE encoded).
  * @param messageDigest - The keccak256 message digest (32 bytes).
+ * @param messageMetadataDigest - Optional keccak256 metadata digest (32 bytes). Only included in seeds when non-zero.
  * @param programId - Ika dWallet program ID (defaults to devnet).
  */
 export function deriveIkaMessageApprovalPda(
@@ -77,6 +82,7 @@ export function deriveIkaMessageApprovalPda(
   publicKey: Uint8Array,
   signatureScheme: IkaSignatureScheme,
   messageDigest: Uint8Array,
+  messageMetadataDigest?: Uint8Array,
   programId: PublicKey = IKA_DWALLET_PROGRAM_ID_DEVNET
 ): [PublicKey, number] {
   const schemeBuf = Buffer.alloc(2);
@@ -88,6 +94,17 @@ export function deriveIkaMessageApprovalPda(
     schemeBuf,
     Buffer.from(messageDigest),
   ];
+
+  // Per Ika docs: message_metadata_digest seed is only included when non-zero
+  if (messageMetadataDigest) {
+    const metaBuf = Buffer.from(messageMetadataDigest);
+    if (metaBuf.length === 32) {
+      const isZero = metaBuf.every((b) => b === 0);
+      if (!isZero) {
+        seeds.push(metaBuf);
+      }
+    }
+  }
 
   return PublicKey.findProgramAddressSync(seeds, programId);
 }
@@ -119,6 +136,24 @@ export function deriveIkaCoordinatorPda(
 ): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
     [Buffer.from("dwallet_coordinator")],
+    programId
+  );
+}
+
+/**
+ * Derive the GasDeposit PDA for a user.
+ *
+ * Seeds: ["gas_deposit", user_pubkey]
+ *
+ * @param userPubkey - The user's Ed25519 public key (32 bytes).
+ * @param programId - Ika dWallet program ID (defaults to devnet).
+ */
+export function deriveIkaGasDepositPda(
+  userPubkey: Uint8Array,
+  programId: PublicKey = IKA_DWALLET_PROGRAM_ID_DEVNET
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("gas_deposit"), Buffer.from(userPubkey)],
     programId
   );
 }

@@ -12,6 +12,8 @@ import {
   parseIkaMessageApprovalAccount,
   dwalletPdaSeeds,
   deriveIkaDwalletPda,
+  deriveIkaMessageApprovalPda,
+  deriveIkaGasDepositPda,
   DWalletCurve,
   DWalletState,
   IkaSignatureScheme,
@@ -222,6 +224,47 @@ console.log("Test 8: deriveIkaDwalletPda is deterministic");
   const [pda1] = deriveIkaDwalletPda(DWalletCurve.Secp256k1, publicKey);
   const [pda2] = deriveIkaDwalletPda(DWalletCurve.Secp256k1, publicKey);
   assertEq(pda1.toBase58(), pda2.toBase58(), "same inputs produce same PDA");
+}
+
+// ── Test 9: MessageApproval PDA with and without metadata digest ──
+console.log("Test 9: deriveIkaMessageApprovalPda optional metadata digest");
+{
+  const publicKey = Buffer.from("02e2d5f1c3a8b7e6d4c5a9f0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d", "hex");
+  const messageDigest = Buffer.alloc(32);
+  messageDigest.fill(0xab);
+
+  // Without metadata digest
+  const [pdaNoMeta] = deriveIkaMessageApprovalPda(
+    DWalletCurve.Secp256k1, publicKey, IkaSignatureScheme.EcdsaKeccak256, messageDigest
+  );
+
+  // With zero metadata digest (should produce same PDA)
+  const zeroMeta = Buffer.alloc(32);
+  const [pdaZeroMeta] = deriveIkaMessageApprovalPda(
+    DWalletCurve.Secp256k1, publicKey, IkaSignatureScheme.EcdsaKeccak256, messageDigest, zeroMeta
+  );
+
+  // With non-zero metadata digest (should produce different PDA)
+  const nonZeroMeta = Buffer.alloc(32);
+  nonZeroMeta.fill(0xcd);
+  const [pdaWithMeta] = deriveIkaMessageApprovalPda(
+    DWalletCurve.Secp256k1, publicKey, IkaSignatureScheme.EcdsaKeccak256, messageDigest, nonZeroMeta
+  );
+
+  assertEq(pdaNoMeta.toBase58(), pdaZeroMeta.toBase58(), "zero metadata should be excluded");
+  assertTrue(pdaNoMeta.toBase58() !== pdaWithMeta.toBase58(), "non-zero metadata should change PDA");
+}
+
+// ── Test 10: GasDeposit PDA derivation ──
+console.log("Test 10: deriveIkaGasDepositPda");
+{
+  const userPubkey = Buffer.alloc(32);
+  userPubkey.fill(0x42);
+  const [pda1, bump1] = deriveIkaGasDepositPda(userPubkey);
+  const [pda2, bump2] = deriveIkaGasDepositPda(userPubkey);
+  assertEq(pda1.toBase58(), pda2.toBase58(), "same inputs produce same PDA");
+  assertEq(bump1, bump2, "same bump");
+  assertTrue(pda1.toBase58().length > 0, "PDA is valid base58");
 }
 
 // ── Summary ──

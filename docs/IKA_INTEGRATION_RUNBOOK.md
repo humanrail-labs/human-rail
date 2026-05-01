@@ -201,23 +201,67 @@ Source: `chains/solana/examples/voting/e2e-rust/src/main.rs` (lines 375-389)
 **Prerequisites (now met):**
 1. ✅ Real dWallet with authority = Guard CPI PDA
 2. ✅ GuardedDwallet policy linked to real dWallet
-3. ✅ MessageApproval PDA derivation verified
+3. ✅ MessageApproval PDA derivation verified (with optional metadata digest seed)
+
+**Step 1: approve_guarded_message (HumanRail Guard CPI)**
+The Guard program checks policy, then CPI-calls Ika `approve_message`:
+```
+CPI data:    [8, bump, message_digest(32), message_metadata_digest(32), user_pubkey(32), signature_scheme(2)] = 100 bytes
+CPI accounts:
+  0. coordinator      (readonly)   -- DWalletCoordinator PDA
+  1. message_approval (writable)   -- empty PDA to create
+  2. dwallet          (readonly)   -- dWallet account
+  3. caller_program   (readonly)   -- HumanRail Guard (executable)
+  4. cpi_authority    (readonly)   -- Guard CPI PDA (signer via invoke_signed)
+  5. payer            (writable)   -- rent payer
+  6. system_program   (readonly)   -- System program
+```
+
+**Step 2: Presign allocation (gRPC)**
+Before signing, allocate a presign. Two options:
+- **Global presign** (`DWalletRequest::Presign`): usable with any non-imported dWallet for the same `signature_algorithm`
+- **dWallet-specific presign** (`DWalletRequest::PresignForDWallet`): required for imported ECDSA keys
+
+```rust
+DWalletRequest::Presign {
+    dwallet_network_encryption_public_key: nek_bytes,
+    curve: DWalletCurve::Secp256k1,
+    signature_algorithm: DWalletSignatureAlgorithm::ECDSASecp256k1, // NOT signature_scheme!
+}
+```
+Response: `TransactionResponseData::Attestation(NetworkSignedAttestation)` with `VersionedPresignDataAttestation`
+
+**Step 3: gRPC Sign**
+```rust
+DWalletRequest::Sign {
+    message: message_bytes,
+    message_metadata: metadata_bytes, // BCS-serialized per-scheme metadata (empty for most)
+    presign_session_identifier: presign_session_id,
+    message_centralized_signature: user_partial_sig,
+    dwallet_attestation: dkg_attestation, // from DKG response
+    approval_proof: ApprovalProof::Solana {
+        transaction_signature: solana_tx_sig_bytes,
+        slot: 0, // can be 0 in pre-alpha
+    },
+}
+```
+Note: `curve` and `signature_scheme` are NO LONGER fields on `Sign`. Validators derive them from on-chain `MessageApproval` and `dwallet_attestation`.
+Response: `TransactionResponseData::Signature { signature: Vec<u8> }` (always 64 bytes)
+
+**Step 4: Poll for signature on-chain**
+```rust
+let status = data[172];
+if status == 1 {
+    let sig_len = u16::from_le_bytes(data[173..175].try_into().unwrap()) as usize;
+    let signature = &data[175..175 + sig_len];
+}
+```
 
 **Blockers/Questions:**
-1. **Presign allocation** — Must call `Presign` or `PresignForDWallet` via gRPC before signing.
-2. **ApprovalProof construction** — `ApprovalProof::Solana { transaction_signature, slot }`. The transaction signature comes from the `approve_guarded_message` Solana tx.
-3. **Polling for signature** — After gRPC Sign, poll MessageApproval until status=Signed.
-
----
-
-## Phase 5D — gRPC Sign + Signature Verification
-
-**Goal:** Submit a `DWalletRequest::Sign` via gRPC and verify the signature is committed on-chain.
-
-**Blockers/Questions:**
-1. **Presign allocation** — Must call `Presign` or `PresignForDWallet` via gRPC before signing.
-2. **ApprovalProof construction** — `ApprovalProof::Solana { transaction_signature, slot }`. The transaction signature comes from the `approve_guarded_message` Solana tx.
-3. **Polling for signature** — After gRPC Sign, poll MessageApproval until status=Signed.
+1. **Presign availability** — Need to confirm whether global presigns are pre-allocated on devnet or must be requested per-sign.
+2. **message_centralized_signature** — Need to understand how the user's partial signature is computed client-side.
+3. **GasDeposit** — The PDF documents a GasDeposit PDA (discriminator 4, 139 bytes) that holds IKA/SOL balance for fees. The E2E examples work without explicit gas deposits, but this may become required.
+4. **MessageApproval PDA seeds with metadata** — The `message_metadata_digest` seed is only included when non-zero. Our derivation helper now supports this.
 
 ---
 
@@ -291,6 +335,7 @@ Updated layout with `message_metadata_digest` field:
 
 ### MessageApproval PDA Derivation
 - Verified seeds: `["dwallet", chunks(curve_u16_le || pk), "message_approval", scheme_u16_le, message_digest]`
+- **Optional 5th seed (PDF §8.3.2):** When `message_metadata_digest` is non-zero (all 32 bytes not zero), it is appended as the final seed. This is critical because the on-chain Ika program computes the same seeds. If omitted, PDA derivation fails.
 - **Important:** The seeds include the dWallet PDA prefix, not just the dWallet pubkey
 - The scheme is u16 LE, not a single byte
 
@@ -303,7 +348,37 @@ Updated layout with `message_metadata_digest` field:
 - dWallet account creation requires rent exemption (~0.00114 SOL for 153 bytes)
 - MessageApproval creation requires rent exemption (~0.00223 SOL for 312 bytes)
 - The Guard program's `approve_guarded_message` pays for MessageApproval creation via CPI
-- No additional gas deposit mechanism is currently documented for pre-alpha
+- **GasDeposit account (PDF §8.3.3):** A user-level PDA (`["gas_deposit", user_pubkey]`) that holds SOL for Ika network fees. 139 bytes. Discriminator 4. The Ika program automatically deducts fees from this account. Not strictly required on pre-alpha devnet (E2E examples work without explicit deposits), but production integration will need it.
+
+### GasDeposit Account Layout (139 bytes)
+| Field | Offset | Size | Type |
+|-------|--------|------|------|
+| discriminator | 0 | 1 | u8 |
+| version | 1 | 1 | u8 |
+| user | 2 | 32 | Pubkey |
+| total_deposited | 34 | 8 | u64 LE |
+| total_consumed | 42 | 8 | u64 LE |
+| balance | 50 | 8 | u64 LE |
+| created_at_epoch | 58 | 8 | u64 LE |
+| last_used_at_epoch | 66 | 8 | u64 LE |
+| bump | 74 | 1 | u8 |
+| reserved | 75 | 64 | — |
+| **Total** | | **139** | |
+
+### Presign Signature Algorithms (NOT Signature Schemes)
+The PDF distinguishes between `signature_algorithm` (used in Presign) and `signature_scheme` (used in approve_message CPI):
+
+| Algorithm (Presign) | Value | Scheme (CPI) | Value |
+|--------------------|-------|--------------|-------|
+| ECDSASecp256k1 | 0 | Secp256k1 | 0 |
+| ECDSASecp256r1 | 1 | Secp256r1 | 1 |
+| Taproot | 2 | BIP340 | 2 |
+| EdDSA | 3 | Ed25519 | 3 |
+| Schnorrkel | 4 | Sr25519 | 4 |
+| — | — | Bls12381MinSig | 5 |
+| — | — | Bls12381MinPk | 6 |
+
+**Critical:** `Presign` uses `signature_algorithm` (0-4), while `approve_message` uses `signature_scheme` (0-6). Do not confuse these when constructing gRPC or CPI calls.
 
 ---
 
@@ -323,6 +398,17 @@ The repo currently has `ika-dwallet-anchor` as a Rust dependency only. No npm `@
 
 ---
 
+## PDF Analysis Notes
+
+The IKA dWallet Developer Guide (168 pages, `dWallet Developer Guide-IKA.pdf`) was analyzed in detail after Phase 5C. Key findings that changed our implementation:
+
+1. **MessageApproval PDA seeds with metadata digest (§8.3.2)** — The `message_metadata_digest` is appended to PDA seeds only when non-zero. Our initial implementation always included it, which would have caused PDA mismatches for messages without metadata.
+2. **GasDeposit account (§8.3.3)** — Discovered the 139-byte GasDeposit PDA that tracks per-user Ika fees. Added `deriveIkaGasDepositPda` helper.
+3. **Sign request format change (§7.2.3)** — `DWalletRequest::Sign` no longer includes `curve` or `signature_scheme`. These are derived on-chain from `MessageApproval` + `dwallet_attestation`.
+4. **Presign uses signature_algorithm, not signature_scheme (§7.2.1)** — These are different enums with different ranges. Critical to use the correct one.
+5. **ApprovalProof::Solana format (§7.3.1)** — `{ transaction_signature: Vec<u8>, slot: u64 }`. The `slot` can be 0 in pre-alpha.
+6. **Rent formula confirmed:** `(data_len + 128) * 6960` lamports.
+
 ## References
 
 - Ika pre-alpha repo: `https://github.com/dwallet-labs/ika-pre-alpha` (rev `3bd7945`)
@@ -330,3 +416,4 @@ The repo currently has `ika-dwallet-anchor` as a Rust dependency only. No npm `@
 - TypeScript shared setup: `chains/solana/examples/_shared/ika-setup.ts`
 - E2E Rust voting example: `chains/solana/examples/voting/e2e-rust/src/main.rs`
 - E2E Rust multisig example: `chains/solana/examples/multisig/e2e-rust/src/main.rs`
+- IKA dWallet Developer Guide: `dWallet Developer Guide-IKA.pdf` (168 pages, analyzed May 2026)
