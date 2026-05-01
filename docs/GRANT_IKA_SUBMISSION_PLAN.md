@@ -300,18 +300,24 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] `/vault/dwallets` Ika Readiness panel — display config, derive/fetch dWallet and MessageApproval
 - [x] Added `npm run devnet:inspect-ika` script
 
-### Phase 5B — Create Real Ika dWallet via gRPC DKG (NEXT)
-- [ ] BCS-serialize DWalletRequest::DKG payload
-- [ ] Submit gRPC SubmitTransaction with user signature
-- [ ] Poll for on-chain dWallet PDA
-- [ ] Transfer dWallet authority to Guard CPI authority PDA
+### Phase 5B — Create Real Ika dWallet via gRPC DKG (COMPLETE)
+- [x] BCS-serialize DWalletRequest::DKG payload via Rust CLI (`tools/ika-dkg-cli/`)
+- [x] Submit gRPC SubmitTransaction with zeroed Ed25519 signature (pre-alpha mock pattern)
+- [x] Poll for on-chain dWallet PDA (153 bytes, state=Active)
+- [x] Fix parser offset bug: curve is u16 LE at offset 34, state at 36, bump at 144
+- [x] Added `npm run ika:create-dwallet` script
 
-### Phase 5C — Real approve_guarded_message CPI (PLANNED)
-- [ ] Update GuardedDwallet to reference real Ika dWallet
-- [ ] Submit approve_guarded_message that passes policy and CPI-calls Ika
+### Phase 5C — Transfer Authority + Real Policy (COMPLETE)
+- [x] Transfer dWallet authority to Guard CPI authority PDA (`FCHUWJ...`)
+- [x] Verify authority changed on-chain via `transfer_ownership` (discriminator 24)
+- [x] Create GuardedDwallet policy linked to real Ika dWallet PDA
+- [x] Verify lifecycle: dWallet authority == Guard CPI PDA, GuardedDwallet.dwallet == dWallet PDA
+- [x] Added `npm run ika:transfer-authority` and `npm run ika:create-guarded-policy` scripts
+- [x] Added `/vault/dwallets` Real Ika dWallet + Real Ika Policy cards
+
+### Phase 5D — Real approve_guarded_message CPI + gRPC Sign (NEXT)
+- [ ] Submit approve_guarded_message that passes policy and CPI-calls Ika approve_message
 - [ ] Verify MessageApproval PDA created with status=Pending
-
-### Phase 5D — gRPC Sign + On-Chain Signature Verification (PLANNED)
 - [ ] Allocate presign via gRPC
 - [ ] Submit DWalletRequest::Sign with ApprovalProof
 - [ ] Poll MessageApproval until status=Signed

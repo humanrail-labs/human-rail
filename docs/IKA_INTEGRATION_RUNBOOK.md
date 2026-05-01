@@ -145,19 +145,68 @@ npm run devnet:inspect-ika:debug        # Raw hex dump + offset diagnostics
 
 ---
 
-## Phase 5C — Transfer Authority + Real Signing Request (NEXT)
+## Phase 5C — Transfer Authority + Real Policy (COMPLETE)
 
-**Goal:** Transfer dWallet authority to Guard CPI PDA, then execute a real `approve_guarded_message` that passes policy and CPI-calls Ika.
+**Goal:** Transfer dWallet authority to Guard CPI PDA, then create a GuardedDwallet policy linked to the real Ika dWallet.
+
+**Status:** ✅ COMPLETE — Authority transferred, real policy created and verified.
+
+**What was accomplished:**
+1. **Authority transfer** — Direct `transfer_ownership` instruction (discriminator 24) sent from deployer wallet to Ika program. New authority = HumanRail Guard CPI PDA.
+2. **GuardedDwallet policy** — Created via `initialize_guarded_dwallet_demo` using real Ika dWallet PDA + demo HumanRail refs (owner checks still blocked by `canRegisterAgents=false`).
+3. **Lifecycle verification** — Both accounts verified on-chain: dWallet authority == Guard CPI PDA, GuardedDwallet.dwallet == dWallet PDA.
+
+**Verified transfer (devnet):**
+| Field | Value |
+|-------|-------|
+| dWallet PDA | `A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp` |
+| Authority before | `5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y` |
+| Authority after | `FCHUWJRV33HxGrNqFxKCeqZQkqNUzKBqD1EgqpmeVqd` |
+| Transfer tx | `33xoiwuXmu56hC5Ks18kn6zMota41PNMGHu1KkVdzyFRnRcXX1VCdtK64Jg1LzSku5HuTWkxU6jvaFt63AXxUhtz` |
+
+**Verified policy (devnet):**
+| Field | Value |
+|-------|-------|
+| GuardedDwallet PDA | `C4kAideEcvxk2xgfepFkejUJywNusMQNEnC5qSi2Ycup` |
+| Linked dWallet | `A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp` |
+| Chain ID | 84532 (Base Sepolia) |
+| Asset | USDC:BASE_SEPOLIA |
+| Per-tx limit | 100_000_000 |
+| Daily limit | 500_000_000 |
+| Total limit | 1_000_000_000 |
+| Policy init tx | `AJGYG74FT8wFFoUVNUFN7ok1xD8QrNhpSn2a6tynrXmu8CUWeuhZMfSYywMnANvxUoMyqhNF5XHP44VRmYChf2i` |
+
+**Commands:**
+```bash
+npm run ika:transfer-authority        # Transfer dWallet authority to Guard CPI PDA
+npm run ika:create-guarded-policy     # Create GuardedDwallet linked to real Ika dWallet
+npm run ika:verify-lifecycle          # Verify both accounts on-chain
+```
+
+**Instruction layout (transfer_ownership, direct user call):**
+```
+data    = [24] + new_authority(32 bytes)  // 33 bytes total
+accounts:
+  0. current_authority  (readonly, signer)
+  1. dwallet            (writable)
+```
+Source: `chains/solana/examples/voting/e2e-rust/src/main.rs` (lines 375-389)
+
+---
+
+## Phase 5D — gRPC Sign + Signature Verification (NEXT)
+
+**Goal:** Execute a real `approve_guarded_message` that passes policy and CPI-calls Ika `approve_message`, then submit `DWalletRequest::Sign` via gRPC and verify the signature is committed on-chain.
 
 **Prerequisites (now met):**
-1. ✅ Real dWallet created via gRPC DKG
-2. ✅ dWallet state confirmed `Active(1)` on-chain
-3. ✅ Parser offsets corrected and verified against real 153-byte account
+1. ✅ Real dWallet with authority = Guard CPI PDA
+2. ✅ GuardedDwallet policy linked to real dWallet
+3. ✅ MessageApproval PDA derivation verified
 
 **Blockers/Questions:**
-1. **Authority transfer transaction** — Simple Solana tx with `TransferOwnership` instruction (discriminator 24). Needs current authority (payer) to sign. New authority = HumanRail Guard CPI PDA `FCHUWJRV33HxGrNqFxKCeqZQkqNUzKBqD1EgqpmeVqd`.
-2. **MessageApproval PDA derivation** — Verified from e2e-rust: hierarchical seeds with dWallet prefix + scheme + message digest.
-3. **Coordinator account** — Need to pass the DWalletCoordinator PDA to approve_message. Derivation: `["dwallet_coordinator"]`.
+1. **Presign allocation** — Must call `Presign` or `PresignForDWallet` via gRPC before signing.
+2. **ApprovalProof construction** — `ApprovalProof::Solana { transaction_signature, slot }`. The transaction signature comes from the `approve_guarded_message` Solana tx.
+3. **Polling for signature** — After gRPC Sign, poll MessageApproval until status=Signed.
 
 ---
 

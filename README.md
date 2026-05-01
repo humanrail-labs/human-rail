@@ -73,7 +73,23 @@ npm run devnet:inspect-ika
 
 # Inspect a specific dWallet
 IKA_DWALLET_PUBLIC_KEY=... IKA_DWALLET_CURVE=2 npm run devnet:inspect-ika
+
+# Transfer Ika dWallet authority to Guard CPI PDA (Phase 5C)
+npm run ika:transfer-authority
+
+# Create GuardedDwallet linked to real Ika dWallet (Phase 5C)
+npm run ika:create-guarded-policy
+
+# Verify dWallet + GuardedDwallet lifecycle (Phase 5C)
+npm run ika:verify-lifecycle
 ```
+
+**Phase 5C Devnet Artifacts:**
+| Artifact | Address |
+|----------|---------|
+| Ika dWallet PDA | `A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp` |
+| Guard CPI Authority | `FCHUWJRV33HxGrNqFxKCeqZQkqNUzKBqD1EgqpmeVqd` |
+| GuardedDwallet PDA | `C4kAideEcvxk2xgfepFkejUJywNusMQNEnC5qSi2Ycup` |
 
 ---
 

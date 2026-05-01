@@ -534,12 +534,59 @@ seeds = ["dwallet", chunks..., "message_approval", u16LE(scheme), message_digest
 
 ---
 
+## Phase 5C — Real Ika dWallet Authority Transfer + Policy (COMPLETE)
+
+### What was accomplished
+
+- **`scripts/ika-transfer-authority.ts`** — Transfers Ika dWallet authority from deployer wallet to HumanRail Guard CPI PDA
+  - Reads `.local-ika/dwallet.json` artifact
+  - Verifies dWallet state = Active and authority == payer
+  - Builds `transfer_ownership` instruction (discriminator 24 + new_authority 32 bytes)
+  - Accounts: current_authority (signer, readonly), dwallet (writable)
+  - Confirms transaction and verifies post-transfer authority
+  - Updates artifact with transfer metadata
+  - Run: `npm run ika:transfer-authority`
+
+- **`scripts/devnet-create-guarded-dwallet.ts --real-ika`** — Creates GuardedDwallet linked to real Ika dWallet
+  - Reads `.local-ika/dwallet.json` for dWallet PDA
+  - Verifies dWallet authority == Guard CPI PDA before creating policy
+  - Uses `initialize_guarded_dwallet_demo` (demo HumanRail refs still required)
+  - Writes `.local-ika/guarded-dwallet.json` artifact
+  - Run: `npm run ika:create-guarded-policy`
+
+- **`scripts/ika-verify-lifecycle.ts`** — Verifies both accounts on-chain
+  - Confirms dWallet authority == Guard CPI PDA
+  - Confirms GuardedDwallet.dwallet == dWallet PDA
+  - Run: `npm run ika:verify-lifecycle`
+
+### Verified devnet state
+
+| Account | Address | Status |
+|---------|---------|--------|
+| Ika dWallet PDA | `A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp` | Active, authority = Guard CPI PDA |
+| Guard CPI Authority | `FCHUWJRV33HxGrNqFxKCeqZQkqNUzKBqD1EgqpmeVqd` | Derived from Guard program ID |
+| GuardedDwallet PDA | `C4kAideEcvxk2xgfepFkejUJywNusMQNEnC5qSi2Ycup` | Linked to real Ika dWallet |
+
+### Authority transfer transaction
+```
+Instruction: transfer_ownership (discriminator 24)
+Program: Ika dWallet (87W54k...)
+Accounts:
+  0. current_authority (5AXUd...) — signer, readonly
+  1. dwallet (A6hbi...) — writable
+Data: [24] + new_authority(32 bytes)
+Result: authority changed to FCHUW...
+Tx: 33xoiwuXmu56hC5Ks18kn6zMota41PNMGHu1KkVdzyFRnRcXX1VCdtK64Jg1LzSku5HuTWkxU6jvaFt63AXxUhtz
+```
+
+---
+
 ## What Remains for Phase 5B–5E
 
 | Phase | Goal | Status |
 |-------|------|--------|
 | **5B** | Create real Ika dWallet via gRPC DKG | ✅ COMPLETE — DKG succeeded, parser offsets fixed |
-| **5C** | Transfer authority + real `approve_guarded_message` CPI | NEXT — needs authority transfer tx |
+| **5C** | Transfer authority + real policy creation | ✅ COMPLETE — authority transferred, policy created |
 | **5D** | gRPC Sign + signature on-chain verification | Planned — needs presign + ApprovalProof construction |
 | **5E** | Agent runtime `request_cross_chain_signature` tool | Planned — needs 5B–5D complete |
 
@@ -552,6 +599,18 @@ seeds = ["dwallet", chunks..., "message_approval", u16LE(scheme), message_digest
 ```bash
 # Basic inspection (no env vars required)
 npm run devnet:inspect-ika
+
+# Raw hex dump + offset diagnostics
+npm run devnet:inspect-ika:debug
+
+# Transfer dWallet authority to Guard CPI PDA
+npm run ika:transfer-authority
+
+# Create GuardedDwallet linked to real Ika dWallet
+npm run ika:create-guarded-policy
+
+# Verify lifecycle
+npm run ika:verify-lifecycle
 
 # Inspect a specific dWallet
 IKA_DWALLET_PUBLIC_KEY=9NNE4v7DcuQA9fL868wwgx8jsz3pn9EKr97ZADLnw12p IKA_DWALLET_CURVE=2 npm run devnet:inspect-ika

@@ -1,18 +1,22 @@
 #!/usr/bin/env tsx
 /**
- * Phase 4B — Create First Guarded dWallet Policy on Devnet
+ * Phase 4B / 5C — Create Guarded dWallet Policy on Devnet
  *
  * This script:
  * 1. Creates a GuardedDwallet policy using the devnet-only demo initializer
  *    (skips HumanRail owner checks since canRegisterAgents is blocked)
- * 2. Tests freeze/unfreeze
- * 3. Tests a rejected signing request (amount > per_tx_limit)
- * 4. Fetches and verifies all accounts
+ * 2. Supports two modes:
+ *    - Default (Phase 4B): uses placeholder dWallet
+ *    - --real-ika (Phase 5C): uses real Ika dWallet PDA
+ * 3. Tests freeze/unfreeze (Phase 4B only)
+ * 4. Tests a rejected signing request (Phase 4B only)
+ * 5. Fetches and verifies all accounts
  *
  * Usage:
  *   npx tsx scripts/devnet-create-guarded-dwallet.ts
- *   KEYPAIR_PATH=/custom/path npx tsx scripts/devnet-create-guarded-dwallet.ts
- *   FORCE=1 npx tsx scripts/devnet-create-guarded-dwallet.ts
+ *   npx tsx scripts/devnet-create-guarded-dwallet.ts --real-ika
+ *   KEYPAIR_PATH=/custom/path npx tsx scripts/devnet-create-guarded-dwallet.ts --real-ika
+ *   FORCE=1 npx tsx scripts/devnet-create-guarded-dwallet.ts --real-ika
  */
 
 import {
@@ -30,6 +34,10 @@ import {
   deriveGuardSigningRequestPda,
   getDwalletGuardProgramId,
 } from "../packages/sdk/src/index.js";
+import {
+  parseIkaDwalletAccount,
+} from "../lib/ika/parsers";
+import { deriveHumanRailGuardCpiAuthority } from "../lib/ika/pda";
 
 // ---------------------------------------------------------------------------
 // Account discriminators from Anchor IDL
@@ -52,6 +60,10 @@ const DAILY_LIMIT = BigInt(500_000_000);
 const TOTAL_LIMIT = BigInt(1_000_000_000);
 
 const DEMO_DWALLET_LABEL = "DEMO_DWALLET_PLACEHOLDER_FOR_PHASE_4B";
+const REAL_IKA_LABEL = "REAL_IKA_DWALLET_WITH_DEMO_HUMANRAIL_REFS";
+
+const DWALLET_ARTIFACT_PATH = ".local-ika/dwallet.json";
+const GUARDED_ARTIFACT_PATH = ".local-ika/guarded-dwallet.json";
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -305,10 +317,17 @@ function parseGuardSigningRequest(data: Buffer) {
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
+  const useRealIka = process.argv.includes("--real-ika");
+
   console.log("========================================");
-  console.log("Phase 4B — Create Guarded dWallet Policy");
+  if (useRealIka) {
+    console.log("Phase 5C — Create Real Ika Guarded dWallet Policy");
+  } else {
+    console.log("Phase 4B — Create Guarded dWallet Policy");
+  }
   console.log("========================================\n");
 
+  // 1. Load payer
   const keypair = loadKeypair();
   const principal = keypair.publicKey;
   console.log("Principal:", principal.toBase58());
@@ -334,7 +353,61 @@ async function main() {
   console.log("Guard program: EXECUTABLE ✅\n");
 
   // ------------------------------------------------------------------
-  // 1. Demo reference accounts (placeholders — no owner checks in demo mode)
+  // 2. Determine dWallet
+  // ------------------------------------------------------------------
+  let dwallet: PublicKey;
+  let dwalletLabel: string;
+
+  if (useRealIka) {
+    console.log("--- Mode: REAL IKA DWALLET ---");
+    if (!fs.existsSync(DWALLET_ARTIFACT_PATH)) {
+      console.error("ERROR: dWallet artifact not found:", DWALLET_ARTIFACT_PATH);
+      console.error("Run `npm run ika:create-dwallet` first.");
+      process.exit(1);
+    }
+
+    const dwalletArtifact = JSON.parse(fs.readFileSync(DWALLET_ARTIFACT_PATH, "utf-8"));
+    dwallet = new PublicKey(dwalletArtifact.dwallet_pda);
+    dwalletLabel = REAL_IKA_LABEL;
+
+    console.log("dWallet PDA (from artifact):", dwallet.toBase58());
+    console.log("dWallet curve:", dwalletArtifact.curve);
+
+    // Verify dWallet authority == Guard CPI PDA
+    const dwalletInfo = await connection.getAccountInfo(dwallet);
+    if (!dwalletInfo) {
+      console.error("ERROR: dWallet account not found on-chain.");
+      process.exit(1);
+    }
+
+    const parsed = parseIkaDwalletAccount(dwalletInfo.data as Buffer);
+    if (!parsed) {
+      console.error("ERROR: Failed to parse dWallet account.");
+      process.exit(1);
+    }
+
+    const [guardCpiAuthority] = deriveHumanRailGuardCpiAuthority(guardProgramId);
+    console.log("Expected authority (Guard CPI PDA):", guardCpiAuthority.toBase58());
+    console.log("Actual authority:", parsed.authority.toBase58());
+
+    if (parsed.authority.toBase58() !== guardCpiAuthority.toBase58()) {
+      console.error("\nERROR: dWallet authority is NOT the Guard CPI PDA.");
+      console.error("Run `npm run ika:transfer-authority` first.");
+      process.exit(1);
+    }
+    console.log("  ✅ dWallet authority verified as Guard CPI PDA\n");
+  } else {
+    console.log("--- Mode: PLACEHOLDER DWALLET (Phase 4B) ---");
+    const dwalletSeed = "phase-4b-demo-dwallet-seed-v1";
+    dwallet = await PublicKey.createWithSeed(principal, dwalletSeed, SystemProgram.programId);
+    dwalletLabel = DEMO_DWALLET_LABEL;
+    console.log("dWallet pubkey (placeholder):", dwallet.toBase58());
+    console.log("  Label:", dwalletLabel);
+    console.log("  ✅ Placeholder ready\n");
+  }
+
+  // ------------------------------------------------------------------
+  // 3. Demo reference accounts
   // ------------------------------------------------------------------
   console.log("--- Step 1: Demo Reference Accounts ---");
   const humanProfile = await PublicKey.createWithSeed(principal, "phase4b-human-profile", SystemProgram.programId);
@@ -346,19 +419,9 @@ async function main() {
   console.log("  ✅ Demo references ready (no owner checks in demo mode)\n");
 
   // ------------------------------------------------------------------
-  // 2. dWallet placeholder
+  // 4. GuardedDwallet
   // ------------------------------------------------------------------
-  console.log("--- Step 2: dWallet Placeholder ---");
-  const dwalletSeed = "phase-4b-demo-dwallet-seed-v1";
-  const dwallet = await PublicKey.createWithSeed(principal, dwalletSeed, SystemProgram.programId);
-  console.log("dWallet pubkey (placeholder):", dwallet.toBase58());
-  console.log("  Label:", DEMO_DWALLET_LABEL);
-  console.log("  ✅ Placeholder ready\n");
-
-  // ------------------------------------------------------------------
-  // 3. GuardedDwallet
-  // ------------------------------------------------------------------
-  console.log("--- Step 3: GuardedDwallet ---");
+  console.log("--- Step 2: GuardedDwallet ---");
   const [guardedDwalletPda, guardedBump] = deriveGuardedDwalletPda(
     principal,
     agent,
@@ -429,159 +492,202 @@ async function main() {
   console.log("  ✅ GuardedDwallet created and parsed\n");
 
   // ------------------------------------------------------------------
-  // 4. Freeze
+  // 5. Freeze / Unfreeze / Rejected request (Phase 4B only)
   // ------------------------------------------------------------------
-  console.log("--- Step 4: Freeze ---");
-  if (parsed.frozen) {
-    console.log("Already frozen. Skipping freeze.");
-  } else {
-    const tx = buildFreezeGuardedDwalletIx(guardProgramId, principal, guardedDwalletPda);
+  if (!useRealIka) {
+    // Freeze
+    console.log("--- Step 3: Freeze ---");
+    if (parsed.frozen) {
+      console.log("Already frozen. Skipping freeze.");
+    } else {
+      const tx = buildFreezeGuardedDwalletIx(guardProgramId, principal, guardedDwalletPda);
+      const sig = await sendTx(connection, tx, [keypair]);
+      console.log("  freeze_guarded_dwallet tx:", sig);
+      await sleep(SLEEP_MS);
+
+      const frozenData = await connection.getAccountInfo(guardedDwalletPda);
+      if (!frozenData) throw new Error("GuardedDwallet disappeared after freeze");
+      const frozenParsed = parseGuardedDwallet(frozenData.data);
+      console.log("  frozen:", frozenParsed.frozen);
+      if (!frozenParsed.frozen) {
+        console.error("ERROR: Freeze did not set frozen=true");
+        process.exit(1);
+      }
+    }
+    console.log("  ✅ Frozen verified\n");
+
+    // Unfreeze
+    console.log("--- Step 4: Unfreeze ---");
+    const preUnfreezeData = await connection.getAccountInfo(guardedDwalletPda);
+    if (!preUnfreezeData) throw new Error("GuardedDwallet not found before unfreeze");
+    const preUnfreezeParsed = parseGuardedDwallet(preUnfreezeData.data);
+
+    if (!preUnfreezeParsed.frozen) {
+      console.log("Already unfrozen. Skipping unfreeze.");
+    } else {
+      const tx = buildUnfreezeGuardedDwalletIx(guardProgramId, principal, guardedDwalletPda);
+      const sig = await sendTx(connection, tx, [keypair]);
+      console.log("  unfreeze_guarded_dwallet tx:", sig);
+      await sleep(SLEEP_MS);
+
+      const unfrozenData = await connection.getAccountInfo(guardedDwalletPda);
+      if (!unfrozenData) throw new Error("GuardedDwallet disappeared after unfreeze");
+      const unfrozenParsed = parseGuardedDwallet(unfrozenData.data);
+      console.log("  frozen:", unfrozenParsed.frozen);
+      if (unfrozenParsed.frozen) {
+        console.error("ERROR: Unfreeze did not set frozen=false");
+        process.exit(1);
+      }
+    }
+    console.log("  ✅ Unfrozen verified\n");
+
+    // Rejected Signing Request
+    console.log("--- Step 5: Rejected Signing Request ---");
+    const message = "HumanRail Guarded dWallet demo rejected request";
+    const messageDigest = hashInput(message);
+    const messageMetadataDigest = hashInput("phase-4b-metadata");
+    const requestId = hashInput("phase-4b-rejected-request-" + Date.now().toString());
+    const assetHash = hashInput("USDC:BASE_SEPOLIA");
+    const recipientHash = hashInput("0x1111111111111111111111111111111111111111");
+    const rejectAmount = BigInt(101_000_000);
+
+    const [guardSigningRequestPda, requestBump] = deriveGuardSigningRequestPda(
+      guardedDwalletPda,
+      requestId,
+      guardProgramId
+    );
+    console.log("GuardSigningRequest PDA:", guardSigningRequestPda.toBase58());
+    console.log("  Bump:", requestBump);
+
+    const [cpiAuthority] = PublicKey.findProgramAddressSync(
+      [Buffer.from("__ika_cpi_authority")],
+      guardProgramId
+    );
+    console.log("CPI Authority PDA:", cpiAuthority.toBase58());
+
+    const dummyCoordinator = Keypair.generate().publicKey;
+    const dummyMessageApproval = Keypair.generate().publicKey;
+
+    const tx = buildApproveGuardedMessageIx(guardProgramId, {
+      requester: principal,
+      guardedDwallet: guardedDwalletPda,
+      guardSigningRequest: guardSigningRequestPda,
+      dwallet,
+      cpiAuthority,
+      coordinator: dummyCoordinator,
+      messageApproval: dummyMessageApproval,
+      requestId,
+      messageDigest,
+      messageMetadataDigest,
+      destinationChainId: DEMO_CHAIN_ID,
+      assetHash,
+      recipientHash,
+      amount: rejectAmount,
+      signatureScheme: 0,
+      messageApprovalBump: 0,
+    });
     const sig = await sendTx(connection, tx, [keypair]);
-    console.log("  freeze_guarded_dwallet tx:", sig);
+    console.log("  approve_guarded_message tx:", sig);
     await sleep(SLEEP_MS);
 
-    const frozenData = await connection.getAccountInfo(guardedDwalletPda);
-    if (!frozenData) throw new Error("GuardedDwallet disappeared after freeze");
-    const frozenParsed = parseGuardedDwallet(frozenData.data);
-    console.log("  frozen:", frozenParsed.frozen);
-    if (!frozenParsed.frozen) {
-      console.error("ERROR: Freeze did not set frozen=true");
+    const requestData = await connection.getAccountInfo(guardSigningRequestPda);
+    if (!requestData) {
+      console.error("ERROR: GuardSigningRequest not found after transaction.");
       process.exit(1);
     }
-  }
-  console.log("  ✅ Frozen verified\n");
 
-  // ------------------------------------------------------------------
-  // 5. Unfreeze
-  // ------------------------------------------------------------------
-  console.log("--- Step 5: Unfreeze ---");
-  const preUnfreezeData = await connection.getAccountInfo(guardedDwalletPda);
-  if (!preUnfreezeData) throw new Error("GuardedDwallet not found before unfreeze");
-  const preUnfreezeParsed = parseGuardedDwallet(preUnfreezeData.data);
+    const parsedRequest = parseGuardSigningRequest(requestData.data);
+    console.log("\nParsed GuardSigningRequest:");
+    console.log("  version:", parsedRequest.version);
+    console.log("  request_id:", Buffer.from(parsedRequest.requestId).toString("hex").slice(0, 16) + "...");
+    console.log("  guarded_dwallet:", parsedRequest.guardedDwallet.toBase58());
+    console.log("  principal:", parsedRequest.principal.toBase58());
+    console.log("  agent:", parsedRequest.agent.toBase58());
+    console.log("  dwallet:", parsedRequest.dwallet.toBase58());
+    console.log("  destination_chain_id:", parsedRequest.destinationChainId);
+    console.log("  amount:", parsedRequest.amount.toString());
+    console.log("  signature_scheme:", parsedRequest.signatureScheme);
+    console.log("  status:", parsedRequest.status, "(1=approved, 2=rejected)");
+    console.log("  rejection_code:", parsedRequest.rejectionCode, "(7=per_tx_limit_exceeded)");
+    console.log("  ika_message_approval:", parsedRequest.ikaMessageApproval.toBase58());
+    console.log("  created_at:", new Date(Number(parsedRequest.createdAt) * 1000).toISOString());
+    console.log("  bump:", parsedRequest.bump);
 
-  if (!preUnfreezeParsed.frozen) {
-    console.log("Already unfrozen. Skipping unfreeze.");
-  } else {
-    const tx = buildUnfreezeGuardedDwalletIx(guardProgramId, principal, guardedDwalletPda);
-    const sig = await sendTx(connection, tx, [keypair]);
-    console.log("  unfreeze_guarded_dwallet tx:", sig);
-    await sleep(SLEEP_MS);
-
-    const unfrozenData = await connection.getAccountInfo(guardedDwalletPda);
-    if (!unfrozenData) throw new Error("GuardedDwallet disappeared after unfreeze");
-    const unfrozenParsed = parseGuardedDwallet(unfrozenData.data);
-    console.log("  frozen:", unfrozenParsed.frozen);
-    if (unfrozenParsed.frozen) {
-      console.error("ERROR: Unfreeze did not set frozen=false");
+    if (parsedRequest.status !== 2) {
+      console.error("ERROR: Expected status=2 (rejected), got", parsedRequest.status);
       process.exit(1);
     }
+    if (parsedRequest.rejectionCode !== 7) {
+      console.error("ERROR: Expected rejection_code=7 (per_tx_limit_exceeded), got", parsedRequest.rejectionCode);
+      process.exit(1);
+    }
+    console.log("  ✅ Rejected request verified (status=2, code=7, no Ika CPI)\n");
   }
-  console.log("  ✅ Unfrozen verified\n");
 
   // ------------------------------------------------------------------
-  // 6. Rejected Signing Request (amount > per_tx_limit)
+  // 6. Write artifact (Phase 5C only)
   // ------------------------------------------------------------------
-  console.log("--- Step 6: Rejected Signing Request ---");
-  const message = "HumanRail Guarded dWallet demo rejected request";
-  const messageDigest = hashInput(message);
-  const messageMetadataDigest = hashInput("phase-4b-metadata");
-  const requestId = hashInput("phase-4b-rejected-request-" + Date.now().toString());
-  const assetHash = hashInput("USDC:BASE_SEPOLIA");
-  const recipientHash = hashInput("0x1111111111111111111111111111111111111111");
-  const rejectAmount = BigInt(101_000_000); // > per_tx_limit of 100_000_000
+  if (useRealIka) {
+    const assetHash = hashInput("USDC:BASE_SEPOLIA");
+    const recipientHash = hashInput("0x1111111111111111111111111111111111111111");
 
-  const [guardSigningRequestPda, requestBump] = deriveGuardSigningRequestPda(
-    guardedDwalletPda,
-    requestId,
-    guardProgramId
-  );
-  console.log("GuardSigningRequest PDA:", guardSigningRequestPda.toBase58());
-  console.log("  Bump:", requestBump);
+    const artifact = {
+      label: REAL_IKA_LABEL,
+      createdAt: new Date().toISOString(),
+      guardedDwalletPda: guardedDwalletPda.toBase58(),
+      principal: principal.toBase58(),
+      humanProfile: humanProfile.toBase58(),
+      agent: agent.toBase58(),
+      humanrailCapability: humanrailCapability.toBase58(),
+      dwallet: dwallet.toBase58(),
+      policy: {
+        allowedChainId: DEMO_CHAIN_ID,
+        allowedAssetHash: Buffer.from(assetHash).toString("hex"),
+        allowedRecipientHash: Buffer.from(recipientHash).toString("hex"),
+        perTxLimit: PER_TX_LIMIT.toString(),
+        dailyLimit: DAILY_LIMIT.toString(),
+        totalLimit: TOTAL_LIMIT.toString(),
+        expiresAt: new Date(Number(parsed.expiresAt) * 1000).toISOString(),
+      },
+      parsed: {
+        version: parsed.version,
+        frozen: parsed.frozen,
+        bump: parsed.bump,
+      },
+      note: "Demo HumanRail refs; real Ika dWallet.",
+    };
 
-  // CPI authority PDA
-  const [cpiAuthority] = PublicKey.findProgramAddressSync(
-    [Buffer.from("__ika_cpi_authority")],
-    guardProgramId
-  );
-  console.log("CPI Authority PDA:", cpiAuthority.toBase58());
-
-  // Coordinator and message_approval are Ika accounts — for rejection path,
-  // the program does not CPI to Ika, but Anchor still requires them in
-  // the Accounts struct. We can pass dummy pubkeys since they won't be used.
-  const dummyCoordinator = Keypair.generate().publicKey;
-  const dummyMessageApproval = Keypair.generate().publicKey;
-
-  const tx = buildApproveGuardedMessageIx(guardProgramId, {
-    requester: principal,
-    guardedDwallet: guardedDwalletPda,
-    guardSigningRequest: guardSigningRequestPda,
-    dwallet,
-    cpiAuthority,
-    coordinator: dummyCoordinator,
-    messageApproval: dummyMessageApproval,
-    requestId,
-    messageDigest,
-    messageMetadataDigest,
-    destinationChainId: DEMO_CHAIN_ID,
-    assetHash,
-    recipientHash,
-    amount: rejectAmount,
-    signatureScheme: 0, // EcdsaKeccak256
-    messageApprovalBump: 0,
-  });
-  const sig = await sendTx(connection, tx, [keypair]);
-  console.log("  approve_guarded_message tx:", sig);
-  await sleep(SLEEP_MS);
-
-  const requestData = await connection.getAccountInfo(guardSigningRequestPda);
-  if (!requestData) {
-    console.error("ERROR: GuardSigningRequest not found after transaction.");
-    process.exit(1);
+    fs.writeFileSync(GUARDED_ARTIFACT_PATH, JSON.stringify(artifact, null, 2));
+    console.log("Artifact written:", GUARDED_ARTIFACT_PATH);
   }
-
-  const parsedRequest = parseGuardSigningRequest(requestData.data);
-  console.log("\nParsed GuardSigningRequest:");
-  console.log("  version:", parsedRequest.version);
-  console.log("  request_id:", Buffer.from(parsedRequest.requestId).toString("hex").slice(0, 16) + "...");
-  console.log("  guarded_dwallet:", parsedRequest.guardedDwallet.toBase58());
-  console.log("  principal:", parsedRequest.principal.toBase58());
-  console.log("  agent:", parsedRequest.agent.toBase58());
-  console.log("  dwallet:", parsedRequest.dwallet.toBase58());
-  console.log("  destination_chain_id:", parsedRequest.destinationChainId);
-  console.log("  amount:", parsedRequest.amount.toString());
-  console.log("  signature_scheme:", parsedRequest.signatureScheme);
-  console.log("  status:", parsedRequest.status, "(1=approved, 2=rejected)");
-  console.log("  rejection_code:", parsedRequest.rejectionCode, "(7=per_tx_limit_exceeded)");
-  console.log("  ika_message_approval:", parsedRequest.ikaMessageApproval.toBase58());
-  console.log("  created_at:", new Date(Number(parsedRequest.createdAt) * 1000).toISOString());
-  console.log("  bump:", parsedRequest.bump);
-
-  if (parsedRequest.status !== 2) {
-    console.error("ERROR: Expected status=2 (rejected), got", parsedRequest.status);
-    process.exit(1);
-  }
-  if (parsedRequest.rejectionCode !== 7) {
-    console.error("ERROR: Expected rejection_code=7 (per_tx_limit_exceeded), got", parsedRequest.rejectionCode);
-    process.exit(1);
-  }
-  console.log("  ✅ Rejected request verified (status=2, code=7, no Ika CPI)\n");
 
   // ------------------------------------------------------------------
   // Summary
   // ------------------------------------------------------------------
   console.log("========================================");
-  console.log("Phase 4B Complete — Summary");
+  if (useRealIka) {
+    console.log("Phase 5C Complete — Summary");
+  } else {
+    console.log("Phase 4B Complete — Summary");
+  }
   console.log("========================================");
   console.log("Principal:", principal.toBase58());
   console.log("Human Profile (demo):", humanProfile.toBase58());
   console.log("Agent (demo):", agent.toBase58());
   console.log("Capability (demo):", humanrailCapability.toBase58());
-  console.log("dWallet (placeholder):", dwallet.toBase58());
+  console.log("dWallet:", dwallet.toBase58());
+  console.log("  Label:", dwalletLabel);
   console.log("GuardedDwallet PDA:", guardedDwalletPda.toBase58());
-  console.log("GuardSigningRequest PDA:", guardSigningRequestPda.toBase58());
+  if (!useRealIka) {
+    console.log("GuardSigningRequest PDA:", "(see above)");
+  }
   console.log("\nAll transactions confirmed on devnet.");
-  console.log("Placeholder dWallet used:", DEMO_DWALLET_LABEL);
-  console.log("Real Ika dWallet + authority transfer → Phase 5.");
+  if (useRealIka) {
+    console.log("\nNext step: approved approve_guarded_message → Phase 5D.");
+  } else {
+    console.log("Placeholder dWallet used:", DEMO_DWALLET_LABEL);
+    console.log("Real Ika dWallet + authority transfer → Phase 5.");
+  }
 }
 
 main().catch((err) => {

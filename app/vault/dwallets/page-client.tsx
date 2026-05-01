@@ -219,6 +219,16 @@ export default function DwalletGuardPageClient() {
   const [ikaProgramExecutable, setIkaProgramExecutable] = useState<boolean | null>(null);
   const [ikaLoading, setIkaLoading] = useState<string | null>(null);
 
+  // Phase 5C real Ika dWallet state
+  const REAL_IKA_DWALLET_PDA = "A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp";
+  const REAL_IKA_PUBLIC_KEY = "02e2d5f53b1abc0451dfcbfc5a32421fa6cdfb7c6cbfbf7f84a3e6bb177cb0aa5d";
+  const REAL_IKA_AUTHORITY_BEFORE = "5AXUdN6phUqryytP5Cf4C8jRSmtCWRKCRa2thQWwpW3y";
+  const REAL_IKA_AUTHORITY_AFTER = "FCHUWJRV33HxGrNqFxKCeqZQkqNUzKBqD1EgqpmeVqd";
+  const REAL_IKA_TRANSFER_SIG = "33xoiwuXmu56hC5Ks18kn6zMota41PNMGHu1KkVdzyFRnRcXX1VCdtK64Jg1LzSku5HuTWkxU6jvaFt63AXxUhtz";
+  const REAL_GUARDED_DWALLET_PDA = "C4kAideEcvxk2xgfepFkejUJywNusMQNEnC5qSi2Ycup";
+  const [realIkaDwallet, setRealIkaDwallet] = useState<IkaDwallet | null>(null);
+  const [realGuardedDwallet, setRealGuardedDwallet] = useState<GuardedDwallet | null>(null);
+
   // Phase 4B known demo addresses
   const PHASE4B = useMemo(() => {
     if (!guardProgramId) return null;
@@ -1019,6 +1029,212 @@ export default function DwalletGuardPageClient() {
                 <div className="flex items-center gap-2 text-xs text-neutral-400">
                   <Clock className="h-3.5 w-3.5 animate-spin" />
                   {ikaLoading}…
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Phase 5C Real Ika dWallet Card */}
+          <Card className="border-white/[0.06] bg-neutral-900/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base text-white">
+                <Wallet className="h-4 w-4 text-emerald-400" />
+                Real Ika dWallet
+              </CardTitle>
+              <CardDescription className="text-neutral-500">
+                Phase 5C — Real dWallet created via gRPC DKG, authority transferred to Guard
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-emerald-200">Authority transferred ✅</p>
+                  <p className="text-[11px] text-emerald-200/60">
+                    dWallet authority moved from deployer to HumanRail Guard CPI PDA.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="space-y-1">
+                  <span className="text-xs text-neutral-500">dWallet PDA</span>
+                  <div className="flex items-center gap-2">
+                    <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
+                      {REAL_IKA_DWALLET_PDA}
+                    </code>
+                    <button onClick={() => copyToClipboard(REAL_IKA_DWALLET_PDA)} className="text-neutral-500 hover:text-neutral-300">
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                    <a href={`https://solana.fm/address/${REAL_IKA_DWALLET_PDA}?cluster=devnet-alpha`} target="_blank" rel="noreferrer" className="text-neutral-500 hover:text-neutral-300">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-xs text-neutral-500">Signing Public Key</span>
+                  <code className="block truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
+                    {REAL_IKA_PUBLIC_KEY}
+                  </code>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="text-neutral-500">Authority before</div>
+                  <code className="truncate text-neutral-400">{REAL_IKA_AUTHORITY_BEFORE.slice(0, 16)}…</code>
+                  <div className="text-neutral-500">Authority after</div>
+                  <code className="truncate text-neutral-400">{REAL_IKA_AUTHORITY_AFTER.slice(0, 16)}…</code>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-xs text-neutral-500">Transfer Transaction</span>
+                  <div className="flex items-center gap-2">
+                    <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
+                      {REAL_IKA_TRANSFER_SIG.slice(0, 24)}…
+                    </code>
+                    <a href={`https://solana.fm/tx/${REAL_IKA_TRANSFER_SIG}?cluster=devnet-alpha`} target="_blank" rel="noreferrer" className="text-neutral-500 hover:text-neutral-300">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  setIkaLoading("Fetching real dWallet");
+                  try {
+                    const info = await connection.getAccountInfo(new PublicKey(REAL_IKA_DWALLET_PDA));
+                    if (info) {
+                      const parsed = parseIkaDwalletAccount(info.data as Buffer);
+                      setRealIkaDwallet(parsed);
+                    } else {
+                      setRealIkaDwallet(null);
+                    }
+                  } catch (err) {
+                    console.error("Fetch real dWallet failed:", err);
+                    setRealIkaDwallet(null);
+                  } finally {
+                    setIkaLoading(null);
+                  }
+                }}
+                disabled={ikaLoading !== null}
+                className="text-xs"
+              >
+                <Search className="mr-1.5 h-3.5 w-3.5" />
+                Fetch Real Ika dWallet
+              </Button>
+
+              {realIkaDwallet && (
+                <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                  <p className="text-xs font-medium text-neutral-400">On-chain dWallet</p>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="text-neutral-500">Authority</div>
+                    <code className="truncate text-neutral-400">{realIkaDwallet.authority.toBase58().slice(0, 16)}…</code>
+                    <div className="text-neutral-500">State</div>
+                    <code className="truncate text-neutral-400">{["DKGInProgress", "Active", "Frozen"][realIkaDwallet.state] ?? realIkaDwallet.state}</code>
+                    <div className="text-neutral-500">Curve</div>
+                    <code className="truncate text-neutral-400">{DWalletCurve[realIkaDwallet.curve]} ({realIkaDwallet.curve})</code>
+                    <div className="text-neutral-500">Public key len</div>
+                    <code className="truncate text-neutral-400">{realIkaDwallet.publicKeyLen}</code>
+                    <div className="text-neutral-500">Bump</div>
+                    <code className="truncate text-neutral-400">{realIkaDwallet.bump}</code>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Phase 5C Real Ika Policy Card */}
+          <Card className="border-white/[0.06] bg-neutral-900/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base text-white">
+                <Shield className="h-4 w-4 text-sky-400" />
+                Real Ika Policy
+              </CardTitle>
+              <CardDescription className="text-neutral-500">
+                Phase 5C — GuardedDwallet policy linked to real Ika dWallet
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start gap-3 rounded-lg border border-sky-500/20 bg-sky-500/10 p-3">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-sky-400" />
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-sky-200">Policy created ✅</p>
+                  <p className="text-[11px] text-sky-200/60">
+                    GuardedDwallet PDA initialized with real Ika dWallet and demo HumanRail refs.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="space-y-1">
+                  <span className="text-xs text-neutral-500">GuardedDwallet PDA</span>
+                  <div className="flex items-center gap-2">
+                    <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
+                      {REAL_GUARDED_DWALLET_PDA}
+                    </code>
+                    <button onClick={() => copyToClipboard(REAL_GUARDED_DWALLET_PDA)} className="text-neutral-500 hover:text-neutral-300">
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                    <a href={`https://solana.fm/address/${REAL_GUARDED_DWALLET_PDA}?cluster=devnet-alpha`} target="_blank" rel="noreferrer" className="text-neutral-500 hover:text-neutral-300">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="text-neutral-500">Linked dWallet</div>
+                  <code className="truncate text-neutral-400">{REAL_IKA_DWALLET_PDA.slice(0, 16)}…</code>
+                  <div className="text-neutral-500">Chain ID</div>
+                  <code className="truncate text-neutral-400">84532 (Base Sepolia)</code>
+                  <div className="text-neutral-500">Asset</div>
+                  <code className="truncate text-neutral-400">USDC:BASE_SEPOLIA</code>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  setIkaLoading("Fetching real policy");
+                  try {
+                    const parsed = await fetchGuardedDwallet(new PublicKey(REAL_GUARDED_DWALLET_PDA));
+                    setRealGuardedDwallet(parsed);
+                  } catch (err) {
+                    console.error("Fetch real policy failed:", err);
+                    setRealGuardedDwallet(null);
+                  } finally {
+                    setIkaLoading(null);
+                  }
+                }}
+                disabled={ikaLoading !== null}
+                className="text-xs"
+              >
+                <Search className="mr-1.5 h-3.5 w-3.5" />
+                Fetch Real Ika GuardedDwallet
+              </Button>
+
+              {realGuardedDwallet && (
+                <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                  <p className="text-xs font-medium text-neutral-400">On-chain Policy</p>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="text-neutral-500">Principal</div>
+                    <code className="truncate text-neutral-400">{realGuardedDwallet.principal.toBase58().slice(0, 16)}…</code>
+                    <div className="text-neutral-500">dWallet</div>
+                    <code className="truncate text-neutral-400">{realGuardedDwallet.dwallet.toBase58().slice(0, 16)}…</code>
+                    <div className="text-neutral-500">Per-tx limit</div>
+                    <code className="truncate text-neutral-400">{realGuardedDwallet.perTxLimit.toString()}</code>
+                    <div className="text-neutral-500">Daily limit</div>
+                    <code className="truncate text-neutral-400">{realGuardedDwallet.dailyLimit.toString()}</code>
+                    <div className="text-neutral-500">Total limit</div>
+                    <code className="truncate text-neutral-400">{realGuardedDwallet.totalLimit.toString()}</code>
+                    <div className="text-neutral-500">Frozen</div>
+                    <code className="truncate text-neutral-400">{realGuardedDwallet.frozen ? "Yes" : "No"}</code>
+                    <div className="text-neutral-500">Bump</div>
+                    <code className="truncate text-neutral-400">{realGuardedDwallet.bump}</code>
+                  </div>
                 </div>
               )}
             </CardContent>

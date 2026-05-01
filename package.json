@@ -14,7 +14,10 @@
     "devnet:inspect-ika": "tsx scripts/devnet-inspect-ika.ts",
     "devnet:inspect-ika:debug": "IKA_DEBUG_RAW=1 npm run devnet:inspect-ika",
     "ika:create-dwallet": "bash scripts/ika-create-dwallet.sh",
-    "ika:dkg-check": "PROTOC=/home/codespace/.local/protoc/bin/protoc cargo check --manifest-path tools/ika-dkg-cli/Cargo.toml"
+    "ika:dkg-check": "PROTOC=/home/codespace/.local/protoc/bin/protoc cargo check --manifest-path tools/ika-dkg-cli/Cargo.toml",
+    "ika:transfer-authority": "tsx scripts/ika-transfer-authority.ts",
+    "ika:create-guarded-policy": "tsx scripts/devnet-create-guarded-dwallet.ts --real-ika",
+    "ika:verify-lifecycle": "tsx scripts/ika-verify-lifecycle.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
