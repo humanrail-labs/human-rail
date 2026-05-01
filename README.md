@@ -89,6 +89,7 @@ Four layers. Seven programs. One unified trust stack.
 | DataBlink | `GYUeSsQfLYrYc5H27XdrssX5WgU4rNfkLGBnsksQcFpX` |
 | Document Registry | `8uyGoBf7f9N2ChmaJrnVQ4sNRFtnRL4vp5Gi35MQ6Q28` |
 | Receipts | `EFjLqSdPv45PmdhUwaFGRwCfENo58fRCtwTvqnQd8ZwM` |
+| HumanRail dWallet Guard | `G2emUcBmNbFAQfP4deV68ciq9rtYc6pr6iYCt16WdYaF` *(SBF built, deploy pending devnet SOL)* |
 
 ---
 

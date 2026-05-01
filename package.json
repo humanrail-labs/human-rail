@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check:dwallet-guard": "bash scripts/check-dwallet-guard.sh"
+    "check:dwallet-guard": "bash scripts/check-dwallet-guard.sh",
+    "deploy:dwallet-guard": "bash scripts/deploy-dwallet-guard.sh",
+    "verify:dwallet-guard": "bash scripts/verify-dwallet-guard-deploy.sh"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
