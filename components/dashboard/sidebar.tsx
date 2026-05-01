@@ -14,6 +14,7 @@ import {
   Shield,
   Zap,
   Receipt,
+  Wallet,
   ChevronLeft,
   ChevronRight,
   Globe,
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { href: "/vault/identity", label: "My Identity", icon: Fingerprint },
   { href: "/vault/agents", label: "My Agents", icon: Bot },
   { href: "/vault/capabilities", label: "Capabilities", icon: Shield },
+  { href: "/vault/dwallets", label: "Guarded dWallets", icon: Wallet },
   { href: "/vault/payments", label: "Payments", icon: Zap },
   { href: "/vault/activity", label: "Activity Log", icon: Receipt },
 ];

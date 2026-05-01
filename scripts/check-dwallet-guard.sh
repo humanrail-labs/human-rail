@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Ensure Solana/Anchor tools are discoverable
+export PATH="/home/codespace/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$PATH"
+
 echo "========================================"
 echo "HumanRail dWallet Guard — Build Check"
 echo "========================================"

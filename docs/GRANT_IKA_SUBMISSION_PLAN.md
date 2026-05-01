@@ -1,8 +1,9 @@
 # HumanRail Guarded dWallets — Ika Grant Submission Plan
 
 > Track: Guarded dWallets for Cross-Chain Autonomous Agents  
-> Status: Phase 0–2C Complete · Phase 3 Planned  
+> Status: Phase 0–3 Complete  
 > Phase 2C: SBF build + IDL generated + program ID assigned. Deployment blocked by devnet airdrop rate limit.  
+> Phase 3: Frontend `/vault/dwallets` route built with deployment-gated UI, PDA derivations, policy cards, and signing request flow.  
 
 ---
 
@@ -260,12 +261,15 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] **Check script:** `scripts/check-dwallet-guard.sh` + `package.json` script
 - [ ] **Devnet deployment:** Blocked — airdrop faucet rate-limited (0 SOL in deployer wallet)
 
-### Phase 3 — Frontend Integration (PLANNED)
-- [ ] Add `/vault/dwallets` route
-- [ ] UI for creating/linking a dWallet
-- [ ] UI for initializing a GuardConfig
-- [ ] UI for viewing GuardRequest status
-- [ ] Integrate Ika gRPC client for `DWalletRequest::Sign`
+### Phase 3 — Frontend Integration (COMPLETE)
+- [x] Add `/vault/dwallets` route with Config, Policy, and Signing Request tabs
+- [x] Deployment-gated UI — all tx buttons disabled until program is confirmed on-chain
+- [x] Ika config card with pre-alpha disclaimer
+- [x] PDA derivation display (CPI authority, GuardedDwallet, GuardSigningRequest)
+- [x] Policy creation card with demo hash computation
+- [x] Signing request card with keccak256 digest, scheme selector, status previews
+- [x] Added to vault sidebar navigation
+- [ ] Integrate Ika gRPC client for `DWalletRequest::Sign` (Phase 4)
 
 ### Phase 4 — Agent Runtime Integration (PLANNED)
 - [ ] Add `request_cross_chain_signature` tool to agent runtime
@@ -295,8 +299,9 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [ ] Working devnet deployment of HumanRail programs (7/7 deployed)
 - [ ] Architecture diagram
 - [x] Source code for new dWallet Guard program (Phase 2+)
+- [x] Frontend integration for dWallet management (Phase 3)
 - [ ] Devnet deployment of dWallet Guard program (Phase 2C+)
-- [ ] Frontend integration for dWallet management (Phase 3+)
+- [ ] Agent runtime cross-chain signing demo (Phase 4+)
 - [ ] Agent runtime cross-chain signing demo (Phase 4+)
 
 ---

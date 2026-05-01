@@ -384,7 +384,31 @@ After deployment, verify these are already updated (done in Phase 2C):
 
 ---
 
-## What Remains for Phase 3
+## Phase 3 — Frontend Integration (COMPLETE)
+
+### New Route: `/vault/dwallets`
+
+A dedicated vault page for managing guarded dWallets:
+- **Config & PDAs tab** — Shows Guard program status (configured/deployed), Ika protocol config, and derived PDAs (CPI authority, GuardedDwallet, GuardSigningRequest).
+- **Policy Creation tab** — Form to define guardrails (agent, dWallet, chain ID, asset/recipient hashes, limits, expiry). Includes demo hash computation.
+- **Signing Request tab** — Form to submit cross-chain signing requests with keccak256 digest, signature scheme selector, and status preview cards (Pending / Approved / Rejected / Ika Signed).
+
+### Deployment Gating
+All transaction buttons are disabled until `connection.getAccountInfo(guardProgramId)` confirms the program is executable on-chain. If not deployed, a banner shows:
+> "Guard program not deployed yet — SBF build complete; deploy pending devnet SOL"
+
+### SDK / Lib Modules Added
+- `lib/hooks/use-dwallet-guard.ts` — Deployment check, PDA derivations, account parsers
+- `lib/dwallet-guard/utils.ts` — keccak256, policy hash helpers, signature scheme enum
+- `lib/dwallet-guard/instructions.ts` — Raw `TransactionInstruction` builders for all 4 instructions
+- `lib/dwallet-guard/noble-hashes.d.ts` — Type declarations for `@noble/hashes/sha3`
+
+### Transaction Builders
+Implemented as raw instruction builders using exact IDL discriminators and account order. Buttons are gated by `isDeployed`. Full transaction signing is deferred to Phase 4 (agent runtime + live Ika gRPC).
+
+---
+
+## What Remains for Phase 4
 
 1. **Fund deployer wallet** — Devnet airdrop or faucet to get ≥2 SOL for program deployment.
 2. **Deploy to devnet** — Run `anchor deploy --provider.cluster devnet` or `solana program deploy`.
