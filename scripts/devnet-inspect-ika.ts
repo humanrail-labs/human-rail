@@ -395,7 +395,7 @@ async function main() {
             } else {
               console.log(`  \n  ⏳ Phase 5E PENDING — Run: npm run ika:sign-approved-message`);
             }
-            console.log(`  Explorer:       ${solanaFmLink(maPubkey.toBase58())}`);
+            console.log(`  Explorer:       ${solanaFmLink(maPubkey)}`);
           } else {
             console.log("\nMessageApproval exists but could not be parsed.");
           }
