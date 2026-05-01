@@ -67,6 +67,12 @@ See [`docs/GRANT_IKA_SUBMISSION_PLAN.md`](docs/GRANT_IKA_SUBMISSION_PLAN.md) for
 ```bash
 # Create a Guarded dWallet policy (Phase 4B)
 npm run devnet:create-guarded-dwallet
+
+# Inspect Ika program state, derive PDAs, fetch accounts (Phase 5A)
+npm run devnet:inspect-ika
+
+# Inspect a specific dWallet
+IKA_DWALLET_PUBLIC_KEY=... IKA_DWALLET_CURVE=2 npm run devnet:inspect-ika
 ```
 
 ---

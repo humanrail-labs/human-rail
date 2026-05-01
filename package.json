@@ -10,7 +10,8 @@
     "check:dwallet-guard": "bash scripts/check-dwallet-guard.sh",
     "deploy:dwallet-guard": "bash scripts/deploy-dwallet-guard.sh",
     "verify:dwallet-guard": "bash scripts/verify-dwallet-guard-deploy.sh",
-    "devnet:create-guarded-dwallet": "tsx scripts/devnet-create-guarded-dwallet.ts"
+    "devnet:create-guarded-dwallet": "tsx scripts/devnet-create-guarded-dwallet.ts",
+    "devnet:inspect-ika": "tsx scripts/devnet-inspect-ika.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

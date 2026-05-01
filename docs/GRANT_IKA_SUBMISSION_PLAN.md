@@ -288,7 +288,36 @@ GuardRequest:   ["guard_request", guard_config, nonce]
 - [x] Test rejected signing request path (status=2, code=7)
 - [x] Added `npm run devnet:create-guarded-dwallet` script
 
-### Phase 4 — Agent Runtime Integration (PLANNED)
+### Phase 5A — Ika Read-Only Integration Helpers (COMPLETE)
+- [x] Inspect Ika crate source and extract exact offsets/seeds
+- [x] `lib/ika/constants.ts` — program IDs, endpoints, account offsets
+- [x] `lib/ika/types.ts` — DWalletCurve, DWalletState, IkaSignatureScheme, MessageApprovalStatus
+- [x] `lib/ika/pda.ts` — dWallet PDA, MessageApproval PDA, CPI authority PDA derivation
+- [x] `lib/ika/parsers.ts` — parseIkaDwalletAccount, parseIkaMessageApprovalAccount
+- [x] `lib/ika/client.ts` — honest IkaClient (read-only methods implemented, mutations throw)
+- [x] `scripts/devnet-inspect-ika.ts` — read-only devnet inspector
+- [x] `docs/IKA_INTEGRATION_RUNBOOK.md` — full technical note with lifecycle and open questions
+- [x] `/vault/dwallets` Ika Readiness panel — display config, derive/fetch dWallet and MessageApproval
+- [x] Added `npm run devnet:inspect-ika` script
+
+### Phase 5B — Create Real Ika dWallet via gRPC DKG (NEXT)
+- [ ] BCS-serialize DWalletRequest::DKG payload
+- [ ] Submit gRPC SubmitTransaction with user signature
+- [ ] Poll for on-chain dWallet PDA
+- [ ] Transfer dWallet authority to Guard CPI authority PDA
+
+### Phase 5C — Real approve_guarded_message CPI (PLANNED)
+- [ ] Update GuardedDwallet to reference real Ika dWallet
+- [ ] Submit approve_guarded_message that passes policy and CPI-calls Ika
+- [ ] Verify MessageApproval PDA created with status=Pending
+
+### Phase 5D — gRPC Sign + On-Chain Signature Verification (PLANNED)
+- [ ] Allocate presign via gRPC
+- [ ] Submit DWalletRequest::Sign with ApprovalProof
+- [ ] Poll MessageApproval until status=Signed
+- [ ] Read and verify signature bytes
+
+### Phase 5E — Agent Runtime Integration (PLANNED)
 - [ ] Add `request_cross_chain_signature` tool to agent runtime
 - [ ] Add Ika gRPC client to agent executor
 - [ ] End-to-end demo: agent requests Bitcoin or Ethereum signature within policy limits

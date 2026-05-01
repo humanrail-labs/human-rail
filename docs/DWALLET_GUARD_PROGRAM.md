@@ -480,23 +480,71 @@ npm run devnet:create-guarded-dwallet
 
 ---
 
-## What Remains for Phase 5
+## Phase 5A — Ika Read-Only Integration (COMPLETE)
 
-1. **Ika dWallet creation** — Create a real Ika dWallet via gRPC or web UI.
-2. **dWallet authority transfer** — Transfer dWallet authority to the CPI authority PDA.
-3. **Real signing request** — Submit an `approve_guarded_message` that passes all policy checks and CPI-calls Ika.
-4. **gRPC client** — Implement `lib/ika/client.ts` for off-chain signing request submission.
-5. **Receipt integration** — Optionally emit HumanRail Receipts on approve/reject.
-6. **Tests** — Write Rust unit tests + TypeScript integration tests against devnet.
+### What was added
+
+- **`lib/ika/constants.ts`** — Deterministic constants: program IDs, endpoints, account offsets, discriminators.
+- **`lib/ika/types.ts`** — TypeScript enums: `DWalletCurve`, `DWalletState`, `IkaSignatureScheme`, `MessageApprovalStatus`, plus `IkaDwallet` and `IkaMessageApproval` interfaces.
+- **`lib/ika/pda.ts`** — PDA derivation helpers:
+  - `deriveIkaDwalletPda(curve, publicKey)` — dWallet PDA from `["dwallet", chunks(curve_u16_le || pk)]`
+  - `deriveIkaMessageApprovalPda(...)` — hierarchical seeds with dWallet prefix + scheme + message digest
+  - `deriveIkaCpiAuthorityPda(callerProgramId)` — CPI authority for program-controlled signing
+  - `deriveHumanRailGuardCpiAuthority(guardProgramId)` — HumanRail Guard's CPI authority
+- **`lib/ika/parsers.ts`** — Raw account parsers:
+  - `parseIkaDwalletAccount(data)` — authority, curve, state, public key, epoch, NOA pubkey, bump
+  - `parseIkaMessageApprovalAccount(data)` — dwallet, message digest, approver, status @ 172, signature len @ 173, signature @ 175
+- **`lib/ika/client.ts`** — Honest `IkaClient` class:
+  - ✅ `fetchDwallet()`, `fetchMessageApproval()`, `waitForMessageApprovalSigned()`, `isDwalletProgramExecutable()`
+  - 🚧 `createDwalletViaDkg()`, `transferDwalletAuthority()`, `signApprovedMessage()` — throw `IkaNotImplementedError`
+- **`scripts/devnet-inspect-ika.ts`** — Read-only devnet inspector:
+  - Verifies Ika program executable status
+  - Derives and prints Guard CPI authority, coordinator PDA
+  - Optional env-var driven dWallet / MessageApproval fetching
+  - Run: `npm run devnet:inspect-ika`
+- **`docs/IKA_INTEGRATION_RUNBOOK.md`** — Full technical note with lifecycle, offsets, open questions, crate inventory.
+
+### Source verification
+All offsets and seed logic are sourced from the compiled Ika pre-alpha crates (rev `3bd7945`):
+- `ika-dwallet-anchor` CPI SDK
+- `chains/solana/examples/_shared/ika-setup.ts`
+- `chains/solana/examples/voting/e2e-rust/src/main.rs`
+
+### dWallet PDA derivation logic
+```
+payload = u16LE(curve) || public_key
+seeds = ["dwallet", chunk1(32 bytes), chunk2(32 bytes), ...]
+```
+
+### MessageApproval PDA derivation logic
+```
+seeds = ["dwallet", chunks..., "message_approval", u16LE(scheme), message_digest(32)]
+```
+
+---
+
+## What Remains for Phase 5B–5E
+
+| Phase | Goal | Status |
+|-------|------|--------|
+| **5B** | Create real Ika dWallet via gRPC DKG | Planned — needs BCS serialization + gRPC client |
+| **5C** | Transfer authority + real `approve_guarded_message` CPI | Planned — needs 5B dWallet + authority transfer tx |
+| **5D** | gRPC Sign + signature on-chain verification | Planned — needs presign + ApprovalProof construction |
+| **5E** | Agent runtime `request_cross_chain_signature` tool | Planned — needs 5B–5D complete |
 
 > ⚠️ **Preserve the keypair:** `target/deploy/humanrail_dwallet_guard-keypair.json` is required for any future upgrades. It is already `.gitignore`d.
 
 ---
 
-## What Remains for Phase 5
+## How to Inspect Ika State
 
-1. **Validate parsers** — Update `packages/sdk/src/parsers.ts` with exact offsets from the IDL.
-2. **dWallet authority transfer** — Build UI flow to transfer dWallet authority to the CPI authority PDA.
-3. **gRPC client** — Implement `lib/ika/client.ts` for off-chain signing request submission.
-4. **Receipt integration** — Optionally emit HumanRail Receipts on approve/reject.
-5. **Tests** — Write Rust unit tests + TypeScript integration tests against devnet.
+```bash
+# Basic inspection (no env vars required)
+npm run devnet:inspect-ika
+
+# Inspect a specific dWallet
+IKA_DWALLET_PUBLIC_KEY=9NNE4v7DcuQA9fL868wwgx8jsz3pn9EKr97ZADLnw12p IKA_DWALLET_CURVE=2 npm run devnet:inspect-ika
+
+# Inspect a specific MessageApproval
+IKA_MESSAGE_APPROVAL=... npm run devnet:inspect-ika
+```

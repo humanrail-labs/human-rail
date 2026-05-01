@@ -47,6 +47,7 @@ next-env.d.ts
 **/target/
 **/target/deploy/*-keypair.json
 **/*-keypair.json
+.local-keys/
 .anchor/
 Anchor.toml.local
 test-ledger/
