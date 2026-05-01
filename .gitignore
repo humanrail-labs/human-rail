@@ -51,3 +51,4 @@ next-env.d.ts
 .anchor/
 Anchor.toml.local
 test-ledger/
+.local-ika/

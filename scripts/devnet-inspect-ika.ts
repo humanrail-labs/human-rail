@@ -112,32 +112,66 @@ async function main() {
   }
   console.log();
 
-  // 6. Optional: inspect dWallet from env vars
+  // 6. Optional: inspect dWallet from artifact or env vars
+  let artifactDwallet: { dwallet_pda?: string; dwallet_signing_public_key_base64?: string; curve?: string } | null = null;
+  try {
+    const artifactPath = ".local-ika/dwallet.json";
+    const artifactRaw = await import("fs").then((fs) => fs.readFileSync(artifactPath, "utf-8"));
+    artifactDwallet = JSON.parse(artifactRaw);
+  } catch {
+    // Artifact not found — fall back to env vars
+  }
+
   const envDwalletPubkey = process.env.IKA_DWALLET_PUBLIC_KEY;
   const envDwalletCurve = process.env.IKA_DWALLET_CURVE;
 
-  if (envDwalletPubkey) {
+  let inspectPubkey: string | undefined;
+  let inspectCurve: number | undefined;
+  let inspectSource: string = "environment";
+
+  if (artifactDwallet?.dwallet_pda) {
+    inspectPubkey = artifactDwallet.dwallet_signing_public_key_base64;
+    // Map curve string to enum
+    const curveMap: Record<string, number> = {
+      Secp256k1: DWalletCurve.Secp256k1,
+      Secp256r1: DWalletCurve.Secp256r1,
+      Curve25519: DWalletCurve.Curve25519,
+      Ristretto: DWalletCurve.Ristretto,
+    };
+    inspectCurve = curveMap[artifactDwallet.curve ?? ""] ?? DWalletCurve.Secp256k1;
+    inspectSource = "artifact (.local-ika/dwallet.json)";
+  } else if (envDwalletPubkey) {
+    inspectPubkey = envDwalletPubkey;
+    inspectCurve = Number(envDwalletCurve ?? DWalletCurve.Curve25519);
+    inspectSource = "environment";
+  }
+
+  if (inspectPubkey) {
     console.log("═══════════════════════════════════════════════════════════");
-    console.log("  Inspecting dWallet from environment");
+    console.log(`  Inspecting dWallet from ${inspectSource}`);
     console.log("═══════════════════════════════════════════════════════════\n");
 
     let publicKeyBytes: Uint8Array;
     try {
-      publicKeyBytes = new PublicKey(envDwalletPubkey).toBytes();
+      publicKeyBytes = Buffer.from(inspectPubkey, "base64");
+      if (publicKeyBytes.length < 32) {
+        // Try as base58 pubkey instead
+        publicKeyBytes = new PublicKey(inspectPubkey).toBytes();
+      }
     } catch {
-      console.error(`Invalid IKA_DWALLET_PUBLIC_KEY: ${envDwalletPubkey}`);
+      console.error(`Invalid dWallet public key: ${inspectPubkey}`);
       process.exit(1);
     }
 
-    const curve = Number(envDwalletCurve ?? DWalletCurve.Curve25519);
+    const curve = inspectCurve ?? DWalletCurve.Curve25519;
     if (!Object.values(DWalletCurve).includes(curve)) {
-      console.error(`Invalid IKA_DWALLET_CURVE: ${envDwalletCurve}`);
+      console.error(`Invalid curve: ${inspectCurve}`);
       console.error(`Valid values: ${Object.values(DWalletCurve).filter((v) => typeof v === "number").join(", ")}`);
       process.exit(1);
     }
 
     const [dwalletPda] = deriveIkaDwalletPda(curve as DWalletCurve, publicKeyBytes);
-    console.log(`dWallet public key:  ${envDwalletPubkey}`);
+    console.log(`dWallet public key:  ${inspectPubkey}`);
     console.log(`Curve:               ${DWalletCurve[curve]} (${curve})`);
     console.log(`Derived PDA:         ${dwalletPda.toBase58()}`);
     console.log(`Link:                ${solanaFmLink(dwalletPda)}`);

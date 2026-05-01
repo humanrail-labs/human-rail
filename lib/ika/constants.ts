@@ -54,7 +54,7 @@ export const IKA_DISC_NEK = 3;
 // ── Account sizes ──
 
 /** DWallet account total size (discriminator + version + data). */
-export const IKA_DWALLET_LEN = 2 + 690; // 692 bytes
+export const IKA_DWALLET_LEN = 153; // actual devnet account size (pre-alpha mock may vary)
 
 /** DWalletCoordinator account total size. */
 export const IKA_COORDINATOR_LEN = 116;

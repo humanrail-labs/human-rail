@@ -117,7 +117,7 @@ export function parseIkaDwalletAccount(data: Buffer | Uint8Array): IkaDwallet | 
     );
 
     const isImported = buf[IKA_DW_OFFSET_IS_IMPORTED] === 1;
-    const bump = buf[IKA_DW_OFFSET_BUMP];
+    const bump = buf.length > IKA_DW_OFFSET_BUMP ? buf[IKA_DW_OFFSET_BUMP] : undefined;
 
     return {
       discriminator,

@@ -11,7 +11,9 @@
     "deploy:dwallet-guard": "bash scripts/deploy-dwallet-guard.sh",
     "verify:dwallet-guard": "bash scripts/verify-dwallet-guard-deploy.sh",
     "devnet:create-guarded-dwallet": "tsx scripts/devnet-create-guarded-dwallet.ts",
-    "devnet:inspect-ika": "tsx scripts/devnet-inspect-ika.ts"
+    "devnet:inspect-ika": "tsx scripts/devnet-inspect-ika.ts",
+    "ika:create-dwallet": "bash scripts/ika-create-dwallet.sh",
+    "ika:dkg-check": "PROTOC=/home/codespace/.local/protoc/bin/protoc cargo check --manifest-path tools/ika-dkg-cli/Cargo.toml"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
