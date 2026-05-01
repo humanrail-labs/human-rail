@@ -211,7 +211,7 @@ pub fn handler(
     )?;
 
     msg!(
-        "Approved signing request {:?} and CPI'd Ika approve_message via official crate",
+        "Approved signing request {:?} and CPI'd Ika approve_message via new-format CPI",
         request_id
     );
 

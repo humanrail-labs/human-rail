@@ -325,7 +325,83 @@ async function main() {
     console.log();
   }
 
-  // 8. Summary
+  // 8. Optional: inspect signing request artifact
+  let artifactSigningRequest: {
+    guardSigningRequestPda?: string;
+    ikaMessageApprovalPda?: string;
+    approveGuardedMessageSignature?: string;
+    status?: string;
+    preimage?: string;
+    messageDigestHex?: string;
+  } | null = null;
+  try {
+    const srPath = ".local-ika/signing-request.json";
+    const srRaw = await import("fs").then((fs) => fs.readFileSync(srPath, "utf-8"));
+    artifactSigningRequest = JSON.parse(srRaw);
+  } catch {
+    // Artifact not found
+  }
+
+  if (artifactSigningRequest?.guardSigningRequestPda) {
+    console.log("═══════════════════════════════════════════════════════════");
+    console.log("  Inspecting Signing Request from artifact");
+    console.log("═══════════════════════════════════════════════════════════\n");
+
+    console.log("Artifact preimage:", artifactSigningRequest.preimage);
+    console.log("Artifact message digest:", artifactSigningRequest.messageDigestHex);
+    console.log("Artifact status:", artifactSigningRequest.status);
+    console.log("Approve tx:", artifactSigningRequest.approveGuardedMessageSignature);
+
+    // Fetch GuardSigningRequest
+    try {
+      const gsrPubkey = new PublicKey(artifactSigningRequest.guardSigningRequestPda);
+      const gsrInfo = await connection.getAccountInfo(gsrPubkey);
+      if (gsrInfo) {
+        const gsrData = gsrInfo.data as Buffer;
+        // Skip discriminator + version + request_id + guarded_dwallet + principal + agent + dwallet + message_digest + message_metadata_digest + destination_chain_id + asset_hash + recipient_hash + amount + signature_scheme
+        let off = 8 + 1 + 32 + 32 + 32 + 32 + 32 + 32 + 32 + 4 + 32 + 32 + 8 + 2;
+        const gsrStatus = gsrData[off];
+        const gsrRejectionCode = gsrData.readUInt16LE(off + 1);
+        const gsrIkaMa = new PublicKey(gsrData.slice(off + 3, off + 35));
+        console.log("\nGuardSigningRequest on-chain:");
+        console.log(`  Status:         ${gsrStatus === 1 ? "approved" : gsrStatus === 2 ? "rejected" : "unknown"} (${gsrStatus})`);
+        console.log(`  Rejection code: ${gsrRejectionCode}`);
+        console.log(`  IkaMessageApproval: ${gsrIkaMa.toBase58()}`);
+      } else {
+        console.log("\nGuardSigningRequest not found on-chain.");
+      }
+    } catch (err) {
+      console.log("\nError fetching GuardSigningRequest:", err instanceof Error ? err.message : String(err));
+    }
+
+    // Fetch MessageApproval
+    if (artifactSigningRequest.ikaMessageApprovalPda) {
+      try {
+        const maPubkey = new PublicKey(artifactSigningRequest.ikaMessageApprovalPda);
+        const maInfo = await connection.getAccountInfo(maPubkey);
+        if (maInfo) {
+          const parsed = parseIkaMessageApprovalAccount(maInfo.data as Buffer);
+          if (parsed) {
+            console.log("\nIka MessageApproval on-chain:");
+            console.log(`  dWallet:        ${parsed.dwallet.toBase58()}`);
+            console.log(`  Status:         ${parsed.status === 0 ? "Pending" : parsed.status === 1 ? "Signed" : "?"} (${parsed.status})`);
+            console.log(`  Signature len:  ${parsed.signatureLen}`);
+            console.log(`  Signature available: ${parsed.signatureLen > 0 ? "YES" : "NO"}`);
+            console.log(`  Explorer:       ${solanaFmLink(maPubkey.toBase58())}`);
+          } else {
+            console.log("\nMessageApproval exists but could not be parsed.");
+          }
+        } else {
+          console.log("\nMessageApproval not found on-chain.");
+        }
+      } catch (err) {
+        console.log("\nError fetching MessageApproval:", err instanceof Error ? err.message : String(err));
+      }
+    }
+    console.log();
+  }
+
+  // 9. Summary
   console.log("═══════════════════════════════════════════════════════════");
   console.log("  Summary");
   console.log("═══════════════════════════════════════════════════════════");
@@ -339,6 +415,10 @@ async function main() {
   if (!envMessageApproval) {
     console.log(`To inspect a MessageApproval, set:`);
     console.log(`  IKA_MESSAGE_APPROVAL=<base58_pubkey> npm run devnet:inspect-ika`);
+  }
+  if (!artifactSigningRequest?.guardSigningRequestPda) {
+    console.log(`To create a signing request, run:`);
+    console.log(`  npm run ika:approve-message`);
   }
   console.log();
 }

@@ -17,7 +17,8 @@
     "ika:dkg-check": "PROTOC=/home/codespace/.local/protoc/bin/protoc cargo check --manifest-path tools/ika-dkg-cli/Cargo.toml",
     "ika:transfer-authority": "tsx scripts/ika-transfer-authority.ts",
     "ika:create-guarded-policy": "tsx scripts/devnet-create-guarded-dwallet.ts --real-ika",
-    "ika:verify-lifecycle": "tsx scripts/ika-verify-lifecycle.ts"
+    "ika:verify-lifecycle": "tsx scripts/ika-verify-lifecycle.ts",
+    "ika:approve-message": "tsx scripts/ika-approve-guarded-message.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
