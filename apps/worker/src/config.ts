@@ -13,6 +13,7 @@ const EnvSchema = z.object({
   MANDARA_ENV: z.enum(["development", "staging", "production"]).default("development"),
   MANDARA_WORKER_MODE: z.enum(["dry-run", "live-devnet"]).default("dry-run"),
   MANDARA_ENABLE_LIVE_EXECUTION: z.string().default("false"),
+  MANDARA_SERVICE_WALLET_PATH: z.string().default(""),
   MANDARA_SOLANA_RPC_URL: z.string().default("https://api.devnet.solana.com"),
   MANDARA_IKA_GRPC_URL: z.string().default("https://pre-alpha-dev-1.ika.ika-network.net:443"),
   MANDARA_HUMANRAIL_GUARD_PROGRAM_ID: z.string().default("Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2"),

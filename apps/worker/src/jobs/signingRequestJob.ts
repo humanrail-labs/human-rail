@@ -141,7 +141,7 @@ export async function processSigningRequestJob(data: SigningRequestJobData) {
     };
   }
 
-  // 7. Live-devnet mode — P4A: not implemented
+  // 7. Live-devnet mode — P4B: execute on devnet
   if (mode === "live-devnet") {
     if (!liveExecutionEnabled) {
       logger.warn("Live-devnet mode disabled by safety gate", { signingRequestId });
@@ -167,27 +167,41 @@ export async function processSigningRequestJob(data: SigningRequestJobData) {
       };
     }
 
-    logger.info("Live-devnet mode requested but not implemented in P4A", { signingRequestId });
-    await updateSigningRequestStatus(signingRequestId, "requested", {
-      metadata: {
-        liveNotImplemented: true,
-        note: "Live execution not implemented until P4B",
-      },
-    });
-    await recordAuditEvent({
-      organizationId,
-      actorType: "worker",
-      eventType: "signing_request_worker_skipped",
-      resourceType: "signing_request",
-      resourceId: signingRequestId,
-      summary: `Live execution not implemented in P4A`,
-      metadata: { reason: "Live execution not implemented until P4B" },
-    });
-    return {
-      mode: "live-devnet",
-      wouldExecute: false,
-      reason: "Live execution not implemented until P4B",
-    };
+    // Import dynamically to avoid loading Solana deps in dry-run mode
+    const { executeLiveDevnetSigningRequest } = await import(
+      "../services/liveDevnetExecution.js"
+    );
+
+    try {
+      const result = await executeLiveDevnetSigningRequest(
+        signingRequestId,
+        organizationId
+      );
+      logger.info("Live execution completed", { signingRequestId, result });
+      return {
+        mode: "live-devnet",
+        ...result,
+      };
+    } catch (err: any) {
+      logger.error("Live execution failed", { signingRequestId, error: err.message });
+      await updateSigningRequestStatus(signingRequestId, "failed", {
+        metadata: {
+          error: err.message,
+          liveExecutionFailed: true,
+          failedAt: new Date().toISOString(),
+        },
+      });
+      await recordAuditEvent({
+        organizationId,
+        actorType: "worker",
+        eventType: "signing_request_execution_failed",
+        resourceType: "signing_request",
+        resourceId: signingRequestId,
+        summary: `Live execution failed for ${signingRequestId}: ${err.message}`,
+        metadata: { error: err.message },
+      });
+      throw err;
+    }
   }
 
   return { mode, wouldExecute: false, reason: "Unknown worker mode" };

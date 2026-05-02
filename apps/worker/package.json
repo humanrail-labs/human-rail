@@ -14,7 +14,9 @@
   "dependencies": {
     "@mandara/core": "file:../../packages/core",
     "@mandara/db": "file:../../packages/db",
+    "@noble/hashes": "^2.2.0",
     "@prisma/client": "^6.0.0",
+    "@solana/web3.js": "^1.98.4",
     "bullmq": "^5.0.0",
     "dotenv": "^16.4.0",
     "ioredis": "^5.4.0",

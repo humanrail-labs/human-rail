@@ -74,6 +74,9 @@ enum AuditEventType {
   signing_request_execution_failed
   signing_request_worker_skipped
   signing_request_status_updated
+  guard_message_approved
+  ika_message_approval_created
+  ika_signature_committed
   system
 }
 

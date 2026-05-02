@@ -58,3 +58,6 @@ dist/
 Anchor.toml.local
 test-ledger/
 .local-ika/
+
+# Mandara worker temp artifacts
+.local-worker/
