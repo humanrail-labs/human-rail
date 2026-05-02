@@ -1,6 +1,6 @@
 # Mandara Product Implementation Plan
 
-> **Status:** P2 — Artifact import complete. Backend foundation + devnet persistence done.  
+> **Status:** P3 complete. Create/preview APIs implemented. On-chain execution deferred to P4.  
 > **Goal:** Turn the HumanRail grant implementation into a hosted product MVP.  
 > **Last updated:** 2026-05-02
 
@@ -118,29 +118,39 @@ Import the completed Mandara / HumanRail / Ika devnet lifecycle into the product
 
 ---
 
-## P3 — Organization / Agent / Policy / Request APIs
+## P3 — Product Create / Preview APIs
 
 ### Objective
-Implement the full Internal Dashboard API surface.
+Add product-level create and preview APIs so users can create Mandara records without manually editing the database. No on-chain execution yet.
 
-### Files Likely Changed
-- `apps/api/src/routes/orgs.ts` (new)
-- `apps/api/src/routes/agents.ts` (new)
-- `apps/api/src/routes/policies.ts` (new)
-- `apps/api/src/routes/wallets.ts` (new)
-- `apps/api/src/routes/signing-requests.ts` (new)
-- `apps/api/src/middleware/` — org scoping, role checks
-- `packages/core/` (new) — shared Zod schemas
+### Files Changed
+- `packages/db/prisma/schema.prisma` — optional `expiresAt`, new audit event types
+- `packages/core/package.json` — added `@noble/hashes`
+- `packages/core/src/schemas/agent.ts` — updated `CreateAgentSchema`
+- `packages/core/src/schemas/wallet.ts` (new) — `ImportIkaDwalletSchema`
+- `packages/core/src/schemas/policy.ts` — updated `CreatePolicySchema`
+- `packages/core/src/schemas/signingRequest.ts` — preview and create schemas
+- `packages/core/src/policy/evaluatePolicy.ts` (new) — shared policy evaluator
+- `apps/api/src/lib/orgContext.ts` (new) — organization context resolver
+- `apps/api/src/routes/agents.ts` — added POST
+- `apps/api/src/routes/wallets.ts` — added POST `/api/wallets/import`
+- `apps/api/src/routes/policies.ts` — added POST
+- `apps/api/src/routes/signingRequests.ts` — added POST `/preview` and POST `/`
+- `scripts/product-api-smoke.mjs` — expanded to 38 checks
 
 ### Acceptance Criteria
-- [ ] All Dashboard API endpoints return correct Zod-validated responses.
-- [ ] Org scoping enforced: users cannot read another org's agents.
-- [ ] Policy creation submits on-chain transaction and stores PDA in DB.
-- [ ] Signing request creation queues a BullMQ job.
+- [x] `POST /api/agents` creates agents with audit events.
+- [x] `POST /api/wallets/import` imports existing dWallet PDAs.
+- [x] `POST /api/policies` creates policies with keccak256 hash computation.
+- [x] `POST /api/signing-requests/preview` evaluates policy without creating records.
+- [x] `POST /api/signing-requests` creates records with `requested` or `policy_rejected` status.
+- [x] Policy evaluator validates chain, asset, recipient, amount, limits, expiry, agent status, wallet state.
+- [x] Org context resolver enforces membership-based access.
+- [x] Smoke test passes: 38/38 checks.
 
 ### Risks
-- On-chain transaction submission from the backend requires a funded Solana keypair.
-- Mitigation: use the existing deployer wallet or a dedicated Mandara service wallet.
+- Policy evaluation uses off-chain logic only. On-chain Guard may still reject for reasons not captured here.
+- Mitigation: P4 workers will validate against on-chain state before submission.
 
 ---
 

@@ -18,12 +18,10 @@ export const AgentSchema = z.object({
 
 export type Agent = z.infer<typeof AgentSchema>;
 
-export const CreateAgentSchema = AgentSchema.pick({
-  name: true,
-  description: true,
-}).extend({
-  orgId: z.string().cuid2(),
-  onChainAgentPda: z.string().optional(),
+export const CreateAgentSchema = z.object({
+  organizationId: z.string().cuid2().optional(),
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional(),
 });
 
 export type CreateAgentInput = z.infer<typeof CreateAgentSchema>;

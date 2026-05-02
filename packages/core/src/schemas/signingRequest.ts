@@ -35,19 +35,22 @@ export const SigningRequestSchema = z.object({
 
 export type SigningRequest = z.infer<typeof SigningRequestSchema>;
 
-export const CreateSigningRequestSchema = SigningRequestSchema.pick({
-  messageDigest: true,
-  messageMetadataDigest: true,
-  destinationChainId: true,
-  asset: true,
-  recipient: true,
-  amount: true,
-  signatureScheme: true,
-}).extend({
-  orgId: z.string().cuid2(),
+export const PreviewSigningRequestSchema = z.object({
+  organizationId: z.string().cuid2().optional(),
+  agentId: z.string().cuid2(),
   policyId: z.string().cuid2(),
+  destinationChainId: z.number().int().positive(),
+  asset: z.string().min(1).max(32),
+  recipient: z.string().min(1).max(128),
+  amount: z.string().regex(/^\d+$/),
+  message: z.string().min(1).max(4096),
 });
 
-export type CreateSigningRequestInput = z.infer<
-  typeof CreateSigningRequestSchema
->;
+export type PreviewSigningRequestInput = z.infer<typeof PreviewSigningRequestSchema>;
+
+export const CreateSigningRequestSchema = PreviewSigningRequestSchema.extend({
+  persistIfRejected: z.boolean().optional(),
+});
+
+export type CreateSigningRequestInput = z.infer<typeof CreateSigningRequestSchema>;
+

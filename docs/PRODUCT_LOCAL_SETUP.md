@@ -1,7 +1,7 @@
 # Mandara Product Local Setup
 
 > Setup guide for running the Mandara Cloud backend locally.  
-> **Phase:** P1 — Backend API + Prisma DB foundation.  
+> **Phase:** P3 — Create/preview APIs complete.  
 > **Last updated:** 2026-05-02
 
 ---
@@ -132,18 +132,80 @@ curl -X POST http://localhost:4000/api/orgs \
   -d '{"name": "Test Org", "slug": "test-org"}'
 ```
 
-### List organizations
+### Create an agent
 
 ```bash
-curl http://localhost:4000/api/orgs \
-  -H "x-mandara-dev-user: dev@local"
+curl -X POST http://localhost:4000/api/agents \
+  -H "Content-Type: application/json" \
+  -H "x-mandara-dev-user: dev@local" \
+  -d '{"name": "My Agent", "description": "Treasury bot"}'
 ```
 
-### List audit events
+### Import a wallet
 
 ```bash
-curl "http://localhost:4000/api/audit-events?orgId=<ORG_ID>" \
-  -H "x-mandara-dev-user: dev@local"
+curl -X POST http://localhost:4000/api/wallets/import \
+  -H "Content-Type: application/json" \
+  -H "x-mandara-dev-user: dev@local" \
+  -d '{
+    "name": "Base Wallet",
+    "dwalletPda": "A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp",
+    "curve": "Secp256k1",
+    "signingPublicKey": "02e2d5f53b1abc0451dfcbfc5a32421fa6cdfb7c6cbfbf7f84a3e6bb177cb0aa5d"
+  }'
+```
+
+### Create a policy
+
+```bash
+curl -X POST http://localhost:4000/api/policies \
+  -H "Content-Type: application/json" \
+  -H "x-mandara-dev-user: dev@local" \
+  -d '{
+    "agentId": "<AGENT_ID>",
+    "ikaDwalletId": "<WALLET_ID>",
+    "name": "Base Sepolia USDC",
+    "chainId": 84532,
+    "asset": "USDC:BASE_SEPOLIA",
+    "recipient": "0x1111111111111111111111111111111111111111",
+    "perTxLimit": "100000000",
+    "dailyLimit": "500000000",
+    "totalLimit": "1000000000"
+  }'
+```
+
+### Preview a signing request
+
+```bash
+curl -X POST http://localhost:4000/api/signing-requests/preview \
+  -H "Content-Type: application/json" \
+  -H "x-mandara-dev-user: dev@local" \
+  -d '{
+    "agentId": "<AGENT_ID>",
+    "policyId": "<POLICY_ID>",
+    "destinationChainId": 84532,
+    "asset": "USDC:BASE_SEPOLIA",
+    "recipient": "0x1111111111111111111111111111111111111111",
+    "amount": "42000000",
+    "message": "Transfer 42 USDC to treasury"
+  }'
+```
+
+### Create a signing request
+
+```bash
+curl -X POST http://localhost:4000/api/signing-requests \
+  -H "Content-Type: application/json" \
+  -H "x-mandara-dev-user: dev@local" \
+  -d '{
+    "agentId": "<AGENT_ID>",
+    "policyId": "<POLICY_ID>",
+    "destinationChainId": 84532,
+    "asset": "USDC:BASE_SEPOLIA",
+    "recipient": "0x1111111111111111111111111111111111111111",
+    "amount": "42000000",
+    "message": "Transfer 42 USDC to treasury"
+  }'
 ```
 
 ---
@@ -157,11 +219,14 @@ npm run product:api:smoke
 ```
 
 This verifies:
-- `/health`
-- `/version`
-- `/ready`
+- `/health`, `/version`, `/ready`
 - `POST /api/orgs`
 - `GET /api/orgs`
+- `POST /api/agents`
+- `POST /api/wallets/import`
+- `POST /api/policies`
+- `POST /api/signing-requests/preview` (allowed + rejected)
+- `POST /api/signing-requests` (allowed + rejected with persist)
 - `GET /api/audit-events`
 
 ---
@@ -192,13 +257,14 @@ docker compose down -v
 
 ---
 
-## Known Limitations (P1)
+## Known Limitations (P3)
 
 - **No production authentication.** Dev auth uses `x-mandara-dev-user` header. Do not deploy to production without replacing with Clerk/Supabase Auth.
-- **No Ika mutations.** The API does not yet create dWallets or submit signing requests on-chain. That arrives in P4.
+- **No Ika mutations from the API.** The API does not yet create dWallets or submit signing requests on-chain. That arrives in P4.
 - **No worker jobs.** Redis is started but BullMQ is not wired yet.
 - **Devnet only.** All on-chain interactions target Solana devnet and Ika pre-alpha.
 - **Ika pre-alpha disclaimer.** The mock signer is not production MPC custody.
+- **Policy evaluation is off-chain only.** `POST /api/signing-requests` creates a DB record; actual Guard CPI and Ika signing happen in P4 workers.
 
 ---
 
@@ -211,6 +277,7 @@ docker compose down -v
 | `Cannot find module '@mandara/db'` | Run `npm run product:db:generate` |
 | `Database connection error` | Ensure Docker is running and `npm run product:docker:up` succeeded |
 | `401 Unauthorized` | Add `x-mandara-dev-user: dev@local` header to requests |
+| `400 ORG_AMBIGUOUS` | Provide `organizationId` in the request body, or ensure the user belongs to exactly one org |
 
 ---
 

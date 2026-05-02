@@ -1,6 +1,6 @@
 # Mandara Product API Design
 
-> **Status:** P0 draft. API contracts for the Mandara hosted product.  
+> **Status:** P3 complete. Create/preview APIs implemented. On-chain execution deferred to P4.  
 > **Validation:** Zod  
 > **Auth:** Cookie/session for dashboard API; API key (Bearer) for agent API.  
 > **Last updated:** 2026-05-02
@@ -22,7 +22,7 @@ Both are served from the same Fastify backend. The Agent API is namespaced under
 
 | Environment | URL |
 |-------------|-----|
-| Local | `http://localhost:3001` |
+| Local | `http://localhost:4000` |
 | Devnet beta | `https://api.devnet.mandara.humanrail.io` |
 | Future production | `https://api.mandara.humanrail.io` |
 
@@ -30,11 +30,11 @@ Both are served from the same Fastify backend. The Agent API is namespaced under
 
 ## Authentication
 
-### Dashboard API
+### Dashboard API (P3)
 
-- Cookie-based session (HTTPOnly, Secure, SameSite=strict).
-- Set by Clerk/Supabase Auth callback.
-- Middleware resolves `req.user` from session.
+- Dev auth via `x-mandara-dev-user` header in development.
+- Defaults to `dev@local` if header omitted.
+- Production will use cookie-based session (Clerk/Supabase Auth).
 
 ### Agent API
 
@@ -69,7 +69,7 @@ Common codes:
 | `NOT_FOUND` | 404 | Resource does not exist |
 | `VALIDATION_ERROR` | 400 | Zod schema violation |
 | `RATE_LIMITED` | 429 | Too many requests |
-| `POLICY_REJECTED` | 422 | On-chain Guard rejected the request |
+| `POLICY_REJECTED` | 422 | Policy rejected the request (preview or create without persist) |
 | `IKA_ERROR` | 502 | Ika network or gRPC failure |
 
 ---
@@ -152,11 +152,9 @@ Register a new agent.
 **Body (Zod):**
 ```ts
 z.object({
-  orgId: z.string(),
+  organizationId: z.string().cuid2().optional(),
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  // Optional: link to an existing on-chain agent PDA
-  onChainAgentPda: z.string().optional(),
 })
 ```
 
@@ -187,22 +185,34 @@ List Ika dWallets for the organization.
 }
 ```
 
-#### `POST /api/wallets/ika`
+#### `POST /api/wallets/import`
 
-Create or connect an Ika dWallet.
+Import an existing Ika dWallet PDA into the product database.
 
 **Body (Zod):**
 ```ts
 z.object({
-  orgId: z.string(),
-  name: z.string().optional(),
-  // If provided, link an existing on-chain dWallet
-  onChainPda: z.string().optional(),
-  // If omitted, a DKG job is queued
+  organizationId: z.string().cuid2().optional(),
+  name: z.string().min(1).max(100).optional(),
+  dwalletPda: z.string().min(32).max(44),
+  signingPublicKey: z.string().optional(),
+  curve: z.enum(["Secp256k1", "Secp256r1", "Curve25519", "Ristretto"]),
+  authority: z.string().optional(),
+  state: z.enum(["DKGInProgress", "Active", "Frozen"]).default("Active"),
+  ikaProgramId: z.string().optional(),
+  guardCpiAuthority: z.string().optional(),
+  authorityTransferSignature: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
 })
 ```
 
-**Response:** 202 Accepted + job ID (if DKG queued) or 201 + wallet object (if linked).
+**Behavior:**
+- Upserts by `dwalletPda` (onChainPda).
+- No on-chain verification yet (P4).
+- Stores provided values and marks `metadata.source = imported`.
+- Default `ikaProgramId` and `guardCpiAuthority` use known devnet values if not provided.
+
+**Response:** 201 + wallet object.
 
 ---
 
@@ -239,24 +249,30 @@ Create a new GuardedDwallet policy.
 **Body (Zod):**
 ```ts
 z.object({
-  orgId: z.string(),
-  agentId: z.string(),
-  walletId: z.string(),
-  name: z.string().optional(),
-  allowedChainId: z.number().int().positive(),
-  allowedAsset: z.string(), // e.g., "USDC"
-  allowedRecipient: z.string(), // e.g., "0x1111..."
-  perTxLimit: z.string().regex(/^\d+$/), // BigInt as string
+  organizationId: z.string().cuid2().optional(),
+  agentId: z.string().cuid2(),
+  ikaDwalletId: z.string().cuid2(),
+  name: z.string().min(1).max(100).optional(),
+  chainId: z.number().int().positive(),
+  asset: z.string().min(1).max(32),
+  recipient: z.string().min(1).max(128),
+  perTxLimit: z.string().regex(/^\d+$/),
   dailyLimit: z.string().regex(/^\d+$/),
-  totalLimit: z.string().regex(/^\d+$/).optional().default("0"),
-  expiresAt: z.string().datetime(),
+  totalLimit: z.string().regex(/^\d+$/).optional(),
+  expiresAt: z.string().datetime().optional(),
 })
 ```
 
+**Validation rules:**
+- `perTxLimit > 0`
+- `dailyLimit > 0`
+- `perTxLimit <= dailyLimit`
+- If `totalLimit` provided and `> 0`: `dailyLimit <= totalLimit`
+
 **Side effects:**
 - Computes `allowedAssetHash` and `allowedRecipientHash` via keccak256.
-- Builds and submits `initialize_guarded_dwallet` or `initialize_guarded_dwallet_demo` transaction.
-- Stores resulting PDA in DB.
+- `guardedDwalletPda` remains `null` until on-chain policy is created (P4).
+- Records audit event `guarded_policy_created`.
 
 **Response:** 201 + policy object.
 
@@ -275,26 +291,126 @@ List signing requests for the organization.
 
 **Response:** Paginated list of signing request objects.
 
-#### `POST /api/signing-requests`
+#### `GET /api/signing-requests/:id`
 
-Dashboard-initiated signing request (principal signs directly).
+Get a single signing request with relations.
+
+**Response:**
+```json
+{
+  "data": {
+    "id": "req_789",
+    "requestId": "f655534b...",
+    "status": "signed",
+    "messageDigest": "0x5c125f25...",
+    "signatureHex": "0xca5c2643...",
+    "signedAt": "2026-05-02T12:00:05Z",
+    "onChainMessageApprovalPda": "Csrk5KVNrsBzgA7GE9CN1vMEFqzcNsVNoVZ9DBGgZ1MM"
+  }
+}
+```
+
+#### `POST /api/signing-requests/preview`
+
+Preview whether a signing request would pass policy without creating a record.
 
 **Body (Zod):**
 ```ts
 z.object({
-  orgId: z.string(),
-  policyId: z.string(),
-  messageDigest: z.string().regex(/^0x[a-fA-F0-9]{64}$/),
-  messageMetadataDigest: z.string().regex(/^0x[a-fA-F0-9]{64}$/).optional().default("0x" + "0".repeat(64)),
+  organizationId: z.string().cuid2().optional(),
+  agentId: z.string().cuid2(),
+  policyId: z.string().cuid2(),
   destinationChainId: z.number().int().positive(),
-  asset: z.string(),
-  recipient: z.string(),
+  asset: z.string().min(1).max(32),
+  recipient: z.string().min(1).max(128),
   amount: z.string().regex(/^\d+$/),
-  signatureScheme: z.enum(["EcdsaKeccak256", "EcdsaDoubleSha256", "EddsaSha512"]),
+  message: z.string().min(1).max(4096),
 })
 ```
 
-**Response:** 202 Accepted + signing request object with `status: pending`.
+**Response (allowed):**
+```json
+{
+  "data": {
+    "allowed": true,
+    "reason": "Request passes all policy checks. Awaiting worker execution in P4.",
+    "computed": {
+      "assetHash": "d077eb814e4c6cbcfd7be7a842579801e25a2e7966242efb0497d724b4707593",
+      "recipientHash": "efda2c2822100aaf94fb77c3765831ce37fc3c02cbc11603dd6ffa9c0d25ec55",
+      "messageDigest": "5c125f25f32ea5fa95ade18eabba8299fb1497f53fcac4799e4b5eefa7fdf46b"
+    },
+    "limits": {
+      "perTxLimit": "100000000",
+      "dailyLimit": "500000000",
+      "totalLimit": "1000000000",
+      "requestedAmount": "42000000"
+    }
+  }
+}
+```
+
+**Response (rejected):**
+```json
+{
+  "data": {
+    "allowed": false,
+    "reason": "Amount 99900000000 exceeds per-tx limit 100000000",
+    "rejectionCode": "PER_TX_LIMIT_EXCEEDED",
+    "computed": { ... },
+    "limits": { ... }
+  }
+}
+```
+
+#### `POST /api/signing-requests`
+
+Create a signing request record.
+
+**Body (Zod):**
+Same as preview plus optional:
+```ts
+z.object({
+  persistIfRejected: z.boolean().optional(),
+})
+```
+
+**Behavior:**
+1. Validates body.
+2. Resolves organization context.
+3. Fetches policy with agent and wallet.
+4. Runs `evaluateSigningRequest`.
+5. If **allowed**:
+   - Creates `SigningRequest` with `status: requested`.
+   - Records audit event `signing_request_created`.
+   - Returns 201 + `{ signingRequest, evaluation, nextStep }`.
+6. If **rejected** and `persistIfRejected = true`:
+   - Creates `SigningRequest` with `status: policy_rejected`.
+   - Records audit event `signing_request_policy_rejected`.
+   - Returns 201 + `{ signingRequest, evaluation }`.
+7. If **rejected** and `persistIfRejected` is false/missing:
+   - Does not create record.
+   - Records preview audit event.
+   - Returns 422 + structured evaluation.
+
+**No on-chain execution in P3.** Actual Ika/Solana transactions are deferred to P4 workers.
+
+**Response (allowed):**
+```json
+{
+  "data": {
+    "signingRequest": {
+      "id": "req_789",
+      "requestId": "a1b2c3...",
+      "status": "requested",
+      "destinationChainId": 84532,
+      "amount": "42000000",
+      "createdAt": "2026-05-02T12:00:00Z"
+    },
+    "evaluation": { ... },
+    "nextStep": "Awaiting worker execution in P4"
+  }
+}
+```
 
 ---
 

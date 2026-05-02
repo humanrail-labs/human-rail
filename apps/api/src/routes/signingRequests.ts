@@ -1,7 +1,16 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "@mandara/db";
+import { Prisma } from "@prisma/client";
+import {
+  PreviewSigningRequestSchema,
+  CreateSigningRequestSchema,
+  evaluateSigningRequest,
+  PolicyRejectionCode,
+} from "@mandara/core";
 import { success, errorResponse } from "../lib/response.js";
+import { recordAuditEvent } from "../lib/audit.js";
+import { resolveOrganizationContext } from "../lib/orgContext.js";
 
 const ListSigningRequestsQuery = z.object({
   orgId: z.string().cuid2().optional(),
@@ -76,7 +85,245 @@ export default async function signingRequestRoutes(fastify: FastifyInstance) {
     return success(signingRequest);
   });
 
+  fastify.post("/api/signing-requests/preview", async (request, reply) => {
+    const user = request.devUser;
+    if (!user) {
+      return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
+    }
+
+    const parse = PreviewSigningRequestSchema.safeParse(request.body);
+    if (!parse.success) {
+      return reply.status(400).send(
+        errorResponse(
+          "VALIDATION_ERROR",
+          parse.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")
+        )
+      );
+    }
+
+    const {
+      organizationId: explicitOrgId,
+      agentId,
+      policyId,
+      destinationChainId,
+      asset,
+      recipient,
+      amount,
+      message,
+    } = parse.data;
+
+    const { organizationId } = await resolveOrganizationContext(request, explicitOrgId);
+
+    const policy = await prisma.guardedPolicy.findFirst({
+      where: { id: policyId, organizationId, agentId },
+      include: {
+        agent: { select: { status: true } },
+        ikaDwallet: { select: { state: true } },
+      },
+    });
+
+    if (!policy) {
+      return reply.status(404).send(errorResponse("NOT_FOUND", "Policy not found for this agent and organization"));
+    }
+
+    const evaluation = evaluateSigningRequest(
+      {
+        ...policy,
+        perTxLimit: policy.perTxLimit.toString(),
+        dailyLimit: policy.dailyLimit.toString(),
+        totalLimit: policy.totalLimit.toString(),
+      },
+      {
+        destinationChainId,
+        asset,
+        recipient,
+        amount,
+        message,
+      }
+    );
+
+    await recordAuditEvent({
+      organizationId,
+      actorType: "user",
+      actorId: user.id,
+      eventType: "signing_request_previewed",
+      resourceType: "policy",
+      resourceId: policy.id,
+      summary: `Previewed signing request: ${evaluation.allowed ? "allowed" : "rejected"}`,
+      metadata: { allowed: evaluation.allowed, rejectionCode: evaluation.rejectionCode },
+    });
+
+    return success(evaluation);
+  });
+
   fastify.post("/api/signing-requests", async (request, reply) => {
-    return reply.status(501).send(errorResponse("NOT_IMPLEMENTED", "Signing request creation not implemented in P2"));
+    const user = request.devUser;
+    if (!user) {
+      return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
+    }
+
+    const parse = CreateSigningRequestSchema.safeParse(request.body);
+    if (!parse.success) {
+      return reply.status(400).send(
+        errorResponse(
+          "VALIDATION_ERROR",
+          parse.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")
+        )
+      );
+    }
+
+    const {
+      organizationId: explicitOrgId,
+      agentId,
+      policyId,
+      destinationChainId,
+      asset,
+      recipient,
+      amount,
+      message,
+      persistIfRejected,
+    } = parse.data;
+
+    const { organizationId } = await resolveOrganizationContext(request, explicitOrgId);
+
+    const policy = await prisma.guardedPolicy.findFirst({
+      where: { id: policyId, organizationId, agentId },
+      include: {
+        agent: { select: { status: true } },
+        ikaDwallet: { select: { state: true, id: true } },
+      },
+    });
+
+    if (!policy) {
+      return reply.status(404).send(errorResponse("NOT_FOUND", "Policy not found for this agent and organization"));
+    }
+
+    const evaluation = evaluateSigningRequest(
+      {
+        ...policy,
+        perTxLimit: policy.perTxLimit.toString(),
+        dailyLimit: policy.dailyLimit.toString(),
+        totalLimit: policy.totalLimit.toString(),
+      },
+      {
+        destinationChainId,
+        asset,
+        recipient,
+        amount,
+        message,
+      }
+    );
+
+    if (evaluation.allowed) {
+      const requestId = crypto.randomUUID().replace(/-/g, "");
+      const sigReq = await prisma.signingRequest.create({
+        data: {
+          organizationId,
+          agentId,
+          policyId,
+          ikaDwalletId: policy.ikaDwallet?.id ?? null,
+          requestId,
+          messageDigest: `0x${evaluation.computed.messageDigest}`,
+          messageMetadataDigest: "0x0000000000000000000000000000000000000000000000000000000000000000",
+          destinationChainId,
+          asset: asset.trim().toUpperCase(),
+          recipient: recipient.trim().toLowerCase(),
+          assetHash: evaluation.computed.assetHash,
+          recipientHash: evaluation.computed.recipientHash,
+          amount,
+          message,
+          signatureScheme: "EcdsaKeccak256",
+          status: "requested",
+          metadata: {
+            evaluation,
+            nextStep: "Awaiting worker execution in P4",
+          } as unknown as Prisma.JsonObject,
+        },
+      });
+
+      await recordAuditEvent({
+        organizationId,
+        actorType: "user",
+        actorId: user.id,
+        eventType: "signing_request_created",
+        resourceType: "signing_request",
+        resourceId: sigReq.id,
+        summary: `Created signing request ${requestId}`,
+        metadata: { requestId, allowed: true },
+      });
+
+      return reply.status(201).send(
+        success({
+          signingRequest: sigReq,
+          evaluation,
+          nextStep: "Awaiting worker execution in P4",
+        })
+      );
+    }
+
+    // Rejected
+    if (persistIfRejected) {
+      const requestId = crypto.randomUUID().replace(/-/g, "");
+      const sigReq = await prisma.signingRequest.create({
+        data: {
+          organizationId,
+          agentId,
+          policyId,
+          ikaDwalletId: policy.ikaDwallet?.id ?? null,
+          requestId,
+          messageDigest: `0x${evaluation.computed.messageDigest}`,
+          messageMetadataDigest: "0x0000000000000000000000000000000000000000000000000000000000000000",
+          destinationChainId,
+          asset: asset.trim().toUpperCase(),
+          recipient: recipient.trim().toLowerCase(),
+          assetHash: evaluation.computed.assetHash,
+          recipientHash: evaluation.computed.recipientHash,
+          amount,
+          message,
+          signatureScheme: "EcdsaKeccak256",
+          status: "policy_rejected",
+          rejectionReason: evaluation.reason,
+          metadata: {
+            evaluation,
+          } as unknown as Prisma.JsonObject,
+        },
+      });
+
+      await recordAuditEvent({
+        organizationId,
+        actorType: "user",
+        actorId: user.id,
+        eventType: "signing_request_policy_rejected",
+        resourceType: "signing_request",
+        resourceId: sigReq.id,
+        summary: `Signing request ${requestId} rejected by policy`,
+        metadata: { requestId, rejectionCode: evaluation.rejectionCode },
+      });
+
+      return reply.status(201).send(
+        success({
+          signingRequest: sigReq,
+          evaluation,
+        })
+      );
+    }
+
+    // Not persisting — record preview audit and return 422
+    await recordAuditEvent({
+      organizationId,
+      actorType: "user",
+      actorId: user.id,
+      eventType: "signing_request_previewed",
+      resourceType: "policy",
+      resourceId: policy.id,
+      summary: `Signing request rejected by policy (not persisted)`,
+      metadata: { allowed: false, rejectionCode: evaluation.rejectionCode },
+    });
+
+    return reply.status(422).send(
+      errorResponse("POLICY_REJECTED", evaluation.reason, {
+        evaluation,
+      })
+    );
   });
 }

@@ -23,7 +23,7 @@ export const GuardedPolicySchema = z.object({
   totalLimit: z.string().regex(/^\d+$/).optional().default("0"),
   dailySpent: z.string().regex(/^\d+$/).default("0"),
   totalSpent: z.string().regex(/^\d+$/).default("0"),
-  expiresAt: z.string().datetime(),
+  expiresAt: z.string().datetime().optional(),
   status: PolicyStatus.default("active"),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -31,19 +31,18 @@ export const GuardedPolicySchema = z.object({
 
 export type GuardedPolicy = z.infer<typeof GuardedPolicySchema>;
 
-export const CreatePolicySchema = GuardedPolicySchema.pick({
-  allowedChainId: true,
-  allowedAsset: true,
-  allowedRecipient: true,
-  perTxLimit: true,
-  dailyLimit: true,
-  totalLimit: true,
-  expiresAt: true,
-}).extend({
-  orgId: z.string().cuid2(),
+export const CreatePolicySchema = z.object({
+  organizationId: z.string().cuid2().optional(),
   agentId: z.string().cuid2(),
-  walletId: z.string().cuid2(),
-  name: z.string().optional(),
+  ikaDwalletId: z.string().cuid2(),
+  name: z.string().min(1).max(100).optional(),
+  chainId: z.number().int().positive(),
+  asset: z.string().min(1).max(32),
+  recipient: z.string().min(1).max(128),
+  perTxLimit: z.string().regex(/^\d+$/),
+  dailyLimit: z.string().regex(/^\d+$/),
+  totalLimit: z.string().regex(/^\d+$/).optional(),
+  expiresAt: z.string().datetime().optional(),
 });
 
 export type CreatePolicyInput = z.infer<typeof CreatePolicySchema>;

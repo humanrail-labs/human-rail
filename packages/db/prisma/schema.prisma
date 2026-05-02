@@ -62,6 +62,10 @@ enum AuditEventType {
   guarded_policy_imported
   signing_request_imported
   message_approval_imported
+  guarded_policy_created
+  signing_request_previewed
+  signing_request_created
+  signing_request_policy_rejected
   system
 }
 
@@ -212,7 +216,7 @@ model GuardedPolicy {
   dailySpent           Decimal      @default(0) @db.Decimal(78, 0)
   totalSpent           Decimal      @default(0) @db.Decimal(78, 0)
   lastSpendDay         Int?
-  expiresAt            DateTime
+  expiresAt            DateTime?
   status               PolicyStatus @default(active)
   frozenAt             DateTime?
   metadata             Json?
