@@ -187,7 +187,7 @@ async function testLiveEndToEnd() {
       dwalletPda: dwalletArtifact.dwallet_pda,
       curve: dwalletArtifact.curve ?? "Secp256k1",
       signingPublicKey: dwalletArtifact.dwallet_signing_public_key_hex,
-      state: "active",
+      state: dwalletArtifact.state ?? "Active",
       authority: dwalletArtifact.authority,
     }),
   });

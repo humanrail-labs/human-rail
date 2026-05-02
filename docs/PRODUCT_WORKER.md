@@ -1,7 +1,7 @@
 # Mandara Product Worker
 
 > Background worker infrastructure for executing signing requests.  
-> **Phase:** P4B — Live devnet execution with Guard CPI + Ika signing complete.  
+> **Phase:** P4C — Live devnet execution verified end-to-end.  
 > **Queue:** BullMQ + Redis  
 > **Last updated:** 2026-05-02
 

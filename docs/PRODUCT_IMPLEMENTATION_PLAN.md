@@ -193,8 +193,8 @@ Enable actual Guard CPI and Ika signing in live-devnet mode.
 
 ### Files Likely Changed
 - `apps/worker/src/jobs/signingRequestJob.ts` — add live execution branch
-- `apps/worker/src/services/solana.ts` (new) — transaction builder
-- `apps/worker/src/services/ika.ts` (new) — gRPC client wrapper
+- `apps/worker/src/services/liveDevnetExecution.ts` (new) — full live execution service
+- `apps/worker/src/solana/` (new) — PDA derivations, instruction builders, parsers
 
 ### Acceptance Criteria
 - [x] Worker submits `approve_guarded_message` on-chain when `MANDARA_ENABLE_LIVE_EXECUTION=true`.
@@ -206,6 +206,38 @@ Enable actual Guard CPI and Ika signing in live-devnet mode.
 ### Risks
 - Ika gRPC is unstable in pre-alpha. Workers must handle timeouts and devnet wipes gracefully.
 - Mitigation: wrap every gRPC call in timeout + circuit breaker logic.
+
+---
+
+## P4C — Verify Live End-to-End
+
+### Objective
+Run and verify one real end-to-end product-worker live devnet execution.
+
+### Files Changed
+- `scripts/product-live-smoke.mjs` — hardened for live e2e (fixed `state` case)
+- `scripts/product-worker-live-direct.ts` (new) — direct live execution script
+- `docs/PRODUCT_LIVE_EXECUTION_PROOF.md` (new) — execution proof document
+- `docs/PRODUCT_WORKER.md` — updated for P4B/P4C completion
+- `docs/PRODUCT_LIVE_EXECUTION.md` — updated with proof and troubleshooting
+
+### Acceptance Criteria
+- [x] New product SigningRequest created.
+- [x] Worker processes in live-devnet mode.
+- [x] Worker sends `approve_guarded_message` on-chain.
+- [x] Ika MessageApproval created and signed.
+- [x] DB updated to `signed` with signature hex/base64.
+- [x] API execution endpoint returns final signature.
+- [x] Audit events record full lifecycle.
+- [x] Unique message used to avoid PDA collision.
+- [x] Devnet only; no production custody language.
+
+### Proof
+See [`docs/PRODUCT_LIVE_EXECUTION_PROOF.md`](PRODUCT_LIVE_EXECUTION_PROOF.md):
+- Tx: `2o8RbzEMFAUMyTUtZSyhihtLu3eUU7eK6nJTu4SGPTbEcZ15VGLRRR62iBbh5KWYwGA84kntGxr2jLCDP3SPJuVu`
+- GuardSigningRequest PDA: `BgYUiMvdXHJEF1mT1tFYZ6HXPB9APrkGohCG4zivYQnu`
+- MessageApproval PDA: `B7LedZy8bvkdgZUaD9km29BtBwHkPuoP3sWmsQ8YXVDz`
+- Signature (hex): `8a4c890ad6b0b4744da2b3baa559928b193aae9872802e870669db511a3fc2ae73e299318377df7415bbf0af3554a50b1535d2411c3389f3763a86004d5f0b32`
 
 ---
 
