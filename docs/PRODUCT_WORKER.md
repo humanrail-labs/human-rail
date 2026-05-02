@@ -1,7 +1,7 @@
 # Mandara Product Worker
 
 > Background worker infrastructure for executing signing requests.  
-> **Phase:** P4A — Worker foundation with dry-run mode. Live execution deferred to P4B.  
+> **Phase:** P4B — Live devnet execution with Guard CPI + Ika signing complete.  
 > **Queue:** BullMQ + Redis  
 > **Last updated:** 2026-05-02
 
@@ -69,16 +69,18 @@
 ### `live-devnet`
 
 - **Disabled by default** even when mode is set to `live-devnet`.
-- Requires `MANDARA_ENABLE_LIVE_EXECUTION=true`.
-- In P4A, live execution is **not implemented**.
-- If enabled, the worker returns:
-  ```json
-  {
-    "mode": "live-devnet",
-    "wouldExecute": false,
-    "reason": "Live execution not implemented until P4B"
-  }
-  ```
+- Requires `MANDARA_ENABLE_LIVE_EXECUTION=true` and `MANDARA_WORKER_MODE=live-devnet`.
+- When enabled, performs the full on-chain execution flow:
+  1. Loads service wallet and dWallet artifact
+  2. Verifies dWallet authority == Guard CPI PDA on-chain
+  3. Builds and sends `approve_guarded_message` CPI transaction
+  4. Verifies `GuardSigningRequest` is approved on-chain
+  5. Verifies `MessageApproval` is pending on-chain
+  6. Spawns Rust CLI (`ika-dkg-cli sign-approved-message`) via gRPC
+  7. Polls `MessageApproval` for signature (up to 3 minutes)
+  8. Updates DB with signature and final `signed` status
+- Status transitions: `worker_processing` → `guard_approved` → `ika_pending` → `signed`
+- If any step fails, status becomes `failed` with error metadata.
 
 ---
 
@@ -88,8 +90,14 @@
 |------|---------|-------------|
 | `MANDARA_WORKER_MODE` | `dry-run` | Controls whether worker simulates or attempts live execution |
 | `MANDARA_ENABLE_LIVE_EXECUTION` | `false` | Explicit flag required before any on-chain mutation |
+| `MANDARA_SERVICE_WALLET_PATH` | `""` | Path to devnet keypair; required for live mode |
 
-Even if both gates are open, P4A worker refuses live execution and logs a clear message. P4B will implement the actual Guard CPI and Ika signing flow.
+Even if both gates are open, the worker:
+- Verifies dWallet authority == Guard CPI PDA before executing
+- Checks service wallet has sufficient SOL for fees
+- Uses `spawn()` with fixed CLI args (no shell interpolation)
+- Cleans up `.local-worker/` temp artifacts after execution
+- Never commits temporary artifacts (`.local-worker/` is gitignored)
 
 ---
 
@@ -108,13 +116,16 @@ requested
     │
     ├──► requested        (dry-run completes, metadata.workerDryRun=true)
     │
-    └──► guard_approved   (P4B: after on-chain Guard CPI)
+    └──► guard_approved   (live-devnet: after on-chain Guard CPI)
               │
               ▼
-          ika_pending     (P4B: after Ika sign request)
+          ika_pending     (live-devnet: after Ika sign request)
               │
               ▼
-          signed          (P4B: after signature committed)
+          signed          (live-devnet: after signature committed)
+              │
+              ▼
+          failed          (if live execution errors)
 ```
 
 Terminal states: `signed`, `policy_rejected`, `failed`.
@@ -144,7 +155,7 @@ npm run product:worker:build
 npm run product:worker:start
 ```
 
-### Smoke Test
+### Smoke Tests
 
 ```bash
 # Ensure API, DB, and Redis are running
@@ -155,6 +166,10 @@ npm run product:api:start
 
 # Run worker smoke test (processes job directly, no long-running worker needed)
 npm run product:worker:smoke
+
+# Run live devnet smoke test (module load + graceful failure tests)
+# Set LIVE_SMOKETEST=1 to also run the full end-to-end live test
+npm run product:worker:live-smoke
 ```
 
 ---
@@ -168,6 +183,7 @@ npm run product:worker:smoke
 | `MANDARA_ENV` | `development` | Runtime environment |
 | `MANDARA_WORKER_MODE` | `dry-run` | Worker execution mode |
 | `MANDARA_ENABLE_LIVE_EXECUTION` | `false` | Safety gate for live on-chain execution |
+| `MANDARA_SERVICE_WALLET_PATH` | `""` | Devnet keypair path for live transactions |
 | `MANDARA_SOLANA_RPC_URL` | `https://api.devnet.solana.com` | Solana RPC endpoint |
 | `MANDARA_IKA_GRPC_URL` | `https://pre-alpha-dev-1.ika.ika-network.net:443` | Ika gRPC endpoint |
 
@@ -182,7 +198,10 @@ npm run product:worker:smoke
 | `signing_request_dry_run_completed` | worker | Dry-run simulation finishes |
 | `signing_request_execution_failed` | worker | Job fails after max retries |
 | `signing_request_worker_skipped` | worker | Worker skips terminal-state request |
-| `signing_request_status_updated` | worker | Generic status change (future) |
+| `signing_request_status_updated` | worker | Generic status change |
+| `guard_message_approved` | worker | Guard CPI transaction confirmed |
+| `ika_message_approval_created` | worker | Ika MessageApproval account verified |
+| `ika_signature_committed` | worker | Ika signature committed on-chain |
 
 ---
 
@@ -191,25 +210,28 @@ npm run product:worker:smoke
 - Enqueueing the same signing request multiple times is allowed (BullMQ creates separate jobs).
 - The worker skips processing if the signing request is already in a terminal state (`signed`, `policy_rejected`, `failed`).
 - Dry-run does not mutate on-chain state, so it is inherently safe to re-run.
+- Live execution checks if `MessageApproval` is already `Signed` before sending the Guard CPI, and skips to polling if `Pending` + `GuardSigningRequest` approved.
 
 ---
 
-## P4A Limitations
+## P4B Live Execution Details
 
-- **No live Solana transaction submission.** Guard CPI is not called.
-- **No Ika gRPC signing.** Ika mock signer is not invoked.
-- **No polling loop.** Worker processes jobs as they arrive; no continuous on-chain polling yet.
-- **Devnet only.** All infrastructure targets Ika pre-alpha devnet.
+### Architecture
+1. **TypeScript:** Build and submit `approve_guarded_message` transaction
+2. **TypeScript:** Verify `GuardSigningRequest` + `MessageApproval` on-chain
+3. **TypeScript:** Write temporary request artifact to `.local-worker/`
+4. **Spawn:** Rust CLI (`ika-dkg-cli sign-approved-message`) with fixed args
+5. **TypeScript:** Poll `MessageApproval` for signature
+6. **TypeScript:** Update DB records and clean up temp artifact
 
----
+### Security
+- CLI is spawned with `spawn()` using an array of fixed arguments — no shell string interpolation.
+- The service wallet path, RPC URL, and gRPC URL are passed as discrete array elements.
+- Temporary artifacts are always deleted in a `finally` block.
+- `.local-worker/` is listed in `.gitignore` and must never be committed.
 
-## P4B Roadmap
-
-- Implement `approve_guarded_message` on-chain transaction in live-devnet mode.
-- Implement Ika gRPC sign request and polling.
-- Add `guard_approved` → `ika_pending` → `signed` status transitions.
-- Add on-chain PDA tracking (GuardSigningRequest, MessageApproval).
-- Add retry logic for Ika gRPC timeouts.
+### Pre-alpha Disclaimer
+Ika uses a single mock signer, not real MPC custody. All live execution targets Solana devnet only. Do not use mainnet keys or real assets.
 
 ---
 

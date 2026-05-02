@@ -42,7 +42,8 @@
     "product:worker:dev": "npm --prefix apps/worker run dev",
     "product:worker:build": "npm --prefix apps/worker run build",
     "product:worker:start": "npm --prefix apps/worker run start",
-    "product:worker:smoke": "node scripts/product-worker-smoke.mjs"
+    "product:worker:smoke": "node scripts/product-worker-smoke.mjs",
+    "product:worker:live-smoke": "node scripts/product-live-smoke.mjs"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

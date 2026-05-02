@@ -569,70 +569,81 @@ export async function executeLiveDevnetSigningRequest(
   fs.writeFileSync(requestArtifactPath, JSON.stringify(requestArtifact, null, 2));
   logger.info("Wrote request artifact", { path: requestArtifactPath });
 
-  // 11. Spawn Rust CLI for Ika sign
-  logger.info("Spawning Ika sign CLI...");
-  const cliResult = await runIkaSignCli(requestArtifactPath);
+  let signatureHex: string | undefined;
+  let signatureBase64: string | undefined;
+  let signatureLen: number | undefined;
 
-  if (cliResult.exitCode !== 0) {
-    logger.error("Ika sign CLI failed", {
-      exitCode: cliResult.exitCode,
-      stderr: cliResult.stderr.slice(0, 1000),
-    });
-    throw new Error(`Ika sign CLI exited with code ${cliResult.exitCode}: ${cliResult.stderr.slice(0, 500)}`);
-  }
-
-  logger.info("Ika sign CLI completed");
-
-  // 12. Poll MessageApproval for signature
-  logger.info("Polling MessageApproval for on-chain signature...");
-  const { signatureLen, signature } = await pollMessageApprovalSigned(
-    connection,
-    messageApprovalPda
-  );
-  logger.info("MessageApproval signed", { signatureLen });
-
-  const signatureHex = Buffer.from(signature).toString("hex");
-  const signatureBase64 = Buffer.from(signature).toString("base64");
-
-  // 13. Update DB
-  await prisma.messageApproval.updateMany({
-    where: { signingRequestId },
-    data: {
-      status: "signed",
-      signatureLength: signatureLen,
-      signatureHex,
-      signatureBase64,
-    },
-  });
-
-  await prisma.signingRequest.update({
-    where: { id: signingRequestId },
-    data: {
-      status: "signed",
-      onChainRequestPda: guardSigningRequestPda.toBase58(),
-      onChainMessageApprovalPda: messageApprovalPda.toBase58(),
-      approveTxSignature: approveTxSignature || null,
-      signatureHex,
-      signatureBase64,
-      signedAt: new Date(),
-    },
-  });
-
-  await recordAuditEvent({
-    organizationId,
-    actorType: "worker",
-    eventType: "ika_signature_committed",
-    resourceType: "signing_request",
-    resourceId: signingRequestId,
-    summary: `Ika signature committed for ${signingRequestId}`,
-    metadata: { signatureLen, messageApprovalPda: messageApprovalPda.toBase58() },
-  });
-
-  // Cleanup artifact
   try {
-    fs.unlinkSync(requestArtifactPath);
-  } catch {
-    // ignore cleanup errors
+    // 11. Spawn Rust CLI for Ika sign
+    logger.info("Spawning Ika sign CLI...");
+    const cliResult = await runIkaSignCli(requestArtifactPath);
+
+    if (cliResult.exitCode !== 0) {
+      logger.error("Ika sign CLI failed", {
+        exitCode: cliResult.exitCode,
+        stderr: cliResult.stderr.slice(0, 1000),
+      });
+      throw new Error(`Ika sign CLI exited with code ${cliResult.exitCode}: ${cliResult.stderr.slice(0, 500)}`);
+    }
+
+    logger.info("Ika sign CLI completed");
+
+    // 12. Poll MessageApproval for signature
+    logger.info("Polling MessageApproval for on-chain signature...");
+    const pollResult = await pollMessageApprovalSigned(
+      connection,
+      messageApprovalPda
+    );
+    signatureLen = pollResult.signatureLen;
+    const signature = pollResult.signature;
+    logger.info("MessageApproval signed", { signatureLen });
+
+    signatureHex = Buffer.from(signature).toString("hex");
+    signatureBase64 = Buffer.from(signature).toString("base64");
+
+    // 13. Update DB
+    await prisma.messageApproval.updateMany({
+      where: { signingRequestId },
+      data: {
+        status: "signed",
+        signatureLength: signatureLen,
+        signatureHex,
+        signatureBase64,
+      },
+    });
+
+    await prisma.signingRequest.update({
+      where: { id: signingRequestId },
+      data: {
+        status: "signed",
+        onChainRequestPda: guardSigningRequestPda.toBase58(),
+        onChainMessageApprovalPda: messageApprovalPda.toBase58(),
+        approveTxSignature: approveTxSignature || null,
+        signatureHex,
+        signatureBase64,
+        signedAt: new Date(),
+      },
+    });
+
+    await recordAuditEvent({
+      organizationId,
+      actorType: "worker",
+      eventType: "ika_signature_committed",
+      resourceType: "signing_request",
+      resourceId: signingRequestId,
+      summary: `Ika signature committed for ${signingRequestId}`,
+      metadata: { signatureLen, messageApprovalPda: messageApprovalPda.toBase58() },
+    });
+  } finally {
+    // Cleanup artifact — always run, even on failure
+    try {
+      if (fs.existsSync(requestArtifactPath)) {
+        fs.unlinkSync(requestArtifactPath);
+        logger.info("Cleaned up request artifact", { path: requestArtifactPath });
+      }
+    } catch {
+      // ignore cleanup errors
+    }
   }
 
   return {
@@ -641,9 +652,9 @@ export async function executeLiveDevnetSigningRequest(
     approveTxSignature: approveTxSignature || undefined,
     guardSigningRequestPda: guardSigningRequestPda.toBase58(),
     ikaMessageApprovalPda: messageApprovalPda.toBase58(),
-    signatureHex,
-    signatureBase64,
-    signatureLen,
+    signatureHex: signatureHex!,
+    signatureBase64: signatureBase64!,
+    signatureLen: signatureLen!,
   };
 }
 

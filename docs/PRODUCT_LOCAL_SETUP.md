@@ -274,10 +274,12 @@ docker compose down -v
 
 ---
 
-## Known Limitations (P4A)
+## Known Limitations
 
 - **No production authentication.** Dev auth uses `x-mandara-dev-user` header.
-- **No live on-chain execution.** Worker runs in `dry-run` mode by default. Live Guard CPI and Ika signing deferred to P4B.
+- **Dry-run is default.** Worker runs in `dry-run` mode by default. Live devnet execution requires explicit safety gates.
+- **Live execution is gated.** Requires `MANDARA_WORKER_MODE=live-devnet` AND `MANDARA_ENABLE_LIVE_EXECUTION=true`.
+- **Service wallet must be devnet-only.** Never use a mainnet keypair for live execution.
 - **Devnet only.** All on-chain interactions target Solana devnet and Ika pre-alpha.
 - **Ika pre-alpha disclaimer.** The mock signer is not production MPC custody.
 

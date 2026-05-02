@@ -1,6 +1,6 @@
 # Mandara Product Implementation Plan
 
-> **Status:** P4A complete. Worker foundation with dry-run mode implemented. Live on-chain execution deferred to P4B.  
+> **Status:** P4B complete. Worker supports dry-run (default) and live devnet execution with Guard CPI + Ika signing.  
 > **Goal:** Turn the HumanRail grant implementation into a hosted product MVP.  
 > **Last updated:** 2026-05-02
 
@@ -197,11 +197,11 @@ Enable actual Guard CPI and Ika signing in live-devnet mode.
 - `apps/worker/src/services/ika.ts` (new) — gRPC client wrapper
 
 ### Acceptance Criteria
-- [ ] Worker submits `approve_guarded_message` on-chain when `MANDARA_ENABLE_LIVE_EXECUTION=true`.
-- [ ] Worker polls for GuardSigningRequest and MessageApproval status.
-- [ ] Worker requests Ika signature via gRPC and polls for completion.
-- [ ] Status transitions: `guard_approved` → `ika_pending` → `signed`.
-- [ ] Failed jobs retry with exponential backoff (max 5 attempts).
+- [x] Worker submits `approve_guarded_message` on-chain when `MANDARA_ENABLE_LIVE_EXECUTION=true`.
+- [x] Worker polls for GuardSigningRequest and MessageApproval status.
+- [x] Worker requests Ika signature via gRPC and polls for completion.
+- [x] Status transitions: `guard_approved` → `ika_pending` → `signed`.
+- [x] Failed jobs retry with exponential backoff (max 5 attempts).
 
 ### Risks
 - Ika gRPC is unstable in pre-alpha. Workers must handle timeouts and devnet wipes gracefully.
