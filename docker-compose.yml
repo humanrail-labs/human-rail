@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: mandara-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: mandara
+      POSTGRES_PASSWORD: mandara
+      POSTGRES_DB: mandara_dev
+    volumes:
+      - mandara_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mandara -d mandara_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: mandara-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - mandara_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mandara_postgres_data:
+  mandara_redis_data:

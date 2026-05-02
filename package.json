@@ -2,6 +2,10 @@
   "name": "humanrail-demo",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -22,7 +26,18 @@
     "ika:sign-approved-message": "cargo run --manifest-path tools/ika-dkg-cli/Cargo.toml -- sign-approved-message --dwallet-artifact .local-ika/dwallet.json --request-artifact .local-ika/signing-request.json",
     "ika:verify-message-approval": "cargo run --manifest-path tools/ika-dkg-cli/Cargo.toml -- sign-approved-message --dwallet-artifact .local-ika/dwallet.json --request-artifact .local-ika/signing-request.json",
     "test:agent-cross-chain-tool": "tsx scripts/test-agent-cross-chain-tool.ts",
-    "final:check": "bash scripts/final-submission-check.sh"
+    "final:check": "bash scripts/final-submission-check.sh",
+    "product:docker:up": "docker compose up -d postgres redis",
+    "product:docker:down": "docker compose down",
+    "product:db:generate": "cd packages/db && npx prisma generate",
+    "product:db:push": "bash -c 'set -a && source .env.product && set +a && cd packages/db && npx prisma db push'",
+    "product:db:migrate": "bash -c 'set -a && source .env.product && set +a && cd packages/db && npx prisma migrate dev'",
+    "product:db:studio": "bash -c 'set -a && source .env.product && set +a && cd packages/db && npx prisma studio'",
+    "product:api:dev": "npm --prefix apps/api run dev",
+    "product:api:build": "npm --prefix apps/api run build",
+    "product:api:start": "npm --prefix apps/api run start",
+    "product:api:smoke": "node scripts/product-api-smoke.mjs",
+    "product:health": "curl -s http://localhost:4000/health | jq . || curl -s http://localhost:4000/health"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

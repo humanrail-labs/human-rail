@@ -1,0 +1,354 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──
+
+enum AgentStatus {
+  active
+  suspended
+  revoked
+}
+
+enum PolicyStatus {
+  active
+  frozen
+  expired
+  revoked
+}
+
+enum SigningRequestStatus {
+  requested
+  policy_rejected
+  guard_approved
+  ika_pending
+  signed
+  failed
+}
+
+enum MessageApprovalStatus {
+  pending
+  signed
+}
+
+enum AuditEventType {
+  organization_created
+  organization_updated
+  agent_created
+  agent_updated
+  agent_frozen
+  agent_revoked
+  policy_created
+  policy_updated
+  policy_frozen
+  policy_expired
+  signing_requested
+  signing_approved
+  signing_rejected
+  signing_signed
+  signing_failed
+  api_key_created
+  api_key_revoked
+  webhook_created
+  webhook_delivered
+  webhook_failed
+  system
+}
+
+enum WebhookStatus {
+  active
+  paused
+}
+
+// ── Models ──
+
+model Organization {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  tier      String   @default("free")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships       Membership[]
+  agents            Agent[]
+  ikaDwallets       IkaDwallet[]
+  guardedPolicies   GuardedPolicy[]
+  signingRequests   SigningRequest[]
+  auditEvents       AuditEvent[]
+  webhooks          Webhook[]
+  integrationSecrets IntegrationSecret[]
+
+  @@index([slug])
+  @@index([tier])
+  @@map("organizations")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  externalId  String   @unique
+  email       String   @unique
+  displayName String?
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships Membership[]
+
+  @@index([externalId])
+  @@index([email])
+  @@map("users")
+}
+
+model Membership {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           String   @default("member")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("memberships")
+}
+
+model Agent {
+  id                    String     @id @default(cuid())
+  organizationId        String
+  name                  String
+  description           String?
+  status                AgentStatus @default(active)
+  onChainAgentPda       String?
+  onChainProfilePda     String?
+  onChainCapabilityPda  String?
+  frozenAt              DateTime?
+  revokedAt             DateTime?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  apiKeys         AgentApiKey[]
+  signingRequests SigningRequest[]
+  guardedPolicies GuardedPolicy[]
+
+  @@index([organizationId, status])
+  @@index([onChainAgentPda])
+  @@map("agents")
+}
+
+model AgentApiKey {
+  id         String    @id @default(cuid())
+  agentId    String
+  name       String
+  prefix     String
+  hash       String
+  scopes     String[]
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([prefix])
+  @@index([agentId])
+  @@map("agent_api_keys")
+}
+
+model IkaDwallet {
+  id                     String   @id @default(cuid())
+  organizationId         String
+  name                   String?
+  onChainPda             String   @unique
+  curve                  String
+  publicKey              String?
+  state                  String   @default("dkg_in_progress")
+  authority              String?
+  authorityTransferredAt DateTime?
+  createdVia             String   @default("grpc_dkg")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  guardedPolicies GuardedPolicy[]
+
+  @@index([organizationId, state])
+  @@index([onChainPda])
+  @@map("ika_dwallets")
+}
+
+model GuardedPolicy {
+  id                   String       @id @default(cuid())
+  organizationId       String
+  agentId              String
+  ikaDwalletId         String
+  name                 String?
+  onChainPda           String?      @unique
+  allowedChainId       Int
+  allowedAssetHash     String
+  allowedRecipientHash String
+  perTxLimit           Decimal      @db.Decimal(78, 0)
+  dailyLimit           Decimal      @db.Decimal(78, 0)
+  totalLimit           Decimal      @db.Decimal(78, 0)
+  dailySpent           Decimal      @default(0) @db.Decimal(78, 0)
+  totalSpent           Decimal      @default(0) @db.Decimal(78, 0)
+  lastSpendDay         Int?
+  expiresAt            DateTime
+  status               PolicyStatus @default(active)
+  frozenAt             DateTime?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  agent           Agent            @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  ikaDwallet      IkaDwallet       @relation(fields: [ikaDwalletId], references: [id], onDelete: Restrict)
+  signingRequests SigningRequest[]
+
+  @@index([agentId, status])
+  @@index([organizationId])
+  @@index([onChainPda])
+  @@map("guarded_policies")
+}
+
+model SigningRequest {
+  id                        String                 @id @default(cuid())
+  organizationId            String
+  agentId                   String
+  policyId                  String
+  requestId                 String                 @unique
+  messageDigest             String
+  messageMetadataDigest     String
+  destinationChainId        Int
+  assetHash                 String
+  recipientHash             String
+  amount                    Decimal                @db.Decimal(78, 0)
+  signatureScheme           String
+  status                    SigningRequestStatus   @default(requested)
+  rejectionCode             Int?
+  rejectionReason           String?
+  onChainRequestPda         String?
+  onChainMessageApprovalPda String?
+  submittedAt               DateTime?
+  signedAt                  DateTime?
+  signatureHex              String?
+  createdAt                 DateTime               @default(now())
+  updatedAt                 DateTime               @updatedAt
+
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  agent            Agent             @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  policy           GuardedPolicy     @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  messageApproval  MessageApproval?
+
+  @@index([organizationId, createdAt])
+  @@index([agentId, status])
+  @@index([requestId])
+  @@index([onChainRequestPda])
+  @@map("signing_requests")
+}
+
+model MessageApproval {
+  id               String                @id @default(cuid())
+  signingRequestId String                @unique
+  onChainPda       String                @unique
+  dwalletPda       String
+  messageDigest    String
+  metadataDigest   String
+  approver         String
+  userPubkey       String
+  signatureScheme  String
+  epoch            Decimal               @db.Decimal(78, 0)
+  status           MessageApprovalStatus @default(pending)
+  signatureLength  Int?
+  signatureHex     String?
+  fetchedAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  signingRequest SigningRequest @relation(fields: [signingRequestId], references: [id], onDelete: Cascade)
+
+  @@index([onChainPda])
+  @@index([dwalletPda])
+  @@map("message_approvals")
+}
+
+model AuditEvent {
+  id             String         @id @default(cuid())
+  organizationId String
+  actorType      String         // user, agent, system, worker
+  actorId        String?
+  eventType      AuditEventType
+  resourceType   String?        // agent, policy, signing_request, wallet, api_key
+  resourceId     String?
+  summary        String?
+  metadata       Json?
+  createdAt      DateTime       @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([actorType, actorId])
+  @@index([eventType])
+  @@index([resourceType, resourceId])
+  @@map("audit_events")
+}
+
+model Webhook {
+  id             String            @id @default(cuid())
+  organizationId String
+  url            String
+  secret         String            // encrypted at rest by application layer
+  events         String[]
+  status         WebhookStatus     @default(active)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deliveries   WebhookDelivery[]
+
+  @@index([organizationId, status])
+  @@map("webhooks")
+}
+
+model WebhookDelivery {
+  id             String    @id @default(cuid())
+  webhookId      String
+  eventType      String
+  payload        Json
+  responseStatus Int?
+  responseBody   String?
+  error          String?
+  attemptedAt    DateTime  @default(now())
+  retryCount     Int       @default(0)
+  nextRetryAt    DateTime?
+
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, attemptedAt])
+  @@index([nextRetryAt])
+  @@map("webhook_deliveries")
+}
+
+model IntegrationSecret {
+  id             String   @id @default(cuid())
+  organizationId String
+  key            String
+  value          String   // AES-256-GCM encrypted
+  iv             String   // base64
+  tag            String   // base64
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+  @@map("integration_secrets")
+}
