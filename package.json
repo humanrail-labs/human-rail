@@ -38,7 +38,11 @@
     "product:api:start": "npm --prefix apps/api run start",
     "product:api:smoke": "node scripts/product-api-smoke.mjs",
     "product:import-devnet-artifacts": "tsx scripts/product-import-devnet-artifacts.ts",
-    "product:health": "curl -s http://localhost:4000/health | jq . || curl -s http://localhost:4000/health"
+    "product:health": "curl -s http://localhost:4000/health | jq . || curl -s http://localhost:4000/health",
+    "product:worker:dev": "npm --prefix apps/worker run dev",
+    "product:worker:build": "npm --prefix apps/worker run build",
+    "product:worker:start": "npm --prefix apps/worker run start",
+    "product:worker:smoke": "node scripts/product-worker-smoke.mjs"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

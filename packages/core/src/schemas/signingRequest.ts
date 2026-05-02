@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const SigningRequestStatus = z.enum([
   "requested",
+  "queued",
+  "worker_processing",
   "policy_rejected",
   "guard_approved",
   "ika_pending",

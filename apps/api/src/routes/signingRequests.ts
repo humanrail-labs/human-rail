@@ -11,12 +11,13 @@ import {
 import { success, errorResponse } from "../lib/response.js";
 import { recordAuditEvent } from "../lib/audit.js";
 import { resolveOrganizationContext } from "../lib/orgContext.js";
+import { enqueueSigningRequest } from "../services/queue.js";
 
 const ListSigningRequestsQuery = z.object({
   orgId: z.string().cuid2().optional(),
   agentId: z.string().cuid2().optional(),
   policyId: z.string().cuid2().optional(),
-  status: z.enum(["requested", "policy_rejected", "guard_approved", "ika_pending", "signed", "failed"]).optional(),
+  status: z.enum(["requested", "queued", "worker_processing", "policy_rejected", "guard_approved", "ika_pending", "signed", "failed"]).optional(),
   limit: z.string().default("50").transform(Number),
 });
 
@@ -83,6 +84,130 @@ export default async function signingRequestRoutes(fastify: FastifyInstance) {
     }
 
     return success(signingRequest);
+  });
+
+  fastify.post("/api/signing-requests/:id/enqueue", async (request, reply) => {
+    const user = request.devUser;
+    if (!user) {
+      return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
+    }
+
+    const { id } = request.params as { id: string };
+
+    const signingRequest = await prisma.signingRequest.findUnique({
+      where: { id },
+      include: {
+        policy: { select: { organizationId: true } },
+      },
+    });
+
+    if (!signingRequest) {
+      return reply.status(404).send(errorResponse("NOT_FOUND", "Signing request not found"));
+    }
+
+    // Verify access via org context
+    const { organizationId } = await resolveOrganizationContext(request, signingRequest.policy.organizationId);
+
+    // Only allow enqueue for eligible statuses
+    const eligibleStatuses = ["requested", "failed"];
+    if (!eligibleStatuses.includes(signingRequest.status)) {
+      return reply.status(409).send(
+        errorResponse("CONFLICT", `Cannot enqueue signing request with status ${signingRequest.status}`)
+      );
+    }
+
+    const job = await enqueueSigningRequest({
+      signingRequestId: id,
+      organizationId,
+      requestedBy: user.id,
+    });
+
+    const updated = await prisma.signingRequest.update({
+      where: { id },
+      data: {
+        status: "queued",
+        executionJobId: job.id ?? null,
+      },
+    });
+
+    await recordAuditEvent({
+      organizationId,
+      actorType: "user",
+      actorId: user.id,
+      eventType: "signing_request_queued",
+      resourceType: "signing_request",
+      resourceId: id,
+      summary: `Enqueued signing request ${signingRequest.requestId} for worker execution`,
+      metadata: { jobId: job.id, queue: "mandara.signing-requests" },
+    });
+
+    return success({
+      signingRequest: updated,
+      job: {
+        id: job.id,
+        queue: "mandara.signing-requests",
+        status: "queued",
+      },
+    });
+  });
+
+  fastify.get("/api/signing-requests/:id/execution", async (request, reply) => {
+    const user = request.devUser;
+    if (!user) {
+      return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
+    }
+
+    const { id } = request.params as { id: string };
+
+    const signingRequest = await prisma.signingRequest.findUnique({
+      where: { id },
+      include: {
+        agent: { select: { id: true, name: true } },
+        policy: { select: { id: true, name: true } },
+        messageApproval: true,
+      },
+    });
+
+    if (!signingRequest) {
+      return reply.status(404).send(errorResponse("NOT_FOUND", "Signing request not found"));
+    }
+
+    // Verify access
+    await resolveOrganizationContext(request, signingRequest.organizationId);
+
+    const auditEvents = await prisma.auditEvent.findMany({
+      where: {
+        resourceType: "signing_request",
+        resourceId: id,
+        eventType: {
+          in: [
+            "signing_request_queued",
+            "signing_request_processing",
+            "signing_request_dry_run_completed",
+            "signing_request_execution_failed",
+            "signing_request_worker_skipped",
+            "signing_request_status_updated",
+            "signing_request_created",
+            "signing_request_policy_rejected",
+          ],
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+
+    return success({
+      signingRequest: {
+        id: signingRequest.id,
+        status: signingRequest.status,
+        executionJobId: signingRequest.executionJobId,
+        requestId: signingRequest.requestId,
+        amount: signingRequest.amount.toString(),
+        destinationChainId: signingRequest.destinationChainId,
+        message: signingRequest.message,
+      },
+      auditEvents,
+    });
   });
 
   fastify.post("/api/signing-requests/preview", async (request, reply) => {

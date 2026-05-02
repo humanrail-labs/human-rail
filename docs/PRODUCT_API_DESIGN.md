@@ -310,6 +310,76 @@ Get a single signing request with relations.
 }
 ```
 
+#### `POST /api/signing-requests/:id/enqueue`
+
+Enqueue a signing request for worker execution.
+
+**Behavior:**
+- Resolves dev user and verifies access to the signing request's organization.
+- Only allows enqueue for statuses: `requested`, `failed`.
+- Adds a job to the `mandara.signing-requests` BullMQ queue.
+- Updates signing request status to `queued` and stores `executionJobId`.
+- Records audit event `signing_request_queued`.
+
+**Response:**
+```json
+{
+  "data": {
+    "signingRequest": {
+      "id": "req_789",
+      "status": "queued",
+      "executionJobId": "job_123"
+    },
+    "job": {
+      "id": "job_123",
+      "queue": "mandara.signing-requests",
+      "status": "queued"
+    }
+  }
+}
+```
+
+#### `GET /api/signing-requests/:id/execution`
+
+Get execution status and audit trail for a signing request.
+
+**Response:**
+```json
+{
+  "data": {
+    "signingRequest": {
+      "id": "req_789",
+      "status": "requested",
+      "executionJobId": "job_123",
+      "requestId": "f655534b...",
+      "amount": "42000000",
+      "destinationChainId": 84532,
+      "message": "Transfer 42 USDC to treasury"
+    },
+    "auditEvents": [
+      {
+        "eventType": "signing_request_queued",
+        "actorType": "user",
+        "summary": "Enqueued signing request ...",
+        "createdAt": "2026-05-02T12:00:00Z"
+      },
+      {
+        "eventType": "signing_request_processing",
+        "actorType": "worker",
+        "summary": "Worker started processing signing request ...",
+        "createdAt": "2026-05-02T12:00:01Z"
+      },
+      {
+        "eventType": "signing_request_dry_run_completed",
+        "actorType": "worker",
+        "summary": "Dry-run completed for signing request ...",
+        "createdAt": "2026-05-02T12:00:02Z"
+      }
+    ]
+  }
+}
+```
+
 #### `POST /api/signing-requests/preview`
 
 Preview whether a signing request would pass policy without creating a record.

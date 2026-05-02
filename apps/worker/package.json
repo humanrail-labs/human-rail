@@ -1,0 +1,28 @@
+{
+  "name": "@mandara/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mandara/core": "file:../../packages/core",
+    "@mandara/db": "file:../../packages/db",
+    "@prisma/client": "^6.0.0",
+    "bullmq": "^5.0.0",
+    "dotenv": "^16.4.0",
+    "ioredis": "^5.4.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}

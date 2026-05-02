@@ -1,6 +1,6 @@
 # Mandara Product Implementation Plan
 
-> **Status:** P3 complete. Create/preview APIs implemented. On-chain execution deferred to P4.  
+> **Status:** P4A complete. Worker foundation with dry-run mode implemented. Live on-chain execution deferred to P4B.  
 > **Goal:** Turn the HumanRail grant implementation into a hosted product MVP.  
 > **Last updated:** 2026-05-02
 
@@ -154,25 +154,53 @@ Add product-level create and preview APIs so users can create Mandara records wi
 
 ---
 
-## P4 — Ika Worker Jobs
+## P4A — Worker Foundation (Dry-Run)
 
 ### Objective
-Build background workers that handle the actual on-chain work: DKG, authority transfer, Guard CPI, and Ika sign polling.
+Build the worker infrastructure for signing request execution, but keep live on-chain/Ika mutation disabled by default.
 
-### Files Likely Changed
+### Files Changed
+- `packages/db/prisma/schema.prisma` — added `queued`, `worker_processing` statuses; new audit event types; `executionJobId`
 - `apps/worker/` (new)
-  - `src/queues/signing-requests.ts` — consumer
-  - `src/queues/webhooks.ts` — consumer
-  - `src/queues/ika-dkg.ts` — consumer
-  - `src/services/solana.ts` — RPC client + tx builder
-  - `src/services/ika.ts` — wraps Rust CLI or gRPC client
-- `apps/api/src/services/queue.ts` — producer helper
+  - `src/index.ts` — worker bootstrap
+  - `src/config.ts` — worker env + mode gates
+  - `src/queues.ts` — BullMQ queue + worker setup
+  - `src/jobs/signingRequestJob.ts` — processor logic
+  - `src/lib/audit.ts`, `status.ts`, `logger.ts` — helpers
+- `apps/api/src/services/queue.ts` (new) — BullMQ producer
+- `apps/api/src/routes/signingRequests.ts` — added `POST /:id/enqueue` and `GET /:id/execution`
+- `scripts/product-worker-smoke.mjs` (new) — worker smoke test
+- `docs/PRODUCT_WORKER.md` (new)
 
 ### Acceptance Criteria
-- [ ] Worker consumes `signing-requests` jobs and submits `approve_guarded_message` on-chain.
+- [x] `POST /api/signing-requests/:id/enqueue` adds job to BullMQ queue.
+- [x] Worker processes jobs in `dry-run` mode without on-chain mutation.
+- [x] Worker skips terminal-state requests safely.
+- [x] Worker re-evaluates policy before execution.
+- [x] Audit events recorded for queued, processing, dry-run, and skipped states.
+- [x] `GET /api/signing-requests/:id/execution` returns status + audit trail.
+- [x] Worker smoke test passes.
+
+### Risks
+- BullMQ requires Redis. Mitigation: Redis is already in Docker Compose.
+
+---
+
+## P4B — Live On-Chain Execution
+
+### Objective
+Enable actual Guard CPI and Ika signing in live-devnet mode.
+
+### Files Likely Changed
+- `apps/worker/src/jobs/signingRequestJob.ts` — add live execution branch
+- `apps/worker/src/services/solana.ts` (new) — transaction builder
+- `apps/worker/src/services/ika.ts` (new) — gRPC client wrapper
+
+### Acceptance Criteria
+- [ ] Worker submits `approve_guarded_message` on-chain when `MANDARA_ENABLE_LIVE_EXECUTION=true`.
 - [ ] Worker polls for GuardSigningRequest and MessageApproval status.
-- [ ] Worker updates DB with `approved`, `rejected`, or `signed` status.
-- [ ] Worker spawns `tools/ika-dkg-cli` for DKG and sign operations.
+- [ ] Worker requests Ika signature via gRPC and polls for completion.
+- [ ] Status transitions: `guard_approved` → `ika_pending` → `signed`.
 - [ ] Failed jobs retry with exponential backoff (max 5 attempts).
 
 ### Risks

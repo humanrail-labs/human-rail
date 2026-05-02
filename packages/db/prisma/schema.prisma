@@ -24,6 +24,8 @@ enum PolicyStatus {
 
 enum SigningRequestStatus {
   requested
+  queued
+  worker_processing
   policy_rejected
   guard_approved
   ika_pending
@@ -66,6 +68,12 @@ enum AuditEventType {
   signing_request_previewed
   signing_request_created
   signing_request_policy_rejected
+  signing_request_queued
+  signing_request_processing
+  signing_request_dry_run_completed
+  signing_request_execution_failed
+  signing_request_worker_skipped
+  signing_request_status_updated
   system
 }
 
@@ -261,6 +269,7 @@ model SigningRequest {
   signedAt                  DateTime?
   signatureHex              String?
   signatureBase64           String?
+  executionJobId            String?
   metadata                  Json?
   createdAt                 DateTime               @default(now())
   updatedAt                 DateTime               @updatedAt

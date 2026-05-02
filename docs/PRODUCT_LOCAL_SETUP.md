@@ -76,6 +76,16 @@ npm run product:api:dev
 
 The API will start on `http://localhost:4000` with auto-reload.
 
+### 8. Start the Worker (optional)
+
+In a separate terminal:
+
+```bash
+npm run product:worker:dev
+```
+
+The worker will connect to Redis and process signing request jobs.
+
 ---
 
 ## Verify It Works
@@ -210,24 +220,31 @@ curl -X POST http://localhost:4000/api/signing-requests \
 
 ---
 
-## Smoke Test
+## Smoke Tests
 
-Run the automated smoke test:
+### API Smoke Test
 
 ```bash
 npm run product:api:smoke
 ```
 
+This verifies all P3 create/preview endpoints.
+
+### Worker Smoke Test
+
+```bash
+# Ensure API is running
+npm run product:api:start
+
+# In another terminal
+npm run product:worker:smoke
+```
+
 This verifies:
-- `/health`, `/version`, `/ready`
-- `POST /api/orgs`
-- `GET /api/orgs`
-- `POST /api/agents`
-- `POST /api/wallets/import`
-- `POST /api/policies`
-- `POST /api/signing-requests/preview` (allowed + rejected)
-- `POST /api/signing-requests` (allowed + rejected with persist)
-- `GET /api/audit-events`
+- `POST /api/signing-requests/:id/enqueue`
+- Worker dry-run processor execution
+- Status transitions and audit events
+- `GET /api/signing-requests/:id/execution`
 
 ---
 
@@ -257,14 +274,12 @@ docker compose down -v
 
 ---
 
-## Known Limitations (P3)
+## Known Limitations (P4A)
 
-- **No production authentication.** Dev auth uses `x-mandara-dev-user` header. Do not deploy to production without replacing with Clerk/Supabase Auth.
-- **No Ika mutations from the API.** The API does not yet create dWallets or submit signing requests on-chain. That arrives in P4.
-- **No worker jobs.** Redis is started but BullMQ is not wired yet.
+- **No production authentication.** Dev auth uses `x-mandara-dev-user` header.
+- **No live on-chain execution.** Worker runs in `dry-run` mode by default. Live Guard CPI and Ika signing deferred to P4B.
 - **Devnet only.** All on-chain interactions target Solana devnet and Ika pre-alpha.
 - **Ika pre-alpha disclaimer.** The mock signer is not production MPC custody.
-- **Policy evaluation is off-chain only.** `POST /api/signing-requests` creates a DB record; actual Guard CPI and Ika signing happen in P4 workers.
 
 ---
 
