@@ -15,6 +15,15 @@
 | [`DEMO_VIDEO_SCRIPT.md`](DEMO_VIDEO_SCRIPT.md) | Under-5-minute demo video script with screen actions and voiceover |
 | [`FINAL_AUDIT.md`](FINAL_AUDIT.md) | Final audit: commits, programs, artifacts, commands, security check, readiness checklist |
 
+## Product Architecture Documents
+
+| Document | Purpose |
+|----------|---------|
+| [`PRODUCT_ARCHITECTURE.md`](PRODUCT_ARCHITECTURE.md) | Target product architecture for Mandara hosted MVP: backend stack, security model, migration plan, roadmap |
+| [`PRODUCT_DATABASE_MODEL.md`](PRODUCT_DATABASE_MODEL.md) | Proposed Prisma schema for organizations, agents, policies, signing requests, audit events, webhooks |
+| [`PRODUCT_API_DESIGN.md`](PRODUCT_API_DESIGN.md) | API contract draft: dashboard API, agent API, webhook events, error formats, rate limits |
+| [`PRODUCT_IMPLEMENTATION_PLAN.md`](PRODUCT_IMPLEMENTATION_PLAN.md) | Phase-by-phase implementation plan (P0–P10) with objectives, files, acceptance criteria, and risks |
+
 ## Technical Documentation
 
 | Document | Purpose |
