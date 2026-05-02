@@ -1,6 +1,6 @@
 # Mandara Product Implementation Plan
 
-> **Status:** P0 — Architecture audit complete. No code changes yet.  
+> **Status:** P2 — Artifact import complete. Backend foundation + devnet persistence done.  
 > **Goal:** Turn the HumanRail grant implementation into a hosted product MVP.  
 > **Last updated:** 2026-05-02
 
@@ -76,11 +76,11 @@ Create a working Fastify API with Prisma, Postgres, and local Docker Compose for
 - Root `package.json` — add `workspaces` or Turborepo config (optional)
 
 ### Acceptance Criteria
-- [ ] `docker compose up` brings up Postgres 16 and Redis 7.
-- [ ] `npx prisma migrate dev` applies the schema.
-- [ ] Fastify server starts on `:3001` and responds to `GET /health`.
-- [ ] `npm run build` (root Next.js) still passes.
-- [ ] Grant scripts unchanged.
+- [x] `docker compose up` brings up Postgres 16 and Redis 7.
+- [x] `npx prisma migrate dev` applies the schema.
+- [x] Fastify server starts on `:4000` and responds to `GET /health`.
+- [x] `npm run build` (root Next.js) still passes.
+- [x] Grant scripts unchanged.
 
 ### Risks
 - Adding workspaces to root `package.json` may break existing `file:` references if not configured carefully.
@@ -91,19 +91,26 @@ Create a working Fastify API with Prisma, Postgres, and local Docker Compose for
 ## P2 — Persist Ika / HumanRail Artifacts in DB
 
 ### Objective
-Replace `.local-ika/` JSON files with database records. The worker and API should read from DB first, falling back to on-chain if needed.
+Import the completed Mandara / HumanRail / Ika devnet lifecycle into the product database and expose DB-backed read APIs.
 
 ### Files Likely Changed
-- `packages/db/prisma/schema.prisma` — add seed data or migrations for artifact tables
-- `apps/api/src/services/artifacts.ts` (new) — read/write artifact service
-- `apps/worker/src/jobs/dkg.ts` (new stub) — write dWallet artifact to DB after creation
-- `scripts/devnet-create-guarded-dwallet.ts` — optionally write to DB when `--db` flag passed
+- `packages/db/prisma/schema.prisma` — added metadata, asset/recipient plaintext, signatureBase64 fields
+- `packages/core/src/constants/devnetArtifacts.ts` (new) — public artifact constants
+- `packages/core/src/devnetArtifactImport.ts` (new) — idempotent import service
+- `scripts/product-import-devnet-artifacts.ts` (new) — CLI import script
+- `apps/api/src/routes/agents.ts` — DB-backed list
+- `apps/api/src/routes/wallets.ts` — DB-backed list
+- `apps/api/src/routes/policies.ts` — DB-backed list with relations
+- `apps/api/src/routes/signingRequests.ts` — DB-backed list + detail
+- `apps/api/src/routes/messageApprovals.ts` (new) — DB-backed list
+- `apps/api/src/routes/product.ts` (new) — devnet demo status endpoint
 
 ### Acceptance Criteria
-- [ ] Creating a dWallet via script stores the artifact in `ika_dwallets` table.
-- [ ] Creating a GuardedDwallet policy stores the artifact in `guarded_policies` table.
-- [ ] `lib/ika/ikaArtifactReader.ts` can read from DB instead of filesystem.
-- [ ] `.local-ika/` still works as fallback for grant demo compatibility.
+- [x] `npm run product:import-devnet-artifacts` idempotently imports all artifacts.
+- [x] `GET /api/product/devnet-demo` returns full lifecycle snapshot.
+- [x] `GET /api/agents`, `/api/wallets`, `/api/policies`, `/api/signing-requests`, `/api/message-approvals` return DB data.
+- [x] Running import twice does not create duplicates.
+- [x] Smoke test passes after import.
 
 ### Risks
 - DB schema may need adjustment after first real usage.

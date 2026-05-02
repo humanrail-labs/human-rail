@@ -37,6 +37,7 @@
     "product:api:build": "npm --prefix apps/api run build",
     "product:api:start": "npm --prefix apps/api run start",
     "product:api:smoke": "node scripts/product-api-smoke.mjs",
+    "product:import-devnet-artifacts": "tsx scripts/product-import-devnet-artifacts.ts",
     "product:health": "curl -s http://localhost:4000/health | jq . || curl -s http://localhost:4000/health"
   },
   "dependencies": {

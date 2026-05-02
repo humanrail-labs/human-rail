@@ -5,6 +5,8 @@ import { success, errorResponse } from "../lib/response.js";
 
 const ListAuditEventsQuery = z.object({
   orgId: z.string().cuid2().optional(),
+  resourceType: z.string().optional(),
+  eventType: z.string().optional(),
   limit: z.string().default("50").transform(Number),
   cursor: z.string().optional(),
 });
@@ -21,9 +23,12 @@ export default async function auditEventRoutes(fastify: FastifyInstance) {
       return reply.status(400).send(errorResponse("VALIDATION_ERROR", "Invalid query parameters"));
     }
 
-    const { orgId, limit } = query.data;
+    const { orgId, resourceType, eventType, limit } = query.data;
 
-    const where = orgId ? { organizationId: orgId } : {};
+    const where: Record<string, unknown> = {};
+    if (orgId) where.organizationId = orgId;
+    if (resourceType) where.resourceType = resourceType;
+    if (eventType) where.eventType = eventType;
 
     const events = await prisma.auditEvent.findMany({
       where,

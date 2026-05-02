@@ -24,6 +24,7 @@
 | [`PRODUCT_API_DESIGN.md`](PRODUCT_API_DESIGN.md) | API contract draft: dashboard API, agent API, webhook events, error formats, rate limits |
 | [`PRODUCT_IMPLEMENTATION_PLAN.md`](PRODUCT_IMPLEMENTATION_PLAN.md) | Phase-by-phase implementation plan (P0–P10) with objectives, files, acceptance criteria, and risks |
 | [`PRODUCT_LOCAL_SETUP.md`](PRODUCT_LOCAL_SETUP.md) | Local development setup: Docker Compose, Prisma, API server, smoke tests |
+| [`PRODUCT_ARTIFACT_IMPORT.md`](PRODUCT_ARTIFACT_IMPORT.md) | Import completed devnet lifecycle into product database and inspect via API |
 
 ## Technical Documentation
 

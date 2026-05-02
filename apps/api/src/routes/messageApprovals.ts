@@ -3,20 +3,20 @@ import { z } from "zod";
 import { prisma } from "@mandara/db";
 import { success, errorResponse } from "../lib/response.js";
 
-const ListAgentsQuery = z.object({
+const ListMessageApprovalsQuery = z.object({
   orgId: z.string().cuid2().optional(),
-  status: z.enum(["active", "suspended", "revoked"]).optional(),
+  status: z.enum(["pending", "signed"]).optional(),
   limit: z.string().default("50").transform(Number),
 });
 
-export default async function agentRoutes(fastify: FastifyInstance) {
-  fastify.get("/api/agents", async (request, reply) => {
+export default async function messageApprovalRoutes(fastify: FastifyInstance) {
+  fastify.get("/api/message-approvals", async (request, reply) => {
     const user = request.devUser;
     if (!user) {
       return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
     }
 
-    const query = ListAgentsQuery.safeParse(request.query);
+    const query = ListMessageApprovalsQuery.safeParse(request.query);
     if (!query.success) {
       return reply.status(400).send(errorResponse("VALIDATION_ERROR", "Invalid query parameters"));
     }
@@ -26,16 +26,24 @@ export default async function agentRoutes(fastify: FastifyInstance) {
     if (orgId) where.organizationId = orgId;
     if (status) where.status = status;
 
-    const agents = await prisma.agent.findMany({
+    const approvals = await prisma.messageApproval.findMany({
       where,
+      include: {
+        signingRequest: {
+          select: {
+            id: true,
+            requestId: true,
+            status: true,
+            amount: true,
+            asset: true,
+            recipient: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
       take: limit,
     });
 
-    return success(agents);
-  });
-
-  fastify.post("/api/agents", async (request, reply) => {
-    return reply.status(501).send(errorResponse("NOT_IMPLEMENTED", "Agent creation not implemented in P2"));
+    return success(approvals);
   });
 }

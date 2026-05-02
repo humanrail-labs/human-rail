@@ -57,6 +57,11 @@ enum AuditEventType {
   webhook_created
   webhook_delivered
   webhook_failed
+  devnet_artifact_imported
+  ika_dwallet_imported
+  guarded_policy_imported
+  signing_request_imported
+  message_approval_imported
   system
 }
 
@@ -176,11 +181,13 @@ model IkaDwallet {
   authority              String?
   authorityTransferredAt DateTime?
   createdVia             String   @default("grpc_dkg")
+  metadata               Json?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
   organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   guardedPolicies GuardedPolicy[]
+  signingRequests SigningRequest[]
 
   @@index([organizationId, state])
   @@index([onChainPda])
@@ -195,6 +202,8 @@ model GuardedPolicy {
   name                 String?
   onChainPda           String?      @unique
   allowedChainId       Int
+  allowedAsset         String?
+  allowedRecipient     String?
   allowedAssetHash     String
   allowedRecipientHash String
   perTxLimit           Decimal      @db.Decimal(78, 0)
@@ -206,6 +215,7 @@ model GuardedPolicy {
   expiresAt            DateTime
   status               PolicyStatus @default(active)
   frozenAt             DateTime?
+  metadata             Json?
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
 
@@ -225,28 +235,36 @@ model SigningRequest {
   organizationId            String
   agentId                   String
   policyId                  String
+  ikaDwalletId              String?
   requestId                 String                 @unique
   messageDigest             String
   messageMetadataDigest     String
   destinationChainId        Int
+  asset                     String?
+  recipient                 String?
   assetHash                 String
   recipientHash             String
   amount                    Decimal                @db.Decimal(78, 0)
+  message                   String?
   signatureScheme           String
   status                    SigningRequestStatus   @default(requested)
   rejectionCode             Int?
   rejectionReason           String?
   onChainRequestPda         String?
   onChainMessageApprovalPda String?
+  approveTxSignature        String?
   submittedAt               DateTime?
   signedAt                  DateTime?
   signatureHex              String?
+  signatureBase64           String?
+  metadata                  Json?
   createdAt                 DateTime               @default(now())
   updatedAt                 DateTime               @updatedAt
 
   organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   agent            Agent             @relation(fields: [agentId], references: [id], onDelete: Cascade)
   policy           GuardedPolicy     @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  ikaDwallet       IkaDwallet?       @relation(fields: [ikaDwalletId], references: [id], onDelete: SetNull)
   messageApproval  MessageApproval?
 
   @@index([organizationId, createdAt])
@@ -258,6 +276,7 @@ model SigningRequest {
 
 model MessageApproval {
   id               String                @id @default(cuid())
+  organizationId   String
   signingRequestId String                @unique
   onChainPda       String                @unique
   dwalletPda       String
@@ -270,13 +289,17 @@ model MessageApproval {
   status           MessageApprovalStatus @default(pending)
   signatureLength  Int?
   signatureHex     String?
+  signatureBase64  String?
+  metadata         Json?
   fetchedAt        DateTime              @default(now())
+  createdAt        DateTime              @default(now())
   updatedAt        DateTime              @updatedAt
 
   signingRequest SigningRequest @relation(fields: [signingRequestId], references: [id], onDelete: Cascade)
 
   @@index([onChainPda])
   @@index([dwalletPda])
+  @@index([organizationId])
   @@map("message_approvals")
 }
 

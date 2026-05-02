@@ -11,7 +11,9 @@ import agentRoutes from "./routes/agents.js";
 import walletRoutes from "./routes/wallets.js";
 import policyRoutes from "./routes/policies.js";
 import signingRequestRoutes from "./routes/signingRequests.js";
+import messageApprovalRoutes from "./routes/messageApprovals.js";
 import auditEventRoutes from "./routes/auditEvents.js";
+import productRoutes from "./routes/product.js";
 
 export async function buildServer() {
   const fastify = Fastify({
@@ -37,7 +39,9 @@ export async function buildServer() {
   await fastify.register(walletRoutes);
   await fastify.register(policyRoutes);
   await fastify.register(signingRequestRoutes);
+  await fastify.register(messageApprovalRoutes);
   await fastify.register(auditEventRoutes);
+  await fastify.register(productRoutes);
 
   // Global error handler
   fastify.setErrorHandler((err, request, reply) => {

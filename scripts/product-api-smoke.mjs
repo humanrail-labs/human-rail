@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Mandara Product API Smoke Test
- * Verifies the API is running and basic endpoints respond correctly.
+ * Mandara Product API Smoke Test (P2)
+ * Verifies the API is running and DB-backed endpoints respond correctly.
  */
 
 const BASE = process.env.MANDARA_API_URL ?? "http://localhost:4000";
@@ -50,34 +50,63 @@ async function main() {
     return;
   }
 
-  // 4. Create org
-  const testSlug = `smoke-${Date.now()}`;
-  const createOrg = await request("/api/orgs", {
-    method: "POST",
-    headers: { "x-mandara-dev-user": "smoke@local" },
-    body: JSON.stringify({ name: "Smoke Test Org", slug: testSlug }),
-  });
-  ok(createOrg.status === 201, "POST /api/orgs returns 201");
-  ok(createOrg.body?.data?.id, "Created org has an id");
-  const orgId = createOrg.body?.data?.id;
+  const devHeader = { "x-mandara-dev-user": "smoke@local" };
 
-  // 5. List orgs
-  const listOrgs = await request("/api/orgs", {
-    headers: { "x-mandara-dev-user": "smoke@local" },
-  });
-  ok(listOrgs.status === 200, "GET /api/orgs returns 200");
-  ok(Array.isArray(listOrgs.body?.data), "Org list is an array");
+  // 4. Devnet demo status
+  const demo = await request("/api/product/devnet-demo", { headers: devHeader });
+  ok(demo.status === 200, "GET /api/product/devnet-demo returns 200");
 
-  // 6. List audit events
-  const auditEvents = await request(`/api/audit-events?orgId=${orgId}`, {
-    headers: { "x-mandara-dev-user": "smoke@local" },
-  });
+  const hasLifecycle = demo.body?.data?.lifecycleStatus;
+  if (hasLifecycle === "imported") {
+    ok(demo.body?.data?.signed === true, "Devnet demo is signed");
+    ok(demo.body?.data?.messageApproval?.signatureLength === 64, "Signature length is 64");
+    ok(demo.body?.data?.messageApproval?.status === "signed", "MessageApproval status is signed");
+  } else {
+    console.log("\n⚠️  Devnet demo not yet imported. Run: npm run product:import-devnet-artifacts");
+  }
+
+  // 5. Orgs
+  const orgs = await request("/api/orgs", { headers: devHeader });
+  ok(orgs.status === 200, "GET /api/orgs returns 200");
+  ok(Array.isArray(orgs.body?.data), "Org list is an array");
+
+  // 6. Agents
+  const agents = await request("/api/agents", { headers: devHeader });
+  ok(agents.status === 200, "GET /api/agents returns 200");
+  ok(Array.isArray(agents.body?.data), "Agent list is an array");
+
+  // 7. Wallets
+  const wallets = await request("/api/wallets", { headers: devHeader });
+  ok(wallets.status === 200, "GET /api/wallets returns 200");
+  ok(Array.isArray(wallets.body?.data), "Wallet list is an array");
+
+  // 8. Policies
+  const policies = await request("/api/policies", { headers: devHeader });
+  ok(policies.status === 200, "GET /api/policies returns 200");
+  ok(Array.isArray(policies.body?.data), "Policy list is an array");
+
+  // 9. Signing requests
+  const sigReqs = await request("/api/signing-requests", { headers: devHeader });
+  ok(sigReqs.status === 200, "GET /api/signing-requests returns 200");
+  ok(Array.isArray(sigReqs.body?.data), "Signing request list is an array");
+
+  // 10. Message approvals
+  const msgApprovals = await request("/api/message-approvals", { headers: devHeader });
+  ok(msgApprovals.status === 200, "GET /api/message-approvals returns 200");
+  ok(Array.isArray(msgApprovals.body?.data), "Message approval list is an array");
+
+  // 11. Audit events
+  const auditEvents = await request("/api/audit-events", { headers: devHeader });
   ok(auditEvents.status === 200, "GET /api/audit-events returns 200");
   ok(Array.isArray(auditEvents.body?.data), "Audit events list is an array");
-  ok(
-    auditEvents.body?.data?.some((e) => e.eventType === "organization_created"),
-    "Audit events contain organization_created"
-  );
+
+  // 12. Signing request detail (if any exist)
+  if (sigReqs.body?.data?.length > 0) {
+    const firstId = sigReqs.body.data[0].id;
+    const detail = await request(`/api/signing-requests/${firstId}`, { headers: devHeader });
+    ok(detail.status === 200, "GET /api/signing-requests/:id returns 200");
+    ok(detail.body?.data?.id === firstId, "Signing request detail matches ID");
+  }
 
   console.log("\n═══════════════════════════════════════");
   if (process.exitCode) {

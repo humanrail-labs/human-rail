@@ -60,7 +60,15 @@ npm run product:db:push
 
 This creates tables in Postgres without migration files (suitable for local dev).
 
-### 6. Start the API
+### 6. Import devnet artifacts (optional)
+
+```bash
+npm run product:import-devnet-artifacts
+```
+
+This idempotently imports the completed Mandara devnet proof into Postgres.
+
+### 7. Start the API
 
 ```bash
 npm run product:api:dev
