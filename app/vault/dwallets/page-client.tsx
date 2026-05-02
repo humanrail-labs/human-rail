@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import { PublicKey, Transaction, TransactionInstruction, SystemProgram } from "@solana/web3.js";
+import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -25,7 +25,6 @@ import {
   signatureSchemeName,
 } from "@/lib/dwallet-guard/utils";
 import {
-  buildInitializeGuardedDwalletIx,
   buildInitializeGuardedDwalletDemoIx,
   buildFreezeGuardedDwalletIx,
   buildUnfreezeGuardedDwalletIx,
@@ -57,7 +56,9 @@ import {
   ExternalLink,
   Search,
   Activity,
+  LayoutDashboard,
 } from "lucide-react";
+import ProductDashboard from "@/components/vault/product-dashboard";
 import {
   deriveIkaDwalletPda,
   deriveHumanRailGuardCpiAuthority,
@@ -553,12 +554,21 @@ export default function DwalletGuardPageClient() {
       </div>
 
       {/* Main content tabs */}
-      <Tabs defaultValue="config" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-neutral-900">
-          <TabsTrigger value="config">Config & PDAs</TabsTrigger>
+      <Tabs defaultValue="product" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 bg-neutral-900">
+          <TabsTrigger value="product">
+            <LayoutDashboard className="mr-1.5 h-3.5 w-3.5" />
+            Product Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="config">Grant Proof</TabsTrigger>
           <TabsTrigger value="policy">Policy Creation</TabsTrigger>
           <TabsTrigger value="request">Signing Request</TabsTrigger>
         </TabsList>
+
+        {/* Product Dashboard tab */}
+        <TabsContent value="product" className="space-y-4 pt-4">
+          <ProductDashboard />
+        </TabsContent>
 
         {/* Config & PDAs tab */}
         <TabsContent value="config" className="space-y-4 pt-4">

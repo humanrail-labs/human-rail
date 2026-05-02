@@ -246,19 +246,50 @@ See [`docs/PRODUCT_LIVE_EXECUTION_PROOF.md`](PRODUCT_LIVE_EXECUTION_PROOF.md):
 ### Objective
 The Next.js dashboard reads from the Mandara API rather than `.local-ika/` JSON files.
 
-### Files Likely Changed
-- `app/vault/dwallets/page.tsx` — add API client, preserve existing devnet demo
-- `lib/api/client.ts` (new) — typed fetch wrapper for Mandara API
-- `app/dashboard/mandara/` (new) — new product dashboard pages
+### Files Changed
+- `lib/mandara-api/config.ts` (new) — public frontend API config
+- `lib/mandara-api/client.ts` (new) — typed fetch wrapper
+- `lib/mandara-api/types.ts` (new) — TypeScript interfaces
+- `lib/hooks/use-mandara-product.ts` (new) — React hook for dashboard data
+- `components/vault/product-dashboard.tsx` (new) — dashboard UI component
+- `app/vault/dwallets/page-client.tsx` — added Product Dashboard tab as default
+- `scripts/product-dashboard-smoke.mjs` (new) — API-level smoke test
+- `docs/PRODUCT_DASHBOARD.md` (new)
 
 ### Acceptance Criteria
-- [ ] New dashboard pages list agents, wallets, policies, and signing requests from the API.
-- [ ] `/vault/dwallets` continues to work exactly as before (grant demo preserved).
-- [ ] No filesystem artifact reads in new product routes.
+- [x] Product Dashboard tab lists agents, wallets, policies, and signing requests from the API.
+- [x] Create / preview / enqueue signing requests through the UI.
+- [x] Execution detail panel with polling support.
+- [x] `/vault/dwallets` grant demo preserved under "Grant Proof" tab.
+- [x] No filesystem artifact reads in product dashboard.
+- [x] Dashboard smoke test passes.
 
 ### Risks
-- CORS or auth cookie issues between dashboard (`localhost:3000`) and API (`localhost:3001`).
-- Mitigation: configure Fastify CORS and ensure cookies carry `SameSite=lax`.
+- CORS or auth cookie issues between dashboard (`localhost:3000`) and API (`localhost:4000`).
+- Mitigation: Fastify CORS already configured; dev auth uses header.
+
+---
+
+## P6 — Agent API Keys and External Signing Request Endpoint
+
+### Objective
+Allow external agents to authenticate with API keys and request signatures via HTTP.
+
+### Files Likely Changed
+- `apps/api/src/routes/v1/signature-requests.ts` (new)
+- `apps/api/src/routes/v1/agent-status.ts` (new)
+- `apps/api/src/middleware/api-key-auth.ts` (new) — hash verification
+- `app/dashboard/mandara/api-keys/` (new) — UI for creating/revoking keys
+
+### Acceptance Criteria
+- [ ] `POST /v1/signature-requests` with valid Bearer token returns 202.
+- [ ] Invalid or revoked API key returns 401.
+- [ ] API key scoped to agent; cannot request signatures for another agent's policies.
+- [ ] Dashboard UI shows API key creation flow (show once, copy to clipboard).
+
+### Risks
+- API keys are sensitive. A leak allows an attacker to request signatures within policy bounds.
+- Mitigation: keys are hash-only, support revocation, and can be scoped to specific policies.
 
 ---
 

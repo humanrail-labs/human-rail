@@ -246,6 +246,25 @@ This verifies:
 - Status transitions and audit events
 - `GET /api/signing-requests/:id/execution`
 
+### Dashboard Smoke Test
+
+```bash
+# Ensure API is running and DB is seeded
+npm run product:api:start
+
+# In another terminal
+npm run product:dashboard:smoke
+```
+
+This verifies all API endpoints the Product Dashboard uses:
+- `GET /api/product/devnet-demo`
+- `GET /api/agents`, `wallets`, `policies`, `signing-requests`, `message-approvals`, `audit-events`
+- `POST /api/signing-requests/preview`
+- `POST /api/signing-requests`
+- `GET /api/signing-requests/:id/execution`
+
+Set `PRODUCT_DASHBOARD_SMOKE_ENQUEUE=true` to also test enqueue.
+
 ---
 
 ## Database Studio
