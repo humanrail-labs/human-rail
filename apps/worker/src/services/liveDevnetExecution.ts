@@ -29,6 +29,7 @@ import { prisma } from "@mandara/db";
 import { env } from "../config.js";
 import { logger } from "../lib/logger.js";
 import { recordAuditEvent } from "../lib/audit.js";
+import { scheduleWebhookEvent } from "./webhookEvents.js";
 
 import { buildApproveGuardedMessageIx } from "../solana/instructions.js";
 import {
@@ -508,6 +509,18 @@ export async function executeLiveDevnetSigningRequest(
     metadata: { status: "guard_approved" },
   });
 
+  await scheduleWebhookEvent({
+    organizationId,
+    eventType: "signature.guard_approved",
+    signingRequestId,
+    data: {
+      signingRequestId,
+      status: "guard_approved",
+      onChainRequestPda: guardSigningRequestPda.toBase58(),
+      onChainMessageApprovalPda: messageApprovalPda.toBase58(),
+    },
+  });
+
   // 9. Verify MessageApproval is Pending
   const maInfo = await connection.getAccountInfo(messageApprovalPda, "confirmed");
   if (!maInfo) throw new Error("MessageApproval not found on-chain");
@@ -538,6 +551,17 @@ export async function executeLiveDevnetSigningRequest(
     resourceId: signingRequestId,
     summary: `Ika MessageApproval created for ${signingRequestId}`,
     metadata: { messageApprovalPda: messageApprovalPda.toBase58(), status: "pending" },
+  });
+
+  await scheduleWebhookEvent({
+    organizationId,
+    eventType: "signature.ika_pending",
+    signingRequestId,
+    data: {
+      signingRequestId,
+      status: "ika_pending",
+      onChainMessageApprovalPda: messageApprovalPda.toBase58(),
+    },
   });
 
   // 10. Write temporary request artifact for Rust CLI
@@ -633,6 +657,19 @@ export async function executeLiveDevnetSigningRequest(
       resourceId: signingRequestId,
       summary: `Ika signature committed for ${signingRequestId}`,
       metadata: { signatureLen, messageApprovalPda: messageApprovalPda.toBase58() },
+    });
+
+    await scheduleWebhookEvent({
+      organizationId,
+      eventType: "signature.signed",
+      signingRequestId,
+      data: {
+        signingRequestId,
+        status: "signed",
+        signatureHex,
+        signatureBase64,
+        signatureLen,
+      },
     });
   } finally {
     // Cleanup artifact — always run, even on failure

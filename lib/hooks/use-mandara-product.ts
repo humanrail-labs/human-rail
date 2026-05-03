@@ -16,6 +16,10 @@ import {
   listAgentApiKeys,
   createAgentApiKey,
   revokeAgentApiKey,
+  listWebhooks,
+  createWebhook,
+  deleteWebhook,
+  exportAuditEvents,
 } from "@/lib/mandara-api/client";
 import type {
   Agent,
@@ -196,5 +200,9 @@ export function useMandaraProduct() {
     listApiKeys,
     createApiKey,
     revokeApiKey,
+    listWebhooks,
+    createWebhook,
+    deleteWebhook,
+    exportAuditEvents,
   };
 }

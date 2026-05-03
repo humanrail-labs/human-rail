@@ -595,6 +595,8 @@ Check agent status, policies, and spend counters.
 
 When a webhook is configured, Mandara delivers JSON payloads via HTTP POST to the registered URL.
 
+> **Implementation details:** See [`PRODUCT_WEBHOOKS.md`](PRODUCT_WEBHOOKS.md) for the complete P8 implementation including event types, signature verification, and retry behavior.
+
 ### Delivery Format
 
 ```json

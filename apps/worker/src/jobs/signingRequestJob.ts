@@ -1,13 +1,14 @@
 import { prisma } from "@mandara/db";
 import { evaluateSigningRequest } from "@mandara/core";
-import { env, isDryRun, isLiveDevnet, liveExecutionEnabled } from "../config.js";
+import { env, liveExecutionEnabled } from "../config.js";
 import { logger } from "../lib/logger.js";
 import { recordAuditEvent } from "../lib/audit.js";
 import { updateSigningRequestStatus } from "../lib/status.js";
+import { scheduleWebhookEvent } from "../services/webhookEvents.js";
 import type { SigningRequestJobData } from "../queues.js";
 
 export async function processSigningRequestJob(data: SigningRequestJobData) {
-  const { signingRequestId, organizationId, requestedBy } = data;
+  const { signingRequestId, organizationId } = data;
 
   // 1. Load signing request with relations
   const signingRequest = await prisma.signingRequest.findUnique({
@@ -31,7 +32,7 @@ export async function processSigningRequestJob(data: SigningRequestJobData) {
 
   // 2. Skip if already in terminal state
   const terminalStatuses = ["signed", "policy_rejected", "failed"] as const;
-  if (terminalStatuses.includes(signingRequest.status as any)) {
+  if (terminalStatuses.includes(signingRequest.status as typeof terminalStatuses[number])) {
     logger.warn("Skipping job: signing request is in terminal state", {
       signingRequestId,
       status: signingRequest.status,
@@ -107,6 +108,19 @@ export async function processSigningRequestJob(data: SigningRequestJobData) {
       summary: `Worker rejected signing request ${signingRequestId}: ${evaluation.reason}`,
       metadata: { rejectionCode: evaluation.rejectionCode },
     });
+
+    await scheduleWebhookEvent({
+      organizationId,
+      eventType: "signature.policy_rejected",
+      signingRequestId,
+      data: {
+        signingRequestId,
+        status: "policy_rejected",
+        rejectionCode: evaluation.rejectionCode,
+        reason: evaluation.reason,
+      },
+    });
+
     return { allowed: false, evaluation };
   }
 
@@ -182,11 +196,12 @@ export async function processSigningRequestJob(data: SigningRequestJobData) {
         mode: "live-devnet",
         ...result,
       };
-    } catch (err: any) {
-      logger.error("Live execution failed", { signingRequestId, error: err.message });
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      logger.error("Live execution failed", { signingRequestId, error: errMsg });
       await updateSigningRequestStatus(signingRequestId, "failed", {
         metadata: {
-          error: err.message,
+          error: errMsg,
           liveExecutionFailed: true,
           failedAt: new Date().toISOString(),
         },
@@ -197,8 +212,8 @@ export async function processSigningRequestJob(data: SigningRequestJobData) {
         eventType: "signing_request_execution_failed",
         resourceType: "signing_request",
         resourceId: signingRequestId,
-        summary: `Live execution failed for ${signingRequestId}: ${err.message}`,
-        metadata: { error: err.message },
+        summary: `Live execution failed for ${signingRequestId}: ${errMsg}`,
+        metadata: { error: errMsg },
       });
       throw err;
     }

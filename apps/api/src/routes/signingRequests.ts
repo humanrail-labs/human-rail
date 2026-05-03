@@ -12,6 +12,7 @@ import { success, errorResponse } from "../lib/response.js";
 import { recordAuditEvent } from "../lib/audit.js";
 import { resolveOrganizationContext } from "../lib/orgContext.js";
 import { enqueueSigningRequest } from "../services/queue.js";
+import { scheduleWebhookEvent } from "../services/webhookEvents.js";
 
 const ListSigningRequestsQuery = z.object({
   orgId: z.string().cuid2().optional(),
@@ -139,6 +140,18 @@ export default async function signingRequestRoutes(fastify: FastifyInstance) {
       resourceId: id,
       summary: `Enqueued signing request ${signingRequest.requestId} for worker execution`,
       metadata: { jobId: job.id, queue: "mandara.signing-requests" },
+    });
+
+    await scheduleWebhookEvent({
+      organizationId,
+      eventType: "signature.queued",
+      signingRequestId: id,
+      data: {
+        signingRequestId: id,
+        requestId: signingRequest.requestId,
+        status: "queued",
+        jobId: job.id,
+      },
     });
 
     return success({
@@ -377,6 +390,21 @@ export default async function signingRequestRoutes(fastify: FastifyInstance) {
         metadata: { requestId, allowed: true },
       });
 
+      await scheduleWebhookEvent({
+        organizationId,
+        eventType: "signature.requested",
+        signingRequestId: sigReq.id,
+        data: {
+          signingRequestId: sigReq.id,
+          requestId,
+          status: "requested",
+          destinationChainId,
+          asset,
+          recipient,
+          amount,
+        },
+      });
+
       return reply.status(201).send(
         success({
           signingRequest: sigReq,
@@ -423,6 +451,19 @@ export default async function signingRequestRoutes(fastify: FastifyInstance) {
         resourceId: sigReq.id,
         summary: `Signing request ${requestId} rejected by policy`,
         metadata: { requestId, rejectionCode: evaluation.rejectionCode },
+      });
+
+      await scheduleWebhookEvent({
+        organizationId,
+        eventType: "signature.policy_rejected",
+        signingRequestId: sigReq.id,
+        data: {
+          signingRequestId: sigReq.id,
+          requestId,
+          status: "policy_rejected",
+          rejectionCode: evaluation.rejectionCode,
+          reason: evaluation.reason,
+        },
       });
 
       return reply.status(201).send(

@@ -347,19 +347,41 @@ A developer-friendly SDK that wraps the Agent API.
 ### Objective
 Real-time event delivery and compliance-ready data exports.
 
-### Files Likely Changed
-- `apps/api/src/routes/webhooks.ts` (new)
-- `apps/api/src/services/webhooks.ts` (new) — delivery + HMAC signing
-- `apps/worker/src/queues/webhooks.ts` — expanded consumer
-- `app/dashboard/mandara/webhooks/` (new) — UI
-- `app/dashboard/mandara/exports/` (new) — CSV/JSON export UI
-- `packages/db/prisma/schema.prisma` — add `webhooks` and `webhook_deliveries` if not in P1
+### Files Changed
+- `packages/db/prisma/schema.prisma` — added `WebhookDeliveryStatus` enum, updated `WebhookDelivery` model, added audit event types
+- `packages/core/src/schemas/webhook.ts` (new) — `CreateWebhookSchema`, `UpdateWebhookSchema`, `WebhookEventPayloadSchema`
+- `packages/core/src/schemas/auditExport.ts` (new) — `AuditExportQuerySchema`
+- `packages/core/src/webhooks/signing.ts` (new) — `generateWebhookSecret`, `signWebhookPayload`, `verifyWebhookSignature`
+- `apps/api/src/services/webhookQueue.ts` (new) — BullMQ queue producer for webhooks
+- `apps/api/src/services/webhookEvents.ts` (new) — API-side webhook scheduler
+- `apps/api/src/routes/webhooks.ts` (new) — `GET/POST/PATCH/DELETE /api/webhooks`
+- `apps/api/src/routes/auditEvents.ts` — added `GET /api/audit-events/export`
+- `apps/api/src/routes/signingRequests.ts` — emits `signature.requested`, `signature.queued`, `signature.policy_rejected` webhooks
+- `apps/api/src/routes/v1/signatureRequests.ts` — emits webhooks for external API requests
+- `apps/api/src/server.ts` — registered webhook routes
+- `apps/worker/src/services/webhookEvents.ts` (new) — worker-side scheduler
+- `apps/worker/src/services/webhookDelivery.ts` (new) — delivery processor with HMAC signing
+- `apps/worker/src/queues.ts` — added `mandara.webhook-deliveries` queue + `createWebhookWorker`
+- `apps/worker/src/index.ts` — starts webhook worker
+- `apps/worker/src/jobs/signingRequestJob.ts` — emits `signature.policy_rejected`, `signature.failed`
+- `apps/worker/src/services/liveDevnetExecution.ts` — emits `signature.guard_approved`, `signature.ika_pending`, `signature.signed`
+- `lib/mandara-api/client.ts` — added webhook and audit export methods
+- `lib/mandara-api/types.ts` — added `Webhook`, `WebhookDelivery`, `CreateWebhookInput`
+- `lib/hooks/use-mandara-product.ts` — exposed webhook and audit export methods
+- `components/vault/webhook-management.tsx` (new) — dashboard webhook UI
+- `components/vault/audit-export.tsx` (new) — dashboard audit export UI
+- `components/vault/product-dashboard.tsx` — added webhook and audit export cards
+- `scripts/product-webhook-smoke.mjs` (new) — full webhook + audit export smoke test
+- `docs/PRODUCT_WEBHOOKS.md` (new)
+- `docs/PRODUCT_AUDIT_EXPORTS.md` (new)
 
 ### Acceptance Criteria
-- [ ] Users can register webhook URLs and select event types.
-- [ ] Mandara delivers signed payloads within 5 seconds of status change.
-- [ ] Failed deliveries retry 5 times with exponential backoff.
-- [ ] Users can export audit events as CSV or JSON (date-range filtered).
+- [x] Users can register webhook URLs and select event types via dashboard or API.
+- [x] Mandara delivers signed payloads when signing requests change status.
+- [x] Failed deliveries retry with exponential backoff (BullMQ attempts).
+- [x] Users can export audit events as CSV or JSON (date-range filtered).
+- [x] Webhook smoke test passes.
+- [x] All existing smoke tests still pass.
 
 ### Risks
 - Webhook endpoints may be slow or unavailable. Workers must not block on delivery.

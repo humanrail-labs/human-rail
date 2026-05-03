@@ -9,6 +9,7 @@ import { success, errorResponse } from "../../lib/response.js";
 import { recordAuditEvent } from "../../lib/audit.js";
 import { authenticateAgentApiKey, recordAgentApiKeyUsed } from "../../plugins/agentAuth.js";
 import { enqueueSigningRequest } from "../../services/queue.js";
+import { scheduleWebhookEvent } from "../../services/webhookEvents.js";
 
 export default async function v1SignatureRequestRoutes(fastify: FastifyInstance) {
   // ── Agent Status ──
@@ -183,6 +184,16 @@ export default async function v1SignatureRequestRoutes(fastify: FastifyInstance)
           metadata: { allowed: false, rejectionCode: evaluation.rejectionCode },
         });
 
+        await scheduleWebhookEvent({
+          organizationId: auth.organizationId,
+          eventType: "signature.policy_rejected",
+          data: {
+            status: "policy_rejected",
+            rejectionCode: evaluation.rejectionCode,
+            reason: evaluation.reason,
+          },
+        });
+
         await recordAgentApiKeyUsed(request, {
           action: "create",
           allowed: false,
@@ -236,6 +247,21 @@ export default async function v1SignatureRequestRoutes(fastify: FastifyInstance)
         metadata: { requestId, allowed: true },
       });
 
+      await scheduleWebhookEvent({
+        organizationId: auth.organizationId,
+        eventType: "signature.requested",
+        signingRequestId: sigReq.id,
+        data: {
+          signingRequestId: sigReq.id,
+          requestId,
+          status: "requested",
+          destinationChainId,
+          asset,
+          recipient,
+          amount,
+        },
+      });
+
       let execution:
         | { jobId: string | undefined; queue: string; status: string }
         | undefined;
@@ -264,6 +290,18 @@ export default async function v1SignatureRequestRoutes(fastify: FastifyInstance)
           resourceId: sigReq.id,
           summary: `Agent enqueued signing request ${requestId}`,
           metadata: { jobId: job.id, queue: "mandara.signing-requests" },
+        });
+
+        await scheduleWebhookEvent({
+          organizationId: auth.organizationId,
+          eventType: "signature.queued",
+          signingRequestId: sigReq.id,
+          data: {
+            signingRequestId: sigReq.id,
+            requestId,
+            status: "queued",
+            jobId: job.id,
+          },
         });
 
         execution = {

@@ -32,6 +32,8 @@ import {
   FileKey,
   Bot,
 } from "lucide-react";
+import WebhookManagement from "./webhook-management";
+import AuditExport from "./audit-export";
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -73,6 +75,10 @@ export default function ProductDashboard() {
     listApiKeys,
     createApiKey,
     revokeApiKey,
+    listWebhooks,
+    createWebhook,
+    deleteWebhook,
+    exportAuditEvents,
   } = useMandaraProduct();
 
   const [selectedSrId, setSelectedSrId] = useState<string | null>(null);
@@ -597,6 +603,16 @@ export default function ProductDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Webhooks */}
+      <WebhookManagement
+        listWebhooks={listWebhooks}
+        createWebhook={createWebhook}
+        deleteWebhook={deleteWebhook}
+      />
+
+      {/* Audit Export */}
+      <AuditExport exportAuditEvents={exportAuditEvents} />
 
       {/* Signing Requests */}
       <Card className="border-white/[0.06] bg-neutral-900/50">

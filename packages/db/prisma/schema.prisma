@@ -57,8 +57,14 @@ enum AuditEventType {
   api_key_created
   api_key_revoked
   webhook_created
+  webhook_updated
+  webhook_deleted
   webhook_delivered
   webhook_failed
+  webhook_delivery_scheduled
+  webhook_delivery_succeeded
+  webhook_delivery_failed
+  audit_export_created
   devnet_artifact_imported
   ika_dwallet_imported
   guarded_policy_imported
@@ -84,6 +90,13 @@ enum AuditEventType {
 enum WebhookStatus {
   active
   paused
+}
+
+enum WebhookDeliveryStatus {
+  pending
+  retrying
+  delivered
+  failed
 }
 
 // ── Models ──
@@ -359,21 +372,27 @@ model Webhook {
 }
 
 model WebhookDelivery {
-  id             String    @id @default(cuid())
-  webhookId      String
-  eventType      String
-  payload        Json
-  responseStatus Int?
-  responseBody   String?
-  error          String?
-  attemptedAt    DateTime  @default(now())
-  retryCount     Int       @default(0)
-  nextRetryAt    DateTime?
+  id                String                @id @default(cuid())
+  organizationId    String
+  webhookId         String
+  eventType         String
+  payload           Json
+  status            WebhookDeliveryStatus @default(pending)
+  responseStatus    Int?
+  responseBody      String?
+  error             String?
+  attemptedAt       DateTime              @default(now())
+  retryCount        Int                   @default(0)
+  nextRetryAt       DateTime?
+  deliveredAt       DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
 
   webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
 
   @@index([webhookId, attemptedAt])
   @@index([nextRetryAt])
+  @@index([organizationId, status])
   @@map("webhook_deliveries")
 }
 

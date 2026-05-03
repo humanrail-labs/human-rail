@@ -23,6 +23,9 @@ import type {
   AgentApiKey,
   CreateAgentApiKeyInput,
   CreateAgentApiKeyResult,
+  Webhook,
+  CreateWebhookInput,
+  WebhookDelivery,
 } from "./types";
 
 function getHeaders(): Record<string, string> {
@@ -161,4 +164,48 @@ export function revokeAgentApiKey(agentId: string, keyId: string): Promise<Agent
   return apiFetch<AgentApiKey>(`/api/agents/${agentId}/api-keys/${keyId}`, {
     method: "DELETE",
   });
+}
+
+// ── Webhooks ──
+
+export function listWebhooks(): Promise<Webhook[]> {
+  return apiFetch<Webhook[]>("/api/webhooks");
+}
+
+export function createWebhook(input: CreateWebhookInput): Promise<Webhook & { secret: string }> {
+  return apiFetch<Webhook & { secret: string }>("/api/webhooks", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getWebhook(id: string): Promise<Webhook & { deliveries: WebhookDelivery[] }> {
+  return apiFetch<Webhook & { deliveries: WebhookDelivery[] }>(`/api/webhooks/${id}`);
+}
+
+export function deleteWebhook(id: string): Promise<{ id: string; deleted: boolean }> {
+  return apiFetch<{ id: string; deleted: boolean }>(`/api/webhooks/${id}`, {
+    method: "DELETE",
+  });
+}
+
+// ── Audit Export ──
+
+export function exportAuditEvents(params: {
+  eventType?: string;
+  resourceType?: string;
+  from?: string;
+  to?: string;
+  format?: "json" | "csv";
+  limit?: number;
+}): Promise<{ events: AuditEvent[]; meta: { count: number; format: string } } | string> {
+  const search = new URLSearchParams();
+  if (params.eventType) search.set("eventType", params.eventType);
+  if (params.resourceType) search.set("resourceType", params.resourceType);
+  if (params.from) search.set("from", params.from);
+  if (params.to) search.set("to", params.to);
+  if (params.format) search.set("format", params.format);
+  if (params.limit) search.set("limit", String(params.limit));
+  const qs = search.toString();
+  return apiFetch(`/api/audit-events/export${qs ? `?${qs}` : ""}`);
 }

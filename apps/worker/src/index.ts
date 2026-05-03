@@ -1,5 +1,5 @@
-import { createSigningRequestWorker, redisConnection } from "./queues.js";
-import { env, isDev } from "./config.js";
+import { createSigningRequestWorker, createWebhookWorker, redisConnection } from "./queues.js";
+import { env } from "./config.js";
 import { logger } from "./lib/logger.js";
 
 logger.info("Starting Mandara Worker", {
@@ -9,11 +9,13 @@ logger.info("Starting Mandara Worker", {
   redisUrl: env.REDIS_URL.replace(/:\/\/.*@/, "://***@"), // mask credentials
 });
 
-const worker = createSigningRequestWorker();
+const signingWorker = createSigningRequestWorker();
+const webhookWorker = createWebhookWorker();
 
 async function gracefulShutdown(signal: string) {
   logger.info(`Received ${signal}, shutting down gracefully...`);
-  await worker.close();
+  await signingWorker.close();
+  await webhookWorker.close();
   await redisConnection.quit();
   process.exit(0);
 }

@@ -292,3 +292,31 @@ export interface CreateAgentApiKeyResult {
   createdAt: string;
   expiresAt?: string;
 }
+
+// ── Webhooks ──
+
+export interface Webhook {
+  id: string;
+  url: string;
+  events: string[];
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateWebhookInput {
+  organizationId?: string;
+  url: string;
+  events: string[];
+  secret?: string;
+  isActive?: boolean;
+}
+
+export interface WebhookDelivery {
+  id: string;
+  eventType: string;
+  status: string;
+  responseStatus?: number | null;
+  attemptedAt: string;
+  createdAt: string;
+}

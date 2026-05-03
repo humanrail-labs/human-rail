@@ -14,6 +14,8 @@ The `/vault/dwallets` page now includes a **Product Dashboard** tab that display
 - Overview cards (agents, wallets, policies, signing requests, signed count)
 - Create / preview / enqueue signing requests
 - **Agent API key management** (create, list, revoke)
+- **Webhook management** (create, list, delete)
+- **Audit export** (JSON/CSV download with filters)
 - Signing request execution detail with polling
 - Agents, wallets, and policies tables
 
