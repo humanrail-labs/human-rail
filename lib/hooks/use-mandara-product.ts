@@ -13,6 +13,9 @@ import {
   createSigningRequest,
   enqueueSigningRequest,
   getSigningRequestExecution,
+  listAgentApiKeys,
+  createAgentApiKey,
+  revokeAgentApiKey,
 } from "@/lib/mandara-api/client";
 import type {
   Agent,
@@ -24,6 +27,7 @@ import type {
   DevnetDemoSnapshot,
   PreviewSigningRequestInput,
   CreateSigningRequestInput,
+  CreateAgentApiKeyInput,
 } from "@/lib/mandara-api/types";
 
 export interface MandaraProductState {
@@ -160,6 +164,18 @@ export function useMandaraProduct() {
     }
   }, []);
 
+  const listApiKeys = useCallback(async (agentId: string) => {
+    return listAgentApiKeys(agentId);
+  }, []);
+
+  const createApiKey = useCallback(async (agentId: string, input: CreateAgentApiKeyInput) => {
+    return createAgentApiKey(agentId, input);
+  }, []);
+
+  const revokeApiKey = useCallback(async (agentId: string, keyId: string) => {
+    return revokeAgentApiKey(agentId, keyId);
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => refresh(), 0);
     return () => {
@@ -177,5 +193,8 @@ export function useMandaraProduct() {
     fetchExecution,
     startPollingExecution,
     stopPolling,
+    listApiKeys,
+    createApiKey,
+    revokeApiKey,
   };
 }

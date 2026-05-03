@@ -4,6 +4,7 @@ import { errorResponse } from "./lib/response.js";
 
 import prismaPlugin from "./plugins/prisma.js";
 import authPlugin from "./plugins/auth.js";
+import agentAuthPlugin from "./plugins/agentAuth.js";
 
 import healthRoutes from "./routes/health.js";
 import orgRoutes from "./routes/orgs.js";
@@ -14,6 +15,7 @@ import signingRequestRoutes from "./routes/signingRequests.js";
 import messageApprovalRoutes from "./routes/messageApprovals.js";
 import auditEventRoutes from "./routes/auditEvents.js";
 import productRoutes from "./routes/product.js";
+import v1SignatureRequestRoutes from "./routes/v1/signatureRequests.js";
 
 export async function buildServer() {
   const fastify = Fastify({
@@ -31,6 +33,7 @@ export async function buildServer() {
   // Plugins
   await fastify.register(prismaPlugin);
   await fastify.register(authPlugin);
+  await fastify.register(agentAuthPlugin);
 
   // Routes
   await fastify.register(healthRoutes);
@@ -42,6 +45,7 @@ export async function buildServer() {
   await fastify.register(messageApprovalRoutes);
   await fastify.register(auditEventRoutes);
   await fastify.register(productRoutes);
+  await fastify.register(v1SignatureRequestRoutes);
 
   // Global error handler
   fastify.setErrorHandler((err, request, reply) => {

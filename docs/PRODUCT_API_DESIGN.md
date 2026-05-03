@@ -488,6 +488,8 @@ z.object({
 
 All routes prefixed with `/v1` and require Bearer API key auth.
 
+> **Implementation details:** See [`PRODUCT_AGENT_API.md`](PRODUCT_AGENT_API.md) for the complete P6 implementation including route shapes, auth flow, and security notes.
+
 ---
 
 ### `POST /v1/signature-requests`

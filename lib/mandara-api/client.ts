@@ -20,6 +20,9 @@ import type {
   CreateSigningRequestResult,
   EnqueueResult,
   ExecutionResult,
+  AgentApiKey,
+  CreateAgentApiKeyInput,
+  CreateAgentApiKeyResult,
 } from "./types";
 
 function getHeaders(): Record<string, string> {
@@ -136,4 +139,26 @@ export function listAuditEvents(params?: {
   if (params?.limit) search.set("limit", String(params.limit));
   const qs = search.toString();
   return apiFetch<AuditEvent[]>(`/api/audit-events${qs ? `?${qs}` : ""}`);
+}
+
+// ── Agent API Keys ──
+
+export function listAgentApiKeys(agentId: string): Promise<AgentApiKey[]> {
+  return apiFetch<AgentApiKey[]>(`/api/agents/${agentId}/api-keys`);
+}
+
+export function createAgentApiKey(
+  agentId: string,
+  input: CreateAgentApiKeyInput
+): Promise<CreateAgentApiKeyResult> {
+  return apiFetch<CreateAgentApiKeyResult>(`/api/agents/${agentId}/api-keys`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function revokeAgentApiKey(agentId: string, keyId: string): Promise<AgentApiKey> {
+  return apiFetch<AgentApiKey>(`/api/agents/${agentId}/api-keys/${keyId}`, {
+    method: "DELETE",
+  });
 }

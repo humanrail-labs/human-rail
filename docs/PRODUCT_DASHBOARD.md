@@ -13,6 +13,7 @@ The `/vault/dwallets` page now includes a **Product Dashboard** tab that display
 - API status and devnet lifecycle state
 - Overview cards (agents, wallets, policies, signing requests, signed count)
 - Create / preview / enqueue signing requests
+- **Agent API key management** (create, list, revoke)
 - Signing request execution detail with polling
 - Agents, wallets, and policies tables
 
@@ -127,6 +128,8 @@ Select a signing request and click **Poll status** to auto-refresh execution det
 | `lib/hooks/use-mandara-product.ts` | React hook for dashboard data |
 | `components/vault/product-dashboard.tsx` | Dashboard UI component |
 | `app/vault/dwallets/page-client.tsx` | Page shell with tabs |
+| `apps/api/src/routes/agents.ts` | Dashboard API key management routes |
+| `apps/api/src/lib/apiKeys.ts` | Key generation and hashing utilities |
 
 ---
 

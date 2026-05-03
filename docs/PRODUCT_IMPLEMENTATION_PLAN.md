@@ -275,41 +275,31 @@ The Next.js dashboard reads from the Mandara API rather than `.local-ika/` JSON 
 ### Objective
 Allow external agents to authenticate with API keys and request signatures via HTTP.
 
-### Files Likely Changed
-- `apps/api/src/routes/v1/signature-requests.ts` (new)
-- `apps/api/src/routes/v1/agent-status.ts` (new)
-- `apps/api/src/middleware/api-key-auth.ts` (new) — hash verification
-- `app/dashboard/mandara/api-keys/` (new) — UI for creating/revoking keys
+### Files Changed
+- `packages/db/prisma/schema.prisma` — added `agent_api_key_used` audit event type
+- `packages/core/src/schemas/apiKey.ts` (new) — `CreateAgentApiKeySchema`, `ExternalSignatureRequestInputSchema`
+- `apps/api/src/lib/apiKeys.ts` (new) — `generateAgentApiKey`, `hashAgentApiKey`, `verifyAgentApiKey`
+- `apps/api/src/lib/rateLimit.ts` (new) — placeholder rate-limit structure
+- `apps/api/src/plugins/agentAuth.ts` (new) — Bearer token auth plugin
+- `apps/api/src/routes/agents.ts` — added `POST/GET /api/agents/:id/api-keys`, `DELETE /api/agents/:id/api-keys/:keyId`
+- `apps/api/src/routes/v1/signatureRequests.ts` (new) — `/v1/agent/status`, `/v1/signature-requests/preview`, `/v1/signature-requests`, `/v1/signature-requests/:id`
+- `apps/api/src/server.ts` — registered agent auth plugin and v1 routes
+- `lib/mandara-api/client.ts` — added API key client methods
+- `lib/mandara-api/types.ts` — added API key types
+- `lib/hooks/use-mandara-product.ts` — added `listApiKeys`, `createApiKey`, `revokeApiKey`
+- `components/vault/product-dashboard.tsx` — added Agent API Keys management card
+- `scripts/product-agent-api-smoke.mjs` (new) — full external API smoke test
+- `docs/PRODUCT_AGENT_API.md` (new)
 
 ### Acceptance Criteria
-- [ ] `POST /v1/signature-requests` with valid Bearer token returns 202.
-- [ ] Invalid or revoked API key returns 401.
-- [ ] API key scoped to agent; cannot request signatures for another agent's policies.
-- [ ] Dashboard UI shows API key creation flow (show once, copy to clipboard).
-
-### Risks
-- API keys are sensitive. A leak allows an attacker to request signatures within policy bounds.
-- Mitigation: keys are hash-only, support revocation, and can be scoped to specific policies.
-
----
-
-## P6 — Agent API Keys and External Signing Request Endpoint
-
-### Objective
-Allow external agents to authenticate with API keys and request signatures via HTTP.
-
-### Files Likely Changed
-- `apps/api/src/routes/v1/signature-requests.ts` (new)
-- `apps/api/src/routes/v1/agent-status.ts` (new)
-- `apps/api/src/middleware/api-key-auth.ts` (new)
-- `apps/api/src/services/api-keys.ts` (new) — hash verification
-- `app/dashboard/mandara/api-keys/` (new) — UI for creating/revoking keys
-
-### Acceptance Criteria
-- [ ] `POST /v1/signature-requests` with valid Bearer token returns 202.
-- [ ] Invalid or revoked API key returns 401.
-- [ ] API key scoped to agent; cannot request signatures for another agent's policies.
-- [ ] Dashboard UI shows API key creation flow (show once, copy to clipboard).
+- [x] `POST /v1/signature-requests` with valid Bearer token returns 201.
+- [x] Invalid or revoked API key returns 401.
+- [x] API key scoped to agent; cannot request signatures for another agent's policies.
+- [x] Dashboard UI shows API key creation flow (show once, copy to clipboard).
+- [x] Keys are stored as SHA-256 hashes only; raw key shown once.
+- [x] Policy ambiguity handled (multiple active policies requires explicit `policyId`).
+- [x] Rejected requests return 422 with `POLICY_REJECTED`; not persisted.
+- [x] Agent API smoke test passes.
 
 ### Risks
 - API keys are sensitive. A leak allows an attacker to request signatures within policy bounds.

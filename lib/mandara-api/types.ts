@@ -264,3 +264,31 @@ export interface ExecutionResult {
   signingRequest: SigningRequest;
   auditEvents: AuditEvent[];
 }
+
+// ── Agent API Keys ──
+
+export interface AgentApiKey {
+  id: string;
+  name: string;
+  prefix: string;
+  scopes: string[];
+  lastUsedAt?: string | null;
+  expiresAt?: string | null;
+  revokedAt?: string | null;
+  createdAt: string;
+}
+
+export interface CreateAgentApiKeyInput {
+  name: string;
+  expiresAt?: string;
+}
+
+export interface CreateAgentApiKeyResult {
+  id: string;
+  name: string;
+  prefix: string;
+  keyPreview: string;
+  rawKey: string;
+  createdAt: string;
+  expiresAt?: string;
+}

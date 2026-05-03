@@ -70,6 +70,9 @@ export default function ProductDashboard() {
     fetchExecution,
     startPollingExecution,
     stopPolling,
+    listApiKeys,
+    createApiKey,
+    revokeApiKey,
   } = useMandaraProduct();
 
   const [selectedSrId, setSelectedSrId] = useState<string | null>(null);
@@ -88,6 +91,14 @@ export default function ProductDashboard() {
   const [createdSr, setCreatedSr] = useState<Awaited<ReturnType<typeof createSigningRequest>> | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  // API Key management state
+  const [apiKeyAgentId, setApiKeyAgentId] = useState("");
+  const [apiKeyName, setApiKeyName] = useState("");
+  const [apiKeys, setApiKeys] = useState<Awaited<ReturnType<typeof listApiKeys>>>([]);
+  const [createdApiKey, setCreatedApiKey] = useState<Awaited<ReturnType<typeof createApiKey>> | null>(null);
+  const [apiKeyLoading, setApiKeyLoading] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
 
   const signedCount = signingRequests.filter((s) => s.status === "signed").length;
 
@@ -174,6 +185,50 @@ export default function ProductDashboard() {
       setPolling(false);
     };
   }, [selectedSrId, startPollingExecution]);
+
+  const handleLoadApiKeys = useCallback(async () => {
+    if (!apiKeyAgentId) return;
+    setApiKeyLoading(true);
+    setApiKeyError(null);
+    try {
+      const keys = await listApiKeys(apiKeyAgentId);
+      setApiKeys(keys);
+    } catch (err) {
+      setApiKeyError(err instanceof Error ? err.message : "Failed to load API keys");
+    } finally {
+      setApiKeyLoading(false);
+    }
+  }, [apiKeyAgentId, listApiKeys]);
+
+  const handleCreateApiKey = useCallback(async () => {
+    if (!apiKeyAgentId || !apiKeyName) return;
+    setApiKeyLoading(true);
+    setApiKeyError(null);
+    setCreatedApiKey(null);
+    try {
+      const key = await createApiKey(apiKeyAgentId, { name: apiKeyName });
+      setCreatedApiKey(key);
+      setApiKeyName("");
+      await handleLoadApiKeys();
+    } catch (err) {
+      setApiKeyError(err instanceof Error ? err.message : "Failed to create API key");
+    } finally {
+      setApiKeyLoading(false);
+    }
+  }, [apiKeyAgentId, apiKeyName, createApiKey, handleLoadApiKeys]);
+
+  const handleRevokeApiKey = useCallback(async (keyId: string) => {
+    if (!apiKeyAgentId) return;
+    setApiKeyLoading(true);
+    try {
+      await revokeApiKey(apiKeyAgentId, keyId);
+      await handleLoadApiKeys();
+    } catch (err) {
+      setApiKeyError(err instanceof Error ? err.message : "Failed to revoke API key");
+    } finally {
+      setApiKeyLoading(false);
+    }
+  }, [apiKeyAgentId, revokeApiKey, handleLoadApiKeys]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -394,6 +449,150 @@ export default function ProductDashboard() {
               <p className="text-[11px] text-emerald-200/60">
                 Queueing creates a worker job. Live signing requires the backend worker with live-devnet gates enabled.
               </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* API Key Management */}
+      <Card className="border-white/[0.06] bg-neutral-900/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base text-white">
+            <FileKey className="h-4 w-4 text-amber-400" />
+            Agent API Keys
+          </CardTitle>
+          <CardDescription className="text-neutral-500">
+            Create and revoke API keys for external agent authentication
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-neutral-400">Agent</Label>
+              <select
+                className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-sm text-neutral-300 outline-none focus:border-sky-500/30"
+                value={apiKeyAgentId}
+                onChange={(e) => {
+                  setApiKeyAgentId(e.target.value);
+                  setApiKeys([]);
+                  setCreatedApiKey(null);
+                }}
+              >
+                <option value="">Select agent…</option>
+                {agents.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-neutral-400">Key Name</Label>
+              <Input
+                value={apiKeyName}
+                onChange={(e) => setApiKeyName(e.target.value)}
+                placeholder="e.g. production-agent"
+                className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+              />
+            </div>
+            <div className="flex items-end gap-2">
+              <Button
+                size="sm"
+                onClick={handleCreateApiKey}
+                disabled={apiKeyLoading || !apiKeyAgentId || !apiKeyName}
+                className="bg-amber-600 text-xs hover:bg-amber-700"
+              >
+                <FileKey className="mr-1.5 h-3.5 w-3.5" />
+                Create API Key
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLoadApiKeys}
+                disabled={apiKeyLoading || !apiKeyAgentId}
+                className="text-xs"
+              >
+                <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${apiKeyLoading ? "animate-spin" : ""}`} />
+                Load Keys
+              </Button>
+            </div>
+          </div>
+
+          {apiKeyError && (
+            <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+              <p className="text-xs text-red-200/80">{apiKeyError}</p>
+            </div>
+          )}
+
+          {createdApiKey && (
+            <div className="space-y-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3">
+              <p className="text-xs font-medium text-amber-200">API Key Created</p>
+              <p className="text-[11px] text-amber-200/70">
+                Copy the raw key now. It will not be shown again.
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-xs text-amber-200/90">
+                  {createdApiKey.rawKey}
+                </code>
+                <button
+                  onClick={() => copyToClipboard(createdApiKey.rawKey)}
+                  className="text-amber-200/70 hover:text-amber-200"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-amber-200/60">Prefix</span>
+                <span className="text-amber-200/80">{createdApiKey.prefix}</span>
+              </div>
+            </div>
+          )}
+
+          {apiKeys.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-neutral-400">Existing Keys</p>
+              <div className="space-y-1.5">
+                {apiKeys.map((k) => (
+                  <div
+                    key={k.id}
+                    className="flex items-center justify-between rounded bg-black/20 px-2 py-1.5 text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-300">{k.name}</span>
+                      <code className="text-[10px] text-neutral-500">{k.prefix}</code>
+                      {k.revokedAt && (
+                        <Badge variant="outline" className="border-red-500/30 text-red-300 text-[10px]">
+                          Revoked
+                        </Badge>
+                      )}
+                      {k.expiresAt && !k.revokedAt && new Date(k.expiresAt) < new Date() && (
+                        <Badge variant="outline" className="border-amber-500/30 text-amber-300 text-[10px]">
+                          Expired
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {k.lastUsedAt && (
+                        <span className="text-[10px] text-neutral-500">
+                          Used {new Date(k.lastUsedAt).toLocaleDateString()}
+                        </span>
+                      )}
+                      {!k.revokedAt && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRevokeApiKey(k.id)}
+                          disabled={apiKeyLoading}
+                          className="h-6 text-[10px] border-red-500/20 text-red-300 hover:bg-red-500/10"
+                        >
+                          Revoke
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
