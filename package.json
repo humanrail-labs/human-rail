@@ -45,7 +45,10 @@
     "product:worker:smoke": "node scripts/product-worker-smoke.mjs",
     "product:worker:live-smoke": "node scripts/product-live-smoke.mjs",
     "product:dashboard:smoke": "node scripts/product-dashboard-smoke.mjs",
-    "product:agent-api:smoke": "node scripts/product-agent-api-smoke.mjs"
+    "product:agent-api:smoke": "node scripts/product-agent-api-smoke.mjs",
+    "product:create-dev-agent-key": "node scripts/create-dev-agent-api-key.mjs",
+    "mandara-sdk:build": "npm --prefix packages/mandara-sdk run build",
+    "mandara-sdk:smoke": "tsx scripts/mandara-sdk-smoke.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

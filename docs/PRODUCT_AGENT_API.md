@@ -276,6 +276,14 @@ When a request is rejected by policy evaluation:
 | `apps/api/src/lib/rateLimit.ts` | Rate-limit placeholder |
 | `packages/core/src/schemas/apiKey.ts` | Zod schemas for API keys and external requests |
 | `scripts/product-agent-api-smoke.mjs` | Smoke test |
+| `packages/mandara-sdk/` | TypeScript SDK for external agent integrations |
+| `examples/mandara-sdk/` | SDK usage examples |
+
+---
+
+## SDK
+
+For a typed developer SDK, see [`MANDARA_SDK.md`](MANDARA_SDK.md).
 
 ---
 

@@ -332,7 +332,8 @@ lib/
 
 packages/
   ├── agent/                   # AI agent runtime + tool executor
-  └── sdk/                     # HumanRail SDK
+  ├── sdk/                     # HumanRail SDK
+  └── mandara-sdk/             # Mandara external agent API SDK (@mandara/sdk)
 
 programs/
   └── humanrail-dwallet-guard/ # Rust/Anchor program

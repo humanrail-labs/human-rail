@@ -312,21 +312,32 @@ Allow external agents to authenticate with API keys and request signatures via H
 ### Objective
 A developer-friendly SDK that wraps the Agent API.
 
-### Files Likely Changed
+### Files Changed
 - `packages/mandara-sdk/` (new)
-  - `src/index.ts` — `MandaraClient`
-  - `src/types.ts` — shared types
-  - `src/errors.ts` — error classes
-  - `package.json`
-  - `README.md`
+  - `src/index.ts` — exports
+  - `src/client.ts` — `MandaraClient` with getAgentStatus, previewSignatureRequest, requestSignature, getSignatureRequest, waitForSignature
+  - `src/types.ts` — TypeScript interfaces
+  - `src/errors.ts` — `MandaraApiError`, `MandaraTimeoutError`, `MandaraValidationError`
+  - `src/utils.ts` — `isSigned`, `isRejected`, `assertSigned`
+  - `package.json`, `tsconfig.json`
+- `examples/mandara-sdk/` (new) — `basic-request.ts`, `preview-only.ts`, `wait-for-signature.ts`
+- `scripts/mandara-sdk-smoke.ts` (new) — SDK smoke test
+- `scripts/create-dev-agent-api-key.mjs` (new) — helper to create a dev API key
+- `docs/MANDARA_SDK.md` (new)
+- `package.json` — added `mandara-sdk:build`, `mandara-sdk:smoke`, `product:create-dev-agent-key`
 
 ### Acceptance Criteria
-- [ ] `MandaraClient` supports `createSignatureRequest()`, `getSignatureRequest()`, `getAgentStatus()`.
-- [ ] SDK handles pagination, retries, and error parsing automatically.
-- [ ] Published to npm (private scope initially: `@humanrail/mandara`).
+- [x] `MandaraClient` supports `getAgentStatus()`, `previewSignatureRequest()`, `requestSignature()`, `getSignatureRequest()`, `waitForSignature()`.
+- [x] SDK handles API envelope parsing, network errors, and non-2xx responses via `MandaraApiError`.
+- [x] `waitForSignature` polls with configurable timeout and interval; throws on terminal rejected states.
+- [x] Utility functions: `isSigned`, `isRejected`, `assertSigned`.
+- [x] Examples cover basic request, preview-only, and wait-for-signature flows.
+- [x] SDK smoke test passes when `MANDARA_AGENT_API_KEY` is set.
+- [x] Helper script creates a dev API key with one command.
+- [x] Node 18+ compatible (uses global fetch); custom fetch supported.
 
 ### Risks
-- API surface may still change. SDK should be versioned and follow semver.
+- API surface may still change. SDK is marked `0.1.0` and private.
 - Mitigation: mark initial releases as `0.x` with breaking-change warnings.
 
 ---

@@ -27,6 +27,7 @@
 | [`PRODUCT_ARTIFACT_IMPORT.md`](PRODUCT_ARTIFACT_IMPORT.md) | Import completed devnet lifecycle into product database and inspect via API |
 | [`PRODUCT_DASHBOARD.md`](PRODUCT_DASHBOARD.md) | Product dashboard UI: data, create/preview/enqueue, execution polling |
 | [`PRODUCT_AGENT_API.md`](PRODUCT_AGENT_API.md) | External agent API: API keys, Bearer auth, /v1 endpoints, security notes |
+| [`MANDARA_SDK.md`](MANDARA_SDK.md) | TypeScript SDK: install, quick start, API reference, error handling, examples |
 
 ## Technical Documentation
 
