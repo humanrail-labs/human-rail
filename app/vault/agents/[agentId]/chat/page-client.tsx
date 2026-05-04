@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const AGENT_SERVER_URL = process.env.NEXT_PUBLIC_AGENT_SERVER_URL || "http://localhost:4000";
+const AGENT_SERVER_URL = "/api/agents"; // Proxied through Next.js API route
 
 interface ChatMessage {
   id: string;
@@ -140,9 +140,9 @@ export default function AgentChatPageClient() {
     setSending(true);
 
     try {
-      const res = await fetch(`${AGENT_SERVER_URL}/agents/${agentId}/chat`, {
+      const res = await fetch(`${AGENT_SERVER_URL}/${agentId}/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.NEXT_PUBLIC_AGENT_SERVER_SECRET || ""}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text }),
       });
       if (!res.ok) {
