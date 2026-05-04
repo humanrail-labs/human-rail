@@ -237,8 +237,13 @@ export default function AgentVaultLanding() {
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '4rem' }}>
+                <Link href="/mandara">
+                  <Button className="gap-2 rounded-full bg-sky-600 px-8 py-6 text-lg font-semibold text-white hover:bg-sky-700">
+                    Mandara Console <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </Link>
                 <Link href="/vault">
-                  <Button className="gap-2 rounded-full bg-white px-8 py-6 text-lg font-semibold text-black hover:bg-neutral-200">
+                  <Button variant="outline" className="gap-2 rounded-full border-white/15 px-8 py-6 text-lg font-medium text-white hover:bg-white/5">
                     Launch Vault <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
@@ -324,7 +329,7 @@ export default function AgentVaultLanding() {
               Ready to deploy your first agent?
             </h2>
             <p style={{ fontSize: '1.05rem', color: 'rgba(255,255,255,0.45)', maxWidth: '550px', margin: '0 auto 2rem', lineHeight: 1.7 }}>
-              Agent Vault is live on Solana devnet. Connect your wallet, verify your identity, and start building with guardrails.
+              Mandara is live on Solana devnet. Connect your wallet, verify your identity, and start building with guardrails. Or try the Mandara Console for policy-governed AI agent wallets.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
               <Link href="/vault">
@@ -345,7 +350,7 @@ export default function AgentVaultLanding() {
           <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)' }}>
               <Shield className="h-5 w-5" />
-              <span style={{ fontSize: '0.875rem' }}>Agent Vault · Powered by HumanRail Protocol</span>
+              <span style={{ fontSize: '0.875rem' }}>Mandara · Powered by HumanRail Protocol</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.875rem' }}>
               <Link href="/vault" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Vault</Link>

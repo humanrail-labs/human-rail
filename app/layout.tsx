@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Agent Vault · HumanRail", template: "%s · Agent Vault · HumanRail" },
-  description: "Deploy, monitor, and control AI agents on Solana with on-chain guardrails.",
+  title: { default: "Mandara · Policy-Governed AI Agent Wallets", template: "%s · Mandara" },
+  description: "Give AI agents signing power without giving them unlimited wallet control. Mandara is a devnet beta control plane for policy-governed AI agent wallets, powered by HumanRail guardrails and Ika dWallet signing.",
 };
 
 export default function RootLayout({

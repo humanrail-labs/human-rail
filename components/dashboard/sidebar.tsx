@@ -78,7 +78,7 @@ export const Sidebar: FC = () => {
                 Agent Vault
               </span>
               <span className="text-[10px] text-neutral-500 leading-tight">
-                by HumanRail
+                by HumanRail Protocol
               </span>
             </div>
           )}
@@ -151,6 +151,11 @@ export const Sidebar: FC = () => {
             <Github className="h-4 w-4 shrink-0" />
             {!collapsed && <span>GitHub</span>}
           </a>
+          <Link href="/mandara"
+            className={cn("flex items-center gap-3 rounded-md px-3 py-1.5 text-[12px] font-medium text-neutral-600 transition-all hover:text-neutral-400", collapsed && "justify-center")}>
+            <Globe className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>Mandara Console</span>}
+          </Link>
           <a href="https://humanrail.org" target="_blank" rel="noopener noreferrer"
             className={cn("flex items-center gap-3 rounded-md px-3 py-1.5 text-[12px] font-medium text-neutral-600 transition-all hover:text-neutral-400", collapsed && "justify-center")}>
             <Globe className="h-4 w-4 shrink-0" />

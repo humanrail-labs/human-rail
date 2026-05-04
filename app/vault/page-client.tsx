@@ -134,7 +134,7 @@ export default function VaultHomePage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-sky-200">New: Guarded dWallets</p>
-                <p className="text-xs text-sky-400/60">Cross-chain AI agent custody with Ika MPC signing and HumanRail policy guardrails.</p>
+                <p className="text-xs text-sky-400/60">Cross-chain AI agent custody with Ika MPC signing and Mandara policy guardrails.</p>
               </div>
             </div>
             <Button variant="outline" size="sm" className="gap-1.5 border-sky-500/20 text-sky-400 hover:bg-sky-500/5 hover:text-sky-300" disabled>

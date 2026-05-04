@@ -18,6 +18,7 @@ import { Cluster } from "@/lib/solana/providers";
 import { ChevronDown, User, Bot, Shield, Zap, FileText, Receipt } from "lucide-react";
 
 const NAV_ITEMS = [
+  { href: "/mandara", label: "Mandara", icon: Zap },
   { href: "/human", label: "Human", icon: User },
   { href: "/agent", label: "Agent", icon: Bot },
   { href: "/delegation", label: "Delegation", icon: Shield },
@@ -46,12 +47,12 @@ export const Navbar: FC = () => {
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/logo.png"
-              alt="HumanRail"
+              alt="Mandara"
               width={32}
               height={32}
               className="h-8 w-8"
             />
-            <span className="text-lg font-semibold text-white">Agent Vault</span>
+            <span className="text-lg font-semibold text-white">Mandara</span>
           </Link>
 
           <div className="hidden items-center gap-1 md:flex">
