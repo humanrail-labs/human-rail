@@ -28,6 +28,7 @@
 | [`PRODUCT_DASHBOARD.md`](PRODUCT_DASHBOARD.md) | Product dashboard UI: data, create/preview/enqueue, execution polling |
 | [`PRODUCT_AGENT_API.md`](PRODUCT_AGENT_API.md) | External agent API: API keys, Bearer auth, /v1 endpoints, security notes |
 | [`MANDARA_SDK.md`](MANDARA_SDK.md) | TypeScript SDK: install, quick start, API reference, error handling, examples |
+| [`PRODUCT_FRONTEND_REBUILD.md`](PRODUCT_FRONTEND_REBUILD.md) | P11 frontend rebuild: landing page, console dashboard, onboarding wizard, route map |
 | [`PRODUCT_WEBHOOKS.md`](PRODUCT_WEBHOOKS.md) | Webhooks: event types, payload format, signature verification, retry behavior |
 | [`PRODUCT_AUDIT_EXPORTS.md`](PRODUCT_AUDIT_EXPORTS.md) | Audit exports: JSON/CSV download, event types, query parameters |
 | [`PRODUCT_DEPLOYMENT.md`](PRODUCT_DEPLOYMENT.md) | Devnet beta deployment: Docker, Render, Fly, Railway, VPS, env vars, health checks |

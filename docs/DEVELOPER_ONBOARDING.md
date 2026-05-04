@@ -299,7 +299,29 @@ Your endpoint will receive HMAC-signed POST requests. See [`PRODUCT_WEBHOOKS.md`
 
 ---
 
-## 14. Audit Export
+## 14. Frontend Console (Non-Technical Users)
+
+For a guided UI experience, open the Mandara Console:
+
+```bash
+# In a new terminal
+npm run dev
+```
+
+Then open http://localhost:3000/mandara/app/onboarding
+
+The onboarding wizard walks through:
+1. Creating an agent
+2. Importing a signing wallet
+3. Setting a mandate
+4. Creating a connection key
+5. Sending a test signature request
+
+For technical details (PDAs, Ika program IDs, transaction signatures), use `/vault/dwallets`.
+
+---
+
+## 15. Audit Export
 
 ```bash
 # JSON

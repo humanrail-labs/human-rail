@@ -1,25 +1,26 @@
 # Mandara Product Dashboard
 
 > Next.js dashboard integration for the Mandara product backend.  
-> **Phase:** P5 — Product Dashboard MVP  
-> **Last updated:** 2026-05-02
+> **Phase:** P11 — Product Frontend Rebuild  
+> **Last updated:** 2026-05-04
 
 ---
 
 ## Overview
 
-The `/vault/dwallets` page now includes a **Product Dashboard** tab that displays live data from the Mandara API:
+## Routes
 
-- API status and devnet lifecycle state
-- Overview cards (agents, wallets, policies, signing requests, signed count)
-- Create / preview / enqueue signing requests
-- **Agent API key management** (create, list, revoke)
-- **Webhook management** (create, list, delete)
-- **Audit export** (JSON/CSV download with filters)
-- Signing request execution detail with polling
-- Agents, wallets, and policies tables
+| Route | Audience | Features |
+|---|---|---|
+| `/mandara` | Public | Product landing page with value prop, features, devnet disclaimer |
+| `/mandara/app` | Users | Console dashboard with setup progress, overview cards, recent requests, activity log |
+| `/mandara/app/onboarding` | Users | Guided 7-step wizard: agent → wallet → mandate → API key → test request |
+| `/mandara/app/agents` | Users | Agent list and status |
+| `/mandara/app/requests` | Users | Signature requests with human-readable status and execution detail |
+| `/mandara/app/activity` | Users | Audit activity log in plain English |
+| `/vault/dwallets` | Technical | **Preserved** — Advanced Technical Proof view with PDA derivations, Ika program details, on-chain transactions |
 
-The existing grant proof UI (Ika lifecycle, Phase 4B/5D/5E, agent runtime tool) is preserved under the **Grant Proof** tab.
+The `/vault/dwallets` page now includes a **Product Dashboard** tab that displays live data from the Mandara API. The new `/mandara/app` console is the primary entry point for non-technical users.
 
 ---
 

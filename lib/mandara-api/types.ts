@@ -312,6 +312,47 @@ export interface CreateWebhookInput {
   isActive?: boolean;
 }
 
+// ── Create Inputs ──
+
+export interface CreateAgentInput {
+  organizationId?: string;
+  name: string;
+  description?: string;
+}
+
+export interface ImportWalletInput {
+  organizationId?: string;
+  name?: string;
+  dwalletPda: string;
+  signingPublicKey?: string;
+  curve: string;
+  authority?: string;
+  state?: string;
+  ikaProgramId?: string;
+  guardCpiAuthority?: string;
+  authorityTransferSignature?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreatePolicyInput {
+  organizationId?: string;
+  agentId: string;
+  ikaDwalletId: string;
+  name?: string;
+  chainId: number;
+  asset: string;
+  recipient: string;
+  perTxLimit: string;
+  dailyLimit: string;
+  totalLimit?: string;
+  expiresAt?: string;
+}
+
+export interface CreateOrganizationInput {
+  name: string;
+  slug: string;
+}
+
 export interface WebhookDelivery {
   id: string;
   eventType: string;

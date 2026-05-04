@@ -3,9 +3,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   getDevnetDemo,
+  listOrganizations,
+  createOrganization,
   listAgents,
+  createAgent,
   listWallets,
+  importWallet,
   listPolicies,
+  createPolicy,
   listSigningRequests,
   listMessageApprovals,
   listAuditEvents,
@@ -32,6 +37,11 @@ import type {
   PreviewSigningRequestInput,
   CreateSigningRequestInput,
   CreateAgentApiKeyInput,
+  Organization,
+  CreateAgentInput,
+  ImportWalletInput,
+  CreatePolicyInput,
+  CreateOrganizationInput,
 } from "@/lib/mandara-api/types";
 
 export interface MandaraProductState {
@@ -39,6 +49,7 @@ export interface MandaraProductState {
   error: string | null;
   apiAvailable: boolean | null;
   devnetDemo: DevnetDemoSnapshot | null;
+  organizations: Organization[];
   agents: Agent[];
   wallets: IkaDwallet[];
   policies: GuardedPolicy[];
@@ -53,6 +64,7 @@ export function useMandaraProduct() {
     error: null,
     apiAvailable: null,
     devnetDemo: null,
+    organizations: [],
     agents: [],
     wallets: [],
     policies: [],
@@ -69,8 +81,9 @@ export function useMandaraProduct() {
     try {
       const devnetDemo = await getDevnetDemo();
 
-      const [agents, wallets, policies, signingRequests, messageApprovals, auditEvents] =
+      const [organizations, agents, wallets, policies, signingRequests, messageApprovals, auditEvents] =
         await Promise.all([
+          listOrganizations().catch(() => [] as Organization[]),
           listAgents().catch(() => [] as Agent[]),
           listWallets().catch(() => [] as IkaDwallet[]),
           listPolicies().catch(() => [] as GuardedPolicy[]),
@@ -84,6 +97,7 @@ export function useMandaraProduct() {
         error: null,
         apiAvailable: true,
         devnetDemo,
+        organizations,
         agents,
         wallets,
         policies,
@@ -172,6 +186,30 @@ export function useMandaraProduct() {
     return listAgentApiKeys(agentId);
   }, []);
 
+  const createOrg = useCallback(async (input: CreateOrganizationInput) => {
+    const org = await createOrganization(input);
+    await refresh();
+    return org;
+  }, [refresh]);
+
+  const createNewAgent = useCallback(async (input: CreateAgentInput) => {
+    const agent = await createAgent(input);
+    await refresh();
+    return agent;
+  }, [refresh]);
+
+  const importNewWallet = useCallback(async (input: ImportWalletInput) => {
+    const wallet = await importWallet(input);
+    await refresh();
+    return wallet;
+  }, [refresh]);
+
+  const createNewPolicy = useCallback(async (input: CreatePolicyInput) => {
+    const policy = await createPolicy(input);
+    await refresh();
+    return policy;
+  }, [refresh]);
+
   const createApiKey = useCallback(async (agentId: string, input: CreateAgentApiKeyInput) => {
     return createAgentApiKey(agentId, input);
   }, []);
@@ -204,5 +242,9 @@ export function useMandaraProduct() {
     createWebhook,
     deleteWebhook,
     exportAuditEvents,
+    createOrganization: createOrg,
+    createAgent: createNewAgent,
+    importWallet: importNewWallet,
+    createPolicy: createNewPolicy,
   };
 }

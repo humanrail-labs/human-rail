@@ -28,6 +28,9 @@
 | P6 | Agent API keys | External signing endpoint with API key auth | 3 days |
 | P7 | Mandara SDK | TypeScript SDK for developers consuming the Agent API | 2–3 days |
 | P8 | Webhooks + exports | Real-time events + CSV/JSON audit exports | 3 days |
+| P9 | Devnet beta deployment | Dockerfiles, CI, Render deployment, health checks | 2 days |
+| P10 | Product launch package | Launch docs, landing copy, demo script, pricing, audit | 2 days |
+| P11 | Frontend rebuild | Product landing page, console dashboard, onboarding wizard for non-technical users | 2 days |
 | P9 | Devnet beta deploy | Hosted deployment on devnet with CI/CD | 2–3 days |
 | P10 | Launch docs | Product docs, developer guide, API reference | 2 days |
 

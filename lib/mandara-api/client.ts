@@ -26,6 +26,11 @@ import type {
   Webhook,
   CreateWebhookInput,
   WebhookDelivery,
+  Organization,
+  CreateAgentInput,
+  ImportWalletInput,
+  CreatePolicyInput,
+  CreateOrganizationInput,
 } from "./types";
 
 function getHeaders(): Record<string, string> {
@@ -66,10 +71,32 @@ export function getDevnetDemo(): Promise<DevnetDemoSnapshot> {
   return apiFetch<DevnetDemoSnapshot>("/api/product/devnet-demo");
 }
 
+// ── Organizations ──
+
+export function listOrganizations(): Promise<Organization[]> {
+  return apiFetch<Organization[]>("/api/orgs");
+}
+
+export function createOrganization(
+  input: CreateOrganizationInput
+): Promise<Organization> {
+  return apiFetch<Organization>("/api/orgs", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 // ── Agents ──
 
 export function listAgents(): Promise<Agent[]> {
   return apiFetch<Agent[]>("/api/agents");
+}
+
+export function createAgent(input: CreateAgentInput): Promise<Agent> {
+  return apiFetch<Agent>("/api/agents", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
 // ── Wallets ──
@@ -78,10 +105,24 @@ export function listWallets(): Promise<IkaDwallet[]> {
   return apiFetch<IkaDwallet[]>("/api/wallets");
 }
 
+export function importWallet(input: ImportWalletInput): Promise<IkaDwallet> {
+  return apiFetch<IkaDwallet>("/api/wallets/import", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 // ── Policies ──
 
 export function listPolicies(): Promise<GuardedPolicy[]> {
   return apiFetch<GuardedPolicy[]>("/api/policies");
+}
+
+export function createPolicy(input: CreatePolicyInput): Promise<GuardedPolicy> {
+  return apiFetch<GuardedPolicy>("/api/policies", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
 // ── Signing Requests ──
