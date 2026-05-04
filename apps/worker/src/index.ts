@@ -1,6 +1,7 @@
 import { createSigningRequestWorker, createWebhookWorker, redisConnection } from "./queues.js";
 import { env } from "./config.js";
 import { logger } from "./lib/logger.js";
+import { startHealthServer } from "./health.js";
 
 logger.info("Starting Mandara Worker", {
   env: env.MANDARA_ENV,
@@ -11,9 +12,13 @@ logger.info("Starting Mandara Worker", {
 
 const signingWorker = createSigningRequestWorker();
 const webhookWorker = createWebhookWorker();
+const healthServer = startHealthServer();
 
 async function gracefulShutdown(signal: string) {
   logger.info(`Received ${signal}, shutting down gracefully...`);
+  if (healthServer) {
+    healthServer.close();
+  }
   await signingWorker.close();
   await webhookWorker.close();
   await redisConnection.quit();

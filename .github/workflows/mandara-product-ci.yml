@@ -1,0 +1,52 @@
+name: Mandara Product CI
+
+on:
+  push:
+    branches:
+      - product/mandara-cloud-mvp
+  pull_request:
+    branches:
+      - product/mandara-cloud-mvp
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  product-ci:
+    name: Product Build & Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run product:db:generate
+
+      - name: Build Mandara SDK
+        run: npm run mandara-sdk:build
+
+      - name: Build API
+        run: npm run product:api:build
+
+      - name: Build Worker
+        run: npm run product:worker:build
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Product CI checks
+        run: bash scripts/product-ci-check.sh
+
+      - name: Product readiness check
+        run: bash scripts/product-readiness-check.sh

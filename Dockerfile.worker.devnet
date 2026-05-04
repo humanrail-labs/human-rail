@@ -1,0 +1,68 @@
+# Mandara Worker — Live Devnet Mode
+# Multi-stage build that compiles the Ika Rust CLI and copies it into the final Node image.
+# Supports live on-chain execution (Guard CPI + Ika gRPC signing) on Solana devnet.
+#
+# Build:
+#   docker build -f Dockerfile.worker.devnet -t mandara-worker:devnet .
+# Run:
+#   docker run --env-file .env.product \
+#     -v /path/to/service-wallet.json:/secrets/wallet.json:ro \
+#     -v /path/to/dwallet.json:/app/.local-ika/dwallet.json:ro \
+#     -e MANDARA_SERVICE_WALLET_PATH=/secrets/wallet.json \
+#     mandara-worker:devnet
+#
+# IMPORTANT:
+# - Ika is pre-alpha with a mock signer. Not production MPC custody.
+# - Devnet only. Never enable live execution on mainnet.
+# - Mount service wallet and dWallet artifact as secret volumes.
+
+# ── Stage 1: Build Rust CLI ──
+FROM rust:1-bookworm AS rust-builder
+WORKDIR /build
+
+# Install protobuf compiler for tonic/gRPC build
+RUN apt-get update && apt-get install -y protobuf-compiler && rm -rf /var/lib/apt/lists/*
+
+# Copy only the Rust CLI source for optimal layer caching
+COPY tools/ika-dkg-cli ./tools/ika-dkg-cli
+
+# Build release binary
+RUN cargo build --release --manifest-path tools/ika-dkg-cli/Cargo.toml
+
+# ── Stage 2: Node Worker ──
+FROM node:22-slim AS base
+WORKDIR /app
+
+# Install openssl for Prisma client
+RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# Copy workspace manifests first for layer caching
+COPY package.json package-lock.json ./
+COPY apps/api/package.json ./apps/api/
+COPY apps/worker/package.json ./apps/worker/
+COPY packages/core/package.json ./packages/core/
+COPY packages/db/package.json ./packages/db/
+COPY packages/agent/package.json ./packages/agent/
+COPY packages/sdk/package.json ./packages/sdk/
+COPY packages/mandara-sdk/package.json ./packages/mandara-sdk/
+
+# Install dependencies (workspaces)
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Generate Prisma client and build dependency chain
+RUN npm run product:db:generate
+RUN npm --prefix packages/core run build
+RUN npm --prefix packages/db run build
+RUN npm --prefix apps/worker run build
+
+# Copy pre-built Rust binary
+COPY --from=rust-builder /build/tools/ika-dkg-cli/target/release/ika-dkg-cli /usr/local/bin/ika-dkg-cli
+RUN chmod +x /usr/local/bin/ika-dkg-cli
+
+ENV NODE_ENV=production
+ENV MANDARA_IKA_CLI_PATH=/usr/local/bin/ika-dkg-cli
+
+CMD ["npm", "run", "product:worker:start"]

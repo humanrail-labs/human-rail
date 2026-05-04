@@ -1,0 +1,114 @@
+# Mandara Devnet Beta — Docker Compose
+# Stacks: Postgres, Redis, API, Worker
+#
+# Usage:
+#   cp .env.product.example .env.product
+#   docker compose -f docker-compose.beta.yml up --build
+#
+# For live-devnet worker:
+#   docker compose -f docker-compose.beta.yml build worker --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=1
+#   # Or switch to Dockerfile.worker.devnet:
+#   WORKER_DOCKERFILE=Dockerfile.worker.devnet docker compose -f docker-compose.beta.yml up --build
+#
+# IMPORTANT: This is a devnet beta stack. Ika uses a pre-alpha mock signer.
+# Do NOT use for production custody.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mandara-beta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mandara
+      POSTGRES_PASSWORD: mandara
+      POSTGRES_DB: mandara_beta
+    volumes:
+      - mandara_beta_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mandara -d mandara_beta"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: mandara-beta-redis
+    restart: unless-stopped
+    volumes:
+      - mandara_beta_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: mandara-beta-api
+    restart: unless-stopped
+    env_file:
+      - .env.product
+    environment:
+      DATABASE_URL: "postgresql://mandara:mandara@postgres:5432/mandara_beta?schema=public"
+      REDIS_URL: "redis://redis:6379"
+      MANDARA_API_HOST: "0.0.0.0"
+      MANDARA_API_PORT: "4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    ports:
+      - "4000:4000"
+
+  worker:
+    build:
+      context: .
+      dockerfile: ${WORKER_DOCKERFILE:-Dockerfile.worker}
+    container_name: mandara-beta-worker
+    restart: unless-stopped
+    env_file:
+      - .env.product
+    environment:
+      DATABASE_URL: "postgresql://mandara:mandara@postgres:5432/mandara_beta?schema=public"
+      REDIS_URL: "redis://redis:6379"
+      MANDARA_WORKER_MODE: "dry-run"
+      MANDARA_ENABLE_LIVE_EXECUTION: "false"
+      MANDARA_WORKER_HEALTH_PORT: "4001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    # Live-devnet mounts (commented out by default):
+    # volumes:
+    #   - /path/to/service-wallet.json:/secrets/service-wallet.json:ro
+    #   - /path/to/dwallet.json:/app/.local-ika/dwallet.json:ro
+    # environment:
+    #   MANDARA_WORKER_MODE: "live-devnet"
+    #   MANDARA_ENABLE_LIVE_EXECUTION: "true"
+    #   MANDARA_SERVICE_WALLET_PATH: "/secrets/service-wallet.json"
+
+volumes:
+  mandara_beta_postgres_data:
+  mandara_beta_redis_data:

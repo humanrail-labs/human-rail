@@ -1,0 +1,59 @@
+# Dependencies
+node_modules
+*/node_modules
+.pnpm-store
+
+# Build outputs
+.next
+dist
+target
+*.tsbuildinfo
+
+# Git
+.git
+.gitignore
+
+# Environment and secrets
+.env*
+!.env.product.example
+.local-ika
+.local-keys
+.local-worker
+**/*-keypair.json
+
+# Coverage and logs
+coverage
+logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation (not needed in image)
+docs
+*.md
+
+# Test files
+scripts/*-smoke.mjs
+scripts/*-smoke.ts
+scripts/product-ci-check.sh
+scripts/product-readiness-check.sh
+
+# CI
+.github
+
+# Grant demo artifacts
+.local-ika
+.local-keys
+.local-worker

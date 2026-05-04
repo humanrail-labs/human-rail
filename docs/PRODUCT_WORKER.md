@@ -1,9 +1,9 @@
 # Mandara Product Worker
 
 > Background worker infrastructure for executing signing requests.  
-> **Phase:** P4C — Live devnet execution verified end-to-end.  
+> **Phase:** P9 — Devnet beta deployment package complete.  
 > **Queue:** BullMQ + Redis  
-> **Last updated:** 2026-05-02
+> **Last updated:** 2026-05-04
 
 ---
 
@@ -155,6 +155,22 @@ npm run product:worker:build
 npm run product:worker:start
 ```
 
+### Docker
+
+```bash
+# Dry-run worker (default)
+docker build -f Dockerfile.worker -t mandara-worker .
+docker run --env-file .env.product mandara-worker
+
+# Live-devnet worker (includes Rust CLI)
+docker build -f Dockerfile.worker.devnet -t mandara-worker:devnet .
+docker run --env-file .env.product \
+  -v /path/to/wallet.json:/secrets/wallet.json:ro \
+  -v /path/to/dwallet.json:/app/.local-ika/dwallet.json:ro \
+  -e MANDARA_SERVICE_WALLET_PATH=/secrets/wallet.json \
+  mandara-worker:devnet
+```
+
 ### Smoke Tests
 
 ```bash
@@ -211,6 +227,23 @@ npm run product:worker:live-smoke
 - The worker skips processing if the signing request is already in a terminal state (`signed`, `policy_rejected`, `failed`).
 - Dry-run does not mutate on-chain state, so it is inherently safe to re-run.
 - Live execution checks if `MessageApproval` is already `Signed` before sending the Guard CPI, and skips to polling if `Pending` + `GuardSigningRequest` approved.
+
+---
+
+## Worker Health Server
+
+When `MANDARA_WORKER_HEALTH_PORT` is set, the worker exposes a lightweight HTTP server:
+
+```bash
+# Start worker with health port
+MANDARA_WORKER_HEALTH_PORT=4001 npm run product:worker:start
+```
+
+Endpoints:
+- `GET /health` — Returns `status`, `workerMode`, `liveExecutionEnabled`, `checks` (database, redis)
+- `GET /ready` — Returns 503 if any check is failing
+
+This is used by Docker Compose and platform health checks.
 
 ---
 

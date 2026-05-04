@@ -30,6 +30,9 @@
 | [`MANDARA_SDK.md`](MANDARA_SDK.md) | TypeScript SDK: install, quick start, API reference, error handling, examples |
 | [`PRODUCT_WEBHOOKS.md`](PRODUCT_WEBHOOKS.md) | Webhooks: event types, payload format, signature verification, retry behavior |
 | [`PRODUCT_AUDIT_EXPORTS.md`](PRODUCT_AUDIT_EXPORTS.md) | Audit exports: JSON/CSV download, event types, query parameters |
+| [`PRODUCT_DEPLOYMENT.md`](PRODUCT_DEPLOYMENT.md) | Devnet beta deployment: Docker, Render, Fly, Railway, VPS, env vars, health checks |
+| [`PRODUCT_OPERATIONS_RUNBOOK.md`](PRODUCT_OPERATIONS_RUNBOOK.md) | Day-2 operations: start/stop, health checks, queue inspection, incident response |
+| [`BETA_LAUNCH_CHECKLIST.md`](BETA_LAUNCH_CHECKLIST.md) | Pre-beta readiness checklist: infrastructure, security, docs, monitoring, legal |
 
 ## Technical Documentation
 

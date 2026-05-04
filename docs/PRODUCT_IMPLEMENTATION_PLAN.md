@@ -1,8 +1,8 @@
 # Mandara Product Implementation Plan
 
-> **Status:** P4B complete. Worker supports dry-run (default) and live devnet execution with Guard CPI + Ika signing.  
+> **Status:** P9 complete. Devnet beta deployment package ready: Docker images, CI/CD, deployment docs, operations runbook, and beta checklist.  
 > **Goal:** Turn the HumanRail grant implementation into a hosted product MVP.  
-> **Last updated:** 2026-05-02
+> **Last updated:** 2026-05-04
 
 ---
 
@@ -392,24 +392,50 @@ Real-time event delivery and compliance-ready data exports.
 ## P9 — Hosted Devnet Beta Deployment
 
 ### Objective
-Deploy the full stack to a hosted devnet environment.
+Prepare the full stack for hosted devnet beta deployment: Docker images, compose stack, CI/CD, deployment docs, operations runbook, and beta checklist.
 
-### Files Likely Changed
-- `Dockerfile` (new) — API + worker multi-stage builds
-- `docker-compose.prod.yml` (new) — production-like stack
-- `.github/workflows/ci.yml` (new) — lint, build, test
-- `.github/workflows/deploy-devnet.yml` (new) — deploy to Fly / Railway / Render
-- `apps/api/src/config.ts` — environment-based config
+### Files Changed
+- `Dockerfile.api` (new) — API multi-stage build
+- `Dockerfile.worker` (new) — Worker dry-run image
+- `Dockerfile.worker.devnet` (new) — Worker live-devnet image with Rust CLI binary
+- `.dockerignore` (new) — exclude secrets and build artifacts
+- `docker-compose.beta.yml` (new) — production-like local stack
+- `.github/workflows/mandara-product-ci.yml` (new) — CI for product branch
+- `scripts/product-ci-check.sh` (new) — CI-safe check script
+- `scripts/product-readiness-check.sh` (new) — pre-deployment validation
+- `apps/worker/src/config.ts` — added `MANDARA_WORKER_HEALTH_PORT`, `MANDARA_IKA_CLI_PATH`
+- `apps/worker/src/health.ts` (new) — optional HTTP health server
+- `apps/worker/src/index.ts` — integrated health server with graceful shutdown
+- `apps/worker/src/services/liveDevnetExecution.ts` — supports pre-built Rust CLI path
+- `apps/api/src/routes/health.ts` — added Redis connectivity check
+- `apps/api/src/server.ts` — hardened error handler (no stack trace leak in production)
+- `docs/PRODUCT_DEPLOYMENT.md` (new) — deployment architecture, platform guides, env vars
+- `docs/PRODUCT_OPERATIONS_RUNBOOK.md` (new) — day-2 operations and incident response
+- `docs/BETA_LAUNCH_CHECKLIST.md` (new) — pre-beta readiness checklist
+- `docs/README.md` — added new doc links
+- `package.json` — added `product:ci` and `product:readiness` scripts
 
 ### Acceptance Criteria
-- [ ] API and worker deploy automatically on push to `product/mandara-cloud-mvp`.
-- [ ] Postgres and Redis are hosted (Supabase Postgres + Upstash Redis, or self-hosted).
-- [ ] Dashboard deploys to Vercel (or similar) with `NEXT_PUBLIC_API_URL` set.
-- [ ] Health checks and monitoring (basic logging) in place.
+- [x] `Dockerfile.api` builds and starts API on port 4000.
+- [x] `Dockerfile.worker` builds and starts worker in dry-run mode.
+- [x] `Dockerfile.worker.devnet` builds with multi-stage Rust CLI and supports live execution.
+- [x] `docker-compose.beta.yml` stacks Postgres, Redis, API, and worker with health checks.
+- [x] Worker exposes optional HTTP health server (`/health`, `/ready`) on `MANDARA_WORKER_HEALTH_PORT`.
+- [x] API `/ready` checks Postgres and Redis connectivity.
+- [x] API error handler does not leak stack traces in production.
+- [x] CI workflow runs on push/PR to `product/mandara-cloud-mvp`.
+- [x] `product:readiness` script validates Dockerfiles, docs, env vars, and builds.
+- [x] Deployment docs cover Render, Fly, Railway, VPS, and Vercel.
+- [x] Operations runbook covers start/stop, health checks, queue inspection, incident response.
+- [x] Beta checklist identifies all blockers before open beta.
+- [x] No secrets baked into images; service wallet mounted as volume.
+- [x] Devnet-only disclaimers present in all docs and API responses.
+- [x] `npm run build` (root Next.js) still passes.
+- [x] Grant demo and product dashboard remain intact.
 
 ### Risks
 - Ika pre-alpha devnet may be wiped during beta. Users must be warned.
-- Mitigation: clear devnet-only disclaimers in UI and docs.
+- Mitigation: clear devnet-only disclaimers in UI and docs; operations runbook includes artifact recovery steps.
 
 ---
 

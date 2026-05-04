@@ -62,8 +62,15 @@ export async function buildServer() {
     }
 
     const statusCode = error.statusCode ?? 500;
+    const isProd = env.MANDARA_ENV === "production";
+
+    // In production, do not leak internal error details for 500s
+    const message = statusCode >= 500 && isProd
+      ? "Internal server error"
+      : error.message;
+
     return reply.status(statusCode).send(
-      errorResponse("INTERNAL_ERROR", error.message)
+      errorResponse("INTERNAL_ERROR", message)
     );
   });
 

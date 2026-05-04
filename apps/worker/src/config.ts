@@ -18,6 +18,8 @@ const EnvSchema = z.object({
   MANDARA_IKA_GRPC_URL: z.string().default("https://pre-alpha-dev-1.ika.ika-network.net:443"),
   MANDARA_HUMANRAIL_GUARD_PROGRAM_ID: z.string().default("Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2"),
   MANDARA_IKA_DWALLET_PROGRAM_ID: z.string().default("87W54kGYFQ1rgWqMeu4XTPHWXWmXSQCcjm8vCTfiq1oY"),
+  MANDARA_WORKER_HEALTH_PORT: z.string().optional().transform((v) => (v ? Number(v) : undefined)),
+  MANDARA_IKA_CLI_PATH: z.string().default(""),
 });
 
 export const env = EnvSchema.parse(process.env);

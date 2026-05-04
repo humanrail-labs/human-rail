@@ -2,6 +2,16 @@ import type { FastifyInstance } from "fastify";
 import { env } from "../config.js";
 import { prisma } from "@mandara/db";
 import { success } from "../lib/response.js";
+import { Redis } from "ioredis";
+
+const redisCheck = new Redis(env.REDIS_URL, {
+  maxRetriesPerRequest: 1,
+  connectTimeout: 3000,
+});
+
+redisCheck.on("error", () => {
+  // suppress unhandled error warnings during health checks
+});
 
 export default async function healthRoutes(fastify: FastifyInstance) {
   fastify.get("/health", async () => {
@@ -14,9 +24,9 @@ export default async function healthRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get("/ready", async () => {
-    const checks: Record<string, "ok" | "error" | "skipped"> = {
+    const checks: Record<string, "ok" | "error"> = {
       database: "ok",
-      redis: "skipped",
+      redis: "ok",
     };
 
     try {
@@ -25,14 +35,13 @@ export default async function healthRoutes(fastify: FastifyInstance) {
       checks.database = "error";
     }
 
-    // Redis check prepared for P2+; BullMQ not wired yet
-    // try {
-    //   await redis.ping();
-    // } catch {
-    //   checks.redis = "error";
-    // }
+    try {
+      await redisCheck.ping();
+    } catch {
+      checks.redis = "error";
+    }
 
-    const allOk = Object.values(checks).every((c) => c === "ok" || c === "skipped");
+    const allOk = Object.values(checks).every((c) => c === "ok");
 
     return success({
       status: allOk ? "ready" : "degraded",

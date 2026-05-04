@@ -1,8 +1,8 @@
 # Mandara Product Local Setup
 
 > Setup guide for running the Mandara Cloud backend locally.  
-> **Phase:** P3 — Create/preview APIs complete.  
-> **Last updated:** 2026-05-02
+> **Phase:** P9 — Devnet beta deployment package complete.  
+> **Last updated:** 2026-05-04
 
 ---
 
@@ -301,6 +301,10 @@ docker compose down -v
 - **Service wallet must be devnet-only.** Never use a mainnet keypair for live execution.
 - **Devnet only.** All on-chain interactions target Solana devnet and Ika pre-alpha.
 - **Ika pre-alpha disclaimer.** The mock signer is not production MPC custody.
+
+## Deployment
+
+For hosted beta deployment, see [`PRODUCT_DEPLOYMENT.md`](PRODUCT_DEPLOYMENT.md).
 
 ---
 

@@ -48,6 +48,8 @@
     "product:agent-api:smoke": "node scripts/product-agent-api-smoke.mjs",
     "product:webhook:smoke": "node scripts/product-webhook-smoke.mjs",
     "product:create-dev-agent-key": "node scripts/create-dev-agent-api-key.mjs",
+    "product:ci": "bash scripts/product-ci-check.sh",
+    "product:readiness": "bash scripts/product-readiness-check.sh",
     "mandara-sdk:build": "npm --prefix packages/mandara-sdk run build",
     "mandara-sdk:smoke": "tsx scripts/mandara-sdk-smoke.ts"
   },

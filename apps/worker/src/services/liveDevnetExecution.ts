@@ -182,11 +182,9 @@ async function runIkaSignCli(
   timeoutMs: number = 300_000
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   return new Promise((resolve, reject) => {
-    const args = [
-      "run",
-      "--manifest-path",
-      "tools/ika-dkg-cli/Cargo.toml",
-      "--",
+    const useBinary = env.MANDARA_IKA_CLI_PATH && env.MANDARA_IKA_CLI_PATH.length > 0;
+
+    const binaryArgs = [
       "sign-approved-message",
       "--keypair",
       env.MANDARA_SERVICE_WALLET_PATH,
@@ -200,9 +198,20 @@ async function runIkaSignCli(
       requestArtifactPath,
     ];
 
-    logger.info("Spawning ika-dkg-cli sign-approved-message", { args: args.map((a) => (a.includes("/") ? "..." : a)) });
+    let args: string[];
+    let command: string;
 
-    const child = spawn("cargo", args, {
+    if (useBinary) {
+      command = env.MANDARA_IKA_CLI_PATH;
+      args = binaryArgs;
+      logger.info("Spawning ika-dkg-cli binary", { path: command, args: args.map((a) => (a.includes("/") ? "..." : a)) });
+    } else {
+      command = "cargo";
+      args = ["run", "--manifest-path", "tools/ika-dkg-cli/Cargo.toml", "--", ...binaryArgs];
+      logger.info("Spawning ika-dkg-cli via cargo", { args: args.map((a) => (a.includes("/") ? "..." : a)) });
+    }
+
+    const child = spawn(command, args, {
       cwd: process.cwd(),
       timeout: timeoutMs,
     });
