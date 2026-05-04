@@ -38,4 +38,4 @@ RUN npm --prefix apps/api run build
 ENV NODE_ENV=production
 EXPOSE 4000
 
-CMD ["npm", "run", "product:api:start"]
+CMD ["sh", "apps/api/start.sh"]
