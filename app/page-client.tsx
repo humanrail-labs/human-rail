@@ -202,7 +202,7 @@ export default function AgentVaultLanding() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
                 <Shield className="h-5 w-5 text-emerald-500" />
               </div>
-              <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>Agent Vault</span>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>Mandara</span>
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
               <a href="https://github.com/humanrail-labs/human-rail" target="_blank" rel="noopener noreferrer"

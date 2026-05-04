@@ -62,7 +62,7 @@ export function WalletButton() {
           className="cursor-pointer"
         >
           <LayoutDashboard className="mr-2 h-4 w-4" />
-          Agent Vault
+          Mandara Console
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-neutral-700" />
         <DropdownMenuItem onClick={handleCopyAddress} className="cursor-pointer">

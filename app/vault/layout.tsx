@@ -26,7 +26,7 @@ function WalletGate({ children }: { children: React.ReactNode }) {
           </div>
           <h2 className="mb-2 text-2xl font-bold text-white">Connect Your Wallet</h2>
           <p className="mb-8 text-sm text-neutral-500">
-            Connect a Solana wallet to access Agent Vault — deploy agents, set capabilities, and monitor activity on devnet.
+            Connect a Solana wallet to access Mandara — deploy agents, set capabilities, and monitor activity on devnet.
           </p>
           <Button
             onClick={() => setVisible(true)}
