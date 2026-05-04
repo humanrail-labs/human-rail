@@ -7,6 +7,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useCluster } from "@/lib/solana/cluster-context";
 import { Cluster } from "@/lib/solana/providers";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import {
   Home,
   Fingerprint,
@@ -57,22 +58,13 @@ export const Sidebar: FC = () => {
         )}
       >
         <div className="flex h-16 items-center gap-3 border-b border-white/[0.06] px-4">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-            <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
-              <rect x="6" y="8" width="7" height="2" fill="#10b981" />
-              <rect x="6" y="14" width="7" height="2" fill="#10b981" />
-              <rect x="6" y="20" width="7" height="2" fill="#10b981" />
-              <rect x="6" y="26" width="7" height="2" fill="#10b981" />
-              <rect x="6" y="32" width="7" height="2" fill="#10b981" />
-              <rect x="27" y="8" width="7" height="2" fill="#10b981" />
-              <rect x="27" y="14" width="7" height="2" fill="#10b981" />
-              <rect x="27" y="20" width="7" height="2" fill="#10b981" />
-              <rect x="27" y="26" width="7" height="2" fill="#10b981" />
-              <rect x="27" y="32" width="7" height="2" fill="#10b981" />
-              <circle cx="20" cy="20" r="7" stroke="#10b981" strokeWidth="2.5" fill="none" />
-              <path d="M17 20l2 2 4-4" stroke="#10b981" strokeWidth="2" fill="none" />
-            </svg>
-          </div>
+          <Image
+            src="/humanrail-logo.png"
+            alt="HumanRail"
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0 rounded-lg"
+          />
           {!collapsed && (
             <div className="flex flex-col">
               <span className="text-[15px] font-semibold tracking-tight text-white leading-tight">

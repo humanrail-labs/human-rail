@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { useState } from "react";
 
 const navItems = [
@@ -38,9 +39,13 @@ export default function MandaraAppShell({
       {/* Desktop sidebar */}
       <aside className="hidden w-60 flex-col border-r border-white/[0.06] bg-neutral-900/50 md:flex">
         <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-4">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-[10px] font-bold text-white">
-            M
-          </div>
+          <Image
+            src="/mandara-logo.png"
+            alt="Mandara"
+            width={28}
+            height={28}
+            className="h-7 w-7 rounded-lg"
+          />
           <div>
             <p className="text-sm font-semibold text-white">Mandara</p>
             <p className="text-[10px] text-neutral-500">Devnet Console</p>
@@ -86,9 +91,13 @@ export default function MandaraAppShell({
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-white/[0.06] bg-neutral-900/50 px-4 py-3 md:hidden">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-[10px] font-bold text-white">
-              M
-            </div>
+            <Image
+              src="/mandara-logo.png"
+              alt="Mandara"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded-lg"
+            />
             <span className="text-sm font-semibold text-white">Mandara</span>
             <span className="rounded border border-amber-500/30 px-1.5 py-0.5 text-[10px] text-amber-300">
               Devnet beta

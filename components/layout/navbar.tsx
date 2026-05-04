@@ -63,7 +63,7 @@ export const Navbar: FC = () => {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/logo.png"
+              src="/mandara-logo.png"
               alt="Mandara"
               width={32}
               height={32}
