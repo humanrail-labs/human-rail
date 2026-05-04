@@ -23,11 +23,29 @@ export async function buildServer() {
     logger: {
       level: env.MANDARA_ENV === "development" ? "debug" : "info",
     },
+    bodyLimit: 1024 * 1024, // 1 MB max request body
   });
 
-  // CORS
+  // Security headers (HSTS, X-Frame-Options, etc.)
+  await fastify.register(import("@fastify/helmet"), {
+    contentSecurityPolicy: false, // API doesn't serve HTML
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  });
+
+  // CORS — validated allowlist, never wildcard with credentials
+  const allowedOrigins = env.MANDARA_CORS_ORIGIN
+    .split(",")
+    .map((o) => o.trim())
+    .filter((o) => o !== "*");
+
   await fastify.register(import("@fastify/cors"), {
-    origin: env.MANDARA_CORS_ORIGIN,
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true);
+        return;
+      }
+      cb(new Error("Not allowed by CORS"), false);
+    },
     credentials: true,
   });
 

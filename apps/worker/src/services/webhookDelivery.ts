@@ -6,6 +6,7 @@
 
 import { prisma } from "@mandara/db";
 import { signWebhookPayload } from "@mandara/core";
+import { decrypt } from "../../../apps/api/src/lib/encryption.js";
 import { logger } from "../lib/logger.js";
 import { recordAuditEvent } from "../lib/audit.js";
 
@@ -16,6 +17,29 @@ export interface WebhookDeliveryJobData {
   deliveryId: string;
   webhookId: string;
   organizationId: string;
+}
+
+const BLOCKED_HOSTS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "0.0.0.0",
+  "::1",
+  "169.254.169.254", // AWS metadata
+]);
+
+function isUrlAllowed(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    if (url.protocol !== "https:") return false;
+    const hostname = url.hostname.toLowerCase();
+    if (BLOCKED_HOSTS.has(hostname)) return false;
+    if (hostname.endsWith(".local")) return false;
+    if (hostname.endsWith(".internal")) return false;
+    if (/^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.)/.test(hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function processWebhookDeliveryJob(data: WebhookDeliveryJobData): Promise<void> {
@@ -40,9 +64,36 @@ export async function processWebhookDeliveryJob(data: WebhookDeliveryJobData): P
     return;
   }
 
+  // Validate URL to prevent SSRF
+  if (!isUrlAllowed(delivery.webhook.url)) {
+    logger.warn("Blocked webhook URL", { url: delivery.webhook.url });
+    await prisma.webhookDelivery.update({
+      where: { id: deliveryId },
+      data: { status: "failed", error: "URL not allowed" },
+    });
+    return;
+  }
+
+  // Decrypt webhook secret before signing
+  let webhookSecret: string;
+  try {
+    webhookSecret = decrypt({
+      value: delivery.webhook.secret,
+      iv: (delivery.webhook as unknown as Record<string, string>).iv,
+      tag: (delivery.webhook as unknown as Record<string, string>).tag,
+    });
+  } catch {
+    logger.error("Failed to decrypt webhook secret", { webhookId });
+    await prisma.webhookDelivery.update({
+      where: { id: deliveryId },
+      data: { status: "failed", error: "Webhook secret decryption failed" },
+    });
+    return;
+  }
+
   const rawBody = JSON.stringify(delivery.payload);
   const timestamp = Math.floor(Date.now() / 1000);
-  const signature = signWebhookPayload(delivery.webhook.secret, timestamp, rawBody);
+  const signature = signWebhookPayload(webhookSecret, timestamp, rawBody);
 
   let responseStatus: number | undefined;
   let responseBodyPreview: string | undefined;

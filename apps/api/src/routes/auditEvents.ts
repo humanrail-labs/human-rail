@@ -14,6 +14,15 @@ const ListAuditEventsQuery = z.object({
   cursor: z.string().optional(),
 });
 
+function sanitizeCsvValue(value: string): string {
+  const dangerous = /^[=+\-@\t\r]/;
+  let sanitized = value.replace(/"/g, '""');
+  if (dangerous.test(sanitized)) {
+    sanitized = "'" + sanitized;
+  }
+  return `"${sanitized}"`;
+}
+
 function rowToCsv(row: Record<string, unknown>): string {
   const values = [
     String(row.id ?? ""),
@@ -27,7 +36,7 @@ function rowToCsv(row: Record<string, unknown>): string {
     String(row.summary ?? ""),
     JSON.stringify(row.metadata ?? {}),
   ];
-  return values.map((v) => `"${v.replace(/"/g, "\"\"")}"`).join(",");
+  return values.map((v) => sanitizeCsvValue(v)).join(",");
 }
 
 export default async function auditEventRoutes(fastify: FastifyInstance) {

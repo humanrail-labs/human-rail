@@ -8,15 +8,25 @@ import {
 import { success, errorResponse } from "../../lib/response.js";
 import { recordAuditEvent } from "../../lib/audit.js";
 import { authenticateAgentApiKey, recordAgentApiKeyUsed } from "../../plugins/agentAuth.js";
+import { checkRateLimit } from "../../lib/rateLimit.js";
 import { enqueueSigningRequest } from "../../services/queue.js";
 import { scheduleWebhookEvent } from "../../services/webhookEvents.js";
+import { Redis } from "ioredis";
+import { env } from "../../config.js";
 
 export default async function v1SignatureRequestRoutes(fastify: FastifyInstance) {
   // ── Agent Status ──
+const idempotencyRedis = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null });
+
   fastify.get("/v1/agent/status", {
     preHandler: [authenticateAgentApiKey],
     handler: async (request, reply) => {
       const auth = request.agentAuth!;
+
+      const rate = await checkRateLimit(`agent-status:${auth.apiKeyId}`, 60, 60_000);
+      if (!rate.allowed) {
+        return reply.status(429).send(errorResponse("RATE_LIMITED", "Too many requests"));
+      }
 
       const agent = await prisma.agent.findUnique({
         where: { id: auth.agentId },
@@ -64,6 +74,11 @@ export default async function v1SignatureRequestRoutes(fastify: FastifyInstance)
     preHandler: [authenticateAgentApiKey],
     handler: async (request, reply) => {
       const auth = request.agentAuth!;
+
+      const rate = await checkRateLimit(`agent-preview:${auth.apiKeyId}`, 30, 60_000);
+      if (!rate.allowed) {
+        return reply.status(429).send(errorResponse("RATE_LIMITED", "Too many requests"));
+      }
 
       const parse = ExternalSignatureRequestInputSchema.safeParse(request.body);
       if (!parse.success) {
@@ -127,6 +142,11 @@ export default async function v1SignatureRequestRoutes(fastify: FastifyInstance)
     handler: async (request, reply) => {
       const auth = request.agentAuth!;
 
+      const rate = await checkRateLimit(`agent-create:${auth.apiKeyId}`, 30, 60_000);
+      if (!rate.allowed) {
+        return reply.status(429).send(errorResponse("RATE_LIMITED", "Too many requests"));
+      }
+
       const parse = ExternalSignatureRequestInputSchema.safeParse(request.body);
       if (!parse.success) {
         return reply.status(400).send(
@@ -147,6 +167,14 @@ export default async function v1SignatureRequestRoutes(fastify: FastifyInstance)
         enqueue,
         idempotencyKey,
       } = parse.data;
+
+      // Enforce idempotency key
+      if (idempotencyKey) {
+        const existing = await idempotencyRedis.get(`idempotency:${idempotencyKey}`);
+        if (existing) {
+          return reply.status(409).send(errorResponse("CONFLICT", `Duplicate request: ${existing}`));
+        }
+      }
 
       const resolved = await resolvePolicy(auth.organizationId, auth.agentId, policyId);
       if (!resolved) {
@@ -235,6 +263,11 @@ export default async function v1SignatureRequestRoutes(fastify: FastifyInstance)
           } as unknown as Prisma.JsonObject,
         },
       });
+
+      // Store idempotency key with 24h TTL
+      if (idempotencyKey) {
+        await idempotencyRedis.setex(`idempotency:${idempotencyKey}`, 86400, sigReq.id);
+      }
 
       await recordAuditEvent({
         organizationId: auth.organizationId,

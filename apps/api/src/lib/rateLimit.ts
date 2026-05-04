@@ -1,49 +1,58 @@
 /**
- * Rate-limit placeholder for Mandara Agent API.
+ * Redis-backed rate limiter for Mandara API.
  *
- * P6: No-op / simple in-memory counter disabled by default.
- * Future: Redis-backed sliding-window rate limits per API key.
+ * Uses a sliding window counter stored in Redis so rate limits
+ * work correctly across multiple API server instances.
  */
 
-interface RateLimitConfig {
-  enabled: boolean;
-  windowMs: number;
-  maxRequests: number;
+import { Redis } from "ioredis";
+import { env } from "../config.js";
+
+const redis = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null });
+
+export interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  resetAt: number;
 }
 
-const defaultConfig: RateLimitConfig = {
-  enabled: false,
-  windowMs: 60_000,
-  maxRequests: 100,
-};
-
-const memoryStore = new Map<string, { count: number; resetAt: number }>();
-
-export function checkRateLimit(
+/**
+ * Check if a request is within the rate limit.
+ *
+ * @param key - Unique identifier for the limit bucket (e.g. `apikey:${prefix}` or `ip:${ip}`)
+ * @param maxRequests - Maximum allowed requests in the window
+ * @param windowMs - Window size in milliseconds
+ */
+export async function checkRateLimit(
   key: string,
-  config: Partial<RateLimitConfig> = {}
-): { allowed: boolean; remaining: number; resetAt: number } {
-  const cfg = { ...defaultConfig, ...config };
+  maxRequests: number,
+  windowMs: number
+): Promise<RateLimitResult> {
   const now = Date.now();
+  const windowStart = Math.floor(now / windowMs) * windowMs;
+  const redisKey = `ratelimit:${key}:${windowStart}`;
 
-  if (!cfg.enabled) {
-    return { allowed: true, remaining: cfg.maxRequests, resetAt: now + cfg.windowMs };
-  }
+  const pipeline = redis.pipeline();
+  pipeline.incr(redisKey);
+  pipeline.pexpire(redisKey, windowMs);
 
-  const entry = memoryStore.get(key);
-  if (!entry || now > entry.resetAt) {
-    memoryStore.set(key, { count: 1, resetAt: now + cfg.windowMs });
-    return { allowed: true, remaining: cfg.maxRequests - 1, resetAt: now + cfg.windowMs };
-  }
+  const results = await pipeline.exec();
+  const currentCount = (results?.[0]?.[1] as number) ?? 1;
 
-  if (entry.count >= cfg.maxRequests) {
-    return { allowed: false, remaining: 0, resetAt: entry.resetAt };
-  }
+  const allowed = currentCount <= maxRequests;
+  const remaining = Math.max(0, maxRequests - currentCount);
+  const resetAt = windowStart + windowMs;
 
-  entry.count += 1;
-  return { allowed: true, remaining: cfg.maxRequests - entry.count, resetAt: entry.resetAt };
+  return { allowed, remaining, resetAt };
 }
 
-export function resetRateLimit(key: string): void {
-  memoryStore.delete(key);
+/**
+ * Reset the rate limit counter for a given key.
+ */
+export async function resetRateLimit(key: string): Promise<void> {
+  const pattern = `ratelimit:${key}:*`;
+  const keys = await redis.keys(pattern);
+  if (keys.length > 0) {
+    await redis.del(...keys);
+  }
 }

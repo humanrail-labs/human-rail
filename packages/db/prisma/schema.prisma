@@ -358,7 +358,9 @@ model Webhook {
   id             String            @id @default(cuid())
   organizationId String
   url            String
-  secret         String            // encrypted at rest by application layer
+  secret         String            // AES-256-GCM encrypted ciphertext (hex)
+  iv             String            // AES-256-GCM IV (hex)
+  tag            String            // AES-256-GCM auth tag (hex)
   events         String[]
   status         WebhookStatus     @default(active)
   createdAt      DateTime          @default(now())
