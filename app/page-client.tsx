@@ -230,16 +230,6 @@ export default function AgentVaultLanding() {
                 <span style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)' }}>Live on Solana Devnet</span>
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <Image
-                  src="/humanrail-logo.png"
-                  alt="HumanRail"
-                  width={80}
-                  height={80}
-                  className="mx-auto h-20 w-20 rounded-2xl"
-                />
-              </div>
-
               <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>
                 HumanRail Protocol<br />
                 <span style={{ background: 'linear-gradient(90deg, #34d399, #60a5fa, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
@@ -254,7 +244,7 @@ export default function AgentVaultLanding() {
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '4rem' }}>
                 <Link href="/mandara/app">
                   <Button className="gap-2 rounded-full bg-sky-600 px-8 py-6 text-lg font-semibold text-white hover:bg-sky-700">
-                    Launch App <ArrowRight className="h-5 w-5" />
+                    Launch Mandara <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="/mandara/app/onboarding">
@@ -365,7 +355,7 @@ export default function AgentVaultLanding() {
           <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)' }}>
               <Shield className="h-5 w-5" />
-              <span style={{ fontSize: '0.875rem' }}>Mandara · Powered by HumanRail Protocol</span>
+              <span style={{ fontSize: '0.875rem' }}>HumanRail Protocol · Built by HumanRail Labs</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.875rem' }}>
               <Link href="/vault" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Vault</Link>
