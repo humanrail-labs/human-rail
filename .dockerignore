@@ -44,11 +44,19 @@ docker-compose*.yml
 docs
 *.md
 
-# Test files
+# Examples and tests
+examples
 scripts/*-smoke.mjs
 scripts/*-smoke.ts
 scripts/product-ci-check.sh
 scripts/product-readiness-check.sh
+scripts/product-launch-check.sh
+scripts/clean-dev-disk.sh
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
 
 # CI
 .github

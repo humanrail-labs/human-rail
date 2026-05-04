@@ -34,6 +34,17 @@
 | [`PRODUCT_OPERATIONS_RUNBOOK.md`](PRODUCT_OPERATIONS_RUNBOOK.md) | Day-2 operations: start/stop, health checks, queue inspection, incident response |
 | [`BETA_LAUNCH_CHECKLIST.md`](BETA_LAUNCH_CHECKLIST.md) | Pre-beta readiness checklist: infrastructure, security, docs, monitoring, legal |
 
+## Product Launch Documents
+
+| Document | Purpose |
+|----------|---------|
+| [`PRODUCT_LAUNCH_PACKAGE.md`](PRODUCT_LAUNCH_PACKAGE.md) | Product positioning, problem, solution, target users, use cases, demo proof, next milestones |
+| [`LANDING_PAGE_COPY.md`](LANDING_PAGE_COPY.md) | Hero headlines, feature sections, how-it-works, FAQ, footer copy |
+| [`DEVELOPER_ONBOARDING.md`](DEVELOPER_ONBOARDING.md) | 10-minute guide: local stack, create org/agent/policy, SDK usage, webhooks, troubleshooting |
+| [`CUSTOMER_DEMO_SCRIPT.md`](CUSTOMER_DEMO_SCRIPT.md) | 10-minute and 3-minute demo scripts with narrative, commands, and objection handling |
+| [`PRICING_HYPOTHESIS.md`](PRICING_HYPOTHESIS.md) | Beta pricing model: Dev Sandbox, Builder, Team, Enterprise tiers |
+| [`PRODUCT_FINAL_AUDIT.md`](PRODUCT_FINAL_AUDIT.md) | Final product audit: build results, security status, beta blockers, go/no-go recommendation |
+
 ## Technical Documentation
 
 | Document | Purpose |

@@ -1,6 +1,6 @@
 # Mandara Product Implementation Plan
 
-> **Status:** P9 complete. Devnet beta deployment package ready: Docker images, CI/CD, deployment docs, operations runbook, and beta checklist.  
+> **Status:** P10 complete. Devnet beta launch package finalized: disk cleanup, product docs, landing copy, onboarding guide, demo script, pricing, final audit.  
 > **Goal:** Turn the HumanRail grant implementation into a hosted product MVP.  
 > **Last updated:** 2026-05-04
 
@@ -439,21 +439,41 @@ Prepare the full stack for hosted devnet beta deployment: Docker images, compose
 
 ---
 
-## P10 — Product Launch Docs
+## P10 — Product Launch Package
 
 ### Objective
-Developer-facing documentation for the Mandara product.
+Finalize the Mandara devnet beta launch package: clean disk hygiene, product launch docs, landing page copy, developer onboarding, customer demo script, pricing hypothesis, final product audit, and launch readiness checks.
 
-### Files Likely Changed
-- `docs/MANDARA_DEVELOPER_GUIDE.md` (new)
-- `docs/MANDARA_API_REFERENCE.md` (new)
-- `docs/MANDARA_QUICKSTART.md` (new)
-- `docs/README.md` — update index
+### Files Changed
+- `scripts/clean-dev-disk.sh` (new) — safe dev environment cleanup
+- `scripts/product-launch-check.sh` (new) — launch readiness validation
+- `docs/PRODUCT_LAUNCH_PACKAGE.md` (new) — product positioning, problem, solution, users, use cases, demo proof
+- `docs/LANDING_PAGE_COPY.md` (new) — hero headlines, feature sections, FAQ, footer
+- `docs/DEVELOPER_ONBOARDING.md` (new) — 10-minute guide from zero to first signature
+- `docs/CUSTOMER_DEMO_SCRIPT.md` (new) — 10-min and 3-min demo scripts with objection handling
+- `docs/PRICING_HYPOTHESIS.md` (new) — beta pricing model (Dev Sandbox, Builder, Team, Enterprise)
+- `docs/PRODUCT_FINAL_AUDIT.md` (new) — build results, security status, beta blockers, go/no-go
+- `docs/BETA_LAUNCH_CHECKLIST.md` — updated with P9/P10 completion status
+- `docs/README.md` — added Product Launch section
+- `.dockerignore` — added `examples` and additional cache exclusions to reduce build context
+- `package.json` — added `clean:dev-disk` and `product:launch-check` scripts
 
 ### Acceptance Criteria
-- [ ] Quickstart guide: create org → create agent → request signature in under 10 minutes.
-- [ ] API reference documents every endpoint, auth method, and error code.
-- [ ] All docs mention devnet-only status and Ika pre-alpha limitations.
+- [x] Disk cleanup performed safely; critical artifacts preserved.
+- [x] Docker context reduced by excluding `examples`, logs, and test scripts.
+- [x] `product:ci` passes after cleanup.
+- [x] `product:readiness` passes after cleanup.
+- [x] Product launch package doc covers name, tagline, problem, solution, users, use cases, demo proof, next milestones.
+- [x] Landing page copy includes hero options, feature sections, how-it-works, FAQ, footer.
+- [x] Developer onboarding guide gets a developer to first signature in 10 minutes with exact commands.
+- [x] Customer demo script includes 10-minute flow, 3-minute exec flow, and objection handling.
+- [x] Pricing hypothesis defines Dev Sandbox (free), Builder, Team, Enterprise tiers with mainnet transition notes.
+- [x] Final product audit documents build results, security status, open risks, beta blockers, and go/no-go recommendation.
+- [x] Beta checklist updated: P9/P10 items marked ✅, risky items remain ⚠️/⬜.
+- [x] All new docs mention devnet-only status and Ika pre-alpha limitations.
+- [x] No production custody language anywhere.
+- [x] `npm run build` (root Next.js) still passes.
+- [x] Grant demo and product dashboard remain intact.
 
 ---
 
