@@ -184,7 +184,7 @@ model AgentApiKey {
   id         String    @id @default(cuid())
   agentId    String
   name       String
-  prefix     String
+  prefix     String    @unique
   hash       String
   scopes     String[]
   lastUsedAt DateTime?
@@ -194,7 +194,6 @@ model AgentApiKey {
 
   agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
-  @@index([prefix])
   @@index([agentId])
   @@map("agent_api_keys")
 }
@@ -297,6 +296,7 @@ model SigningRequest {
   ikaDwallet       IkaDwallet?       @relation(fields: [ikaDwalletId], references: [id], onDelete: SetNull)
   messageApproval  MessageApproval?
 
+  @@index([executionJobId])
   @@index([organizationId, createdAt])
   @@index([agentId, status])
   @@index([requestId])

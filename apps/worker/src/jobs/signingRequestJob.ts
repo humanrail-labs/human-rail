@@ -30,6 +30,16 @@ export async function processSigningRequestJob(data: SigningRequestJobData) {
     throw new Error(`Signing request ${signingRequestId} not found`);
   }
 
+  // Verify organization matches job data to prevent cross-org job injection
+  if (signingRequest.organizationId !== organizationId) {
+    logger.warn("Organization mismatch in signing request job", {
+      expected: organizationId,
+      actual: signingRequest.organizationId,
+      signingRequestId,
+    });
+    throw new Error("Organization mismatch in signing request job");
+  }
+
   // 2. Skip if already in terminal state
   const terminalStatuses = ["signed", "policy_rejected", "failed"] as const;
   if (terminalStatuses.includes(signingRequest.status as typeof terminalStatuses[number])) {

@@ -3,9 +3,12 @@
  *
  * Format: mandara_dev_<prefix>_<secret>
  * Only prefix + hash are stored. Raw key is returned once on creation.
+ *
+ * Hashing: HMAC-SHA256 with a server-side pepper for brute-force resistance.
  */
 
 import crypto from "node:crypto";
+import { env } from "../config.js";
 
 const KEY_PREFIX = "mandara_dev";
 const PREFIX_SEGMENT_LENGTH = 8;
@@ -37,7 +40,8 @@ export function generateAgentApiKey(): GeneratedAgentApiKey {
 }
 
 export function hashAgentApiKey(rawKey: string): string {
-  return crypto.createHash("sha256").update(rawKey).digest("hex");
+  const pepper = env.MANDARA_API_KEY_PEPPER || "";
+  return crypto.createHmac("sha256", pepper).update(rawKey).digest("hex");
 }
 
 export function getAgentApiKeyPrefix(rawKey: string): string | null {

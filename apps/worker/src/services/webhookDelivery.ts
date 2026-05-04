@@ -64,6 +64,20 @@ export async function processWebhookDeliveryJob(data: WebhookDeliveryJobData): P
     return;
   }
 
+  // Verify organization matches job data to prevent cross-org job injection
+  if (delivery.webhook.organizationId !== organizationId) {
+    logger.warn("Organization mismatch in webhook delivery job", {
+      expected: organizationId,
+      actual: delivery.webhook.organizationId,
+      deliveryId,
+    });
+    await prisma.webhookDelivery.update({
+      where: { id: deliveryId },
+      data: { status: "failed", error: "Organization mismatch" },
+    });
+    return;
+  }
+
   // Validate URL to prevent SSRF
   if (!isUrlAllowed(delivery.webhook.url)) {
     logger.warn("Blocked webhook URL", { url: delivery.webhook.url });
