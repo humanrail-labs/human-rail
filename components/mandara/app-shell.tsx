@@ -40,13 +40,16 @@ export default function MandaraAppShell({
       <aside className="hidden w-60 flex-col border-r border-white/[0.06] bg-neutral-900/50 md:flex">
         <div className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-4">
           <Image
-            src="/mandara-logo.png"
+            src="/mandara-icon.png"
             alt="Mandara"
             width={48}
             height={48}
             className="h-12 w-12 rounded-lg"
           />
-          <p className="text-[10px] text-neutral-500">Devnet Console</p>
+          <div>
+            <p className="text-sm font-semibold text-white">Mandara</p>
+            <p className="text-[10px] text-neutral-500">Devnet Console</p>
+          </div>
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">
@@ -89,12 +92,13 @@ export default function MandaraAppShell({
         <header className="flex items-center justify-between border-b border-white/[0.06] bg-neutral-900/50 px-4 py-3 md:hidden">
           <div className="flex items-center gap-2">
             <Image
-              src="/mandara-logo.png"
+              src="/mandara-icon.png"
               alt="Mandara"
               width={40}
               height={40}
               className="h-10 w-10 rounded-lg"
             />
+            <span className="text-sm font-semibold text-white">Mandara</span>
             <span className="rounded border border-amber-500/30 px-1.5 py-0.5 text-[10px] text-amber-300">
               Devnet beta
             </span>
