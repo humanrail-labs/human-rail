@@ -9,7 +9,7 @@ import { getProgramId, parseHumanProfile, parseAgentProfile } from '@/lib/progra
 import { useCluster } from '@/lib/solana/cluster-context';
 import { Button } from '@/components/ui/button';
 import {
-  Shield, Zap, Eye, Users, ArrowRight, Github, Wallet, Bot, Fingerprint, Activity,
+  Shield, Zap, Eye, Users, ArrowRight, Github, Wallet, Bot, Fingerprint, Activity, FlaskConical,
 } from 'lucide-react';
 
 // ============================================
@@ -209,9 +209,9 @@ export default function AgentVaultLanding() {
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
                 <Github className="h-5 w-5" /><span>GitHub</span>
               </a>
-              <Link href="/vault">
-                <Button className="gap-2 rounded-full bg-white px-6 text-black hover:bg-neutral-200">
-                  Launch Vault <ArrowRight className="h-4 w-4" />
+              <Link href="/mandara/app">
+                <Button className="gap-2 rounded-full bg-sky-600 px-6 text-white hover:bg-sky-700">
+                  Open Console <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -237,19 +237,19 @@ export default function AgentVaultLanding() {
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '4rem' }}>
-                <Link href="/mandara">
+                <Link href="/mandara/app">
                   <Button className="gap-2 rounded-full bg-sky-600 px-8 py-6 text-lg font-semibold text-white hover:bg-sky-700">
-                    Mandara Console <ArrowRight className="h-5 w-5" />
+                    Open Mandara Console <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/vault">
+                <Link href="/mandara/app/onboarding">
                   <Button variant="outline" className="gap-2 rounded-full border-white/15 px-8 py-6 text-lg font-medium text-white hover:bg-white/5">
-                    Launch Vault <ArrowRight className="h-5 w-5" />
+                    Start Onboarding <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/agent/GLrs6qS2LLwKXZZuZXLFCaVyxkjBovbS2hM9PA4ezdhQ">
+                <Link href="/vault/dwallets">
                   <Button variant="outline" className="gap-2 rounded-full border-white/15 px-8 py-6 text-lg font-medium text-white hover:bg-white/5">
-                    <Bot className="h-5 w-5" /> View Demo Agent
+                    <FlaskConical className="h-5 w-5" /> Advanced Technical Proof
                   </Button>
                 </Link>
               </div>

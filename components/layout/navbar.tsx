@@ -15,17 +15,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Cluster } from "@/lib/solana/providers";
-import { ChevronDown, User, Bot, Shield, Zap, FileText, Receipt } from "lucide-react";
+import {
+  ChevronDown,
+  Zap,
+  FlaskConical,
+  Compass,
+  LayoutDashboard,
+  User,
+  Bot,
+  Shield,
+  FileText,
+  Receipt,
+} from "lucide-react";
 
-const NAV_ITEMS = [
+const MAIN_NAV_ITEMS = [
   { href: "/mandara", label: "Mandara", icon: Zap },
-  { href: "/human", label: "Human", icon: User },
-  { href: "/agent", label: "Agent", icon: Bot },
+  { href: "/mandara/app", label: "Console", icon: LayoutDashboard },
+  { href: "/mandara/app/onboarding", label: "Onboarding", icon: Compass },
+];
+
+const ADVANCED_NAV_ITEMS = [
+  { href: "/vault/dwallets", label: "Technical Proof", icon: FlaskConical },
+  { href: "/human", label: "Protocol Human", icon: User },
+  { href: "/agent", label: "Protocol Agent", icon: Bot },
   { href: "/delegation", label: "Delegation", icon: Shield },
+  { href: "/receipts", label: "Receipts", icon: Receipt },
   { href: "/rails/humanpay", label: "HumanPay", icon: Zap },
   { href: "/rails/datablink", label: "DataBlink", icon: FileText },
   { href: "/rails/documents", label: "Documents", icon: FileText },
-  { href: "/receipts", label: "Receipts", icon: Receipt },
 ];
 
 const CLUSTERS: { value: Cluster; label: string; color: string }[] = [
@@ -56,7 +73,7 @@ export const Navbar: FC = () => {
           </Link>
 
           <div className="hidden items-center gap-1 md:flex">
-            {NAV_ITEMS.map((item) => (
+            {MAIN_NAV_ITEMS.map((item) => (
               <Link key={item.href} href={item.href}>
                 <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white">
                   <item.icon className="mr-1.5 h-4 w-4" />
@@ -64,6 +81,26 @@ export const Navbar: FC = () => {
                 </Button>
               </Link>
             ))}
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white">
+                  <FlaskConical className="mr-1.5 h-4 w-4" />
+                  Advanced
+                  <ChevronDown className="ml-1 h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-neutral-900 border-neutral-700">
+                {ADVANCED_NAV_ITEMS.map((item) => (
+                  <DropdownMenuItem key={item.href} asChild className="cursor-pointer">
+                    <Link href={item.href} className="flex items-center gap-2 text-neutral-300">
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

@@ -5,7 +5,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Wallet, LogOut, Copy, ExternalLink, LayoutDashboard } from "lucide-react";
+import { Wallet, LogOut, Copy, ExternalLink, LayoutDashboard, FlaskConical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,9 @@ import { toast } from "sonner";
 
 export function WalletButton() {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    queueMicrotask(() => setMounted(true));
+  }, []);
 
   const { publicKey, disconnect, connected } = useWallet();
   const { setVisible } = useWalletModal();
@@ -58,11 +60,18 @@ export function WalletButton() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-neutral-900 border-neutral-700">
         <DropdownMenuItem
-          onClick={() => router.push("/vault")}
+          onClick={() => router.push("/mandara/app")}
           className="cursor-pointer"
         >
           <LayoutDashboard className="mr-2 h-4 w-4" />
           Mandara Console
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => router.push("/vault")}
+          className="cursor-pointer"
+        >
+          <FlaskConical className="mr-2 h-4 w-4" />
+          Advanced Protocol Vault
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-neutral-700" />
         <DropdownMenuItem onClick={handleCopyAddress} className="cursor-pointer">

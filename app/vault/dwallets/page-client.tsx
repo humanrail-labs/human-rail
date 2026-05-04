@@ -57,6 +57,7 @@ import {
   Search,
   Activity,
   LayoutDashboard,
+  FlaskConical,
 } from "lucide-react";
 import ProductDashboard from "@/components/vault/product-dashboard";
 import {
@@ -466,20 +467,35 @@ export default function DwalletGuardPageClient() {
 
   return (
     <div className="space-y-6">
-      {/* Mandara Console notice */}
-      <div className="flex items-start gap-3 rounded-xl border border-sky-500/20 bg-sky-500/10 p-4">
-        <div className="flex-1 space-y-1">
-          <p className="text-sm font-medium text-sky-200">Mandara Console is now available</p>
-          <p className="text-xs text-sky-200/70">
-            This is the Advanced Technical Proof view. For normal product onboarding, use the Mandara Console.
-          </p>
+      {/* Advanced Technical Proof banner */}
+      <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <p className="flex items-center gap-2 text-sm font-semibold text-amber-200">
+              <FlaskConical className="h-4 w-4 text-amber-400" />
+              Advanced Technical Proof
+            </p>
+            <p className="max-w-xl text-xs text-amber-200/70">
+              This page preserves the HumanRail + Ika devnet proof: program IDs, PDAs, Guard CPI approval,
+              Ika MessageApproval, and signed devnet lifecycle. For normal product onboarding, use the
+              Mandara Console.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => window.location.href = "/mandara/app"}
+              className="shrink-0 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-700"
+            >
+              Open Mandara Console
+            </button>
+            <button
+              onClick={() => window.location.href = "/mandara/app/onboarding"}
+              className="shrink-0 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-medium text-sky-300 hover:bg-sky-500/20"
+            >
+              Start Onboarding
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => window.location.href = "/mandara/app"}
-          className="shrink-0 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-700"
-        >
-          Open Mandara Console
-        </button>
       </div>
 
       {/* Header */}

@@ -19,16 +19,17 @@ import {
   ChevronRight,
   Globe,
   Github,
+  FlaskConical,
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { href: "/vault", label: "Home", icon: Home, exact: true },
-  { href: "/vault/identity", label: "My Identity", icon: Fingerprint },
-  { href: "/vault/agents", label: "My Agents", icon: Bot },
-  { href: "/vault/capabilities", label: "Capabilities", icon: Shield },
-  { href: "/vault/dwallets", label: "Guarded dWallets", icon: Wallet },
-  { href: "/vault/payments", label: "Payments", icon: Zap },
-  { href: "/vault/activity", label: "Activity Log", icon: Receipt },
+  { href: "/vault", label: "Protocol Home", icon: Home, exact: true },
+  { href: "/vault/identity", label: "Protocol Identity", icon: Fingerprint },
+  { href: "/vault/agents", label: "Protocol Agents", icon: Bot },
+  { href: "/vault/capabilities", label: "Protocol Capabilities", icon: Shield },
+  { href: "/vault/dwallets", label: "Advanced dWallet Proof", icon: Wallet },
+  { href: "/vault/payments", label: "HumanPay Demo", icon: Zap },
+  { href: "/vault/activity", label: "Protocol Receipts", icon: Receipt },
 ];
 
 const CLUSTER_META: Record<Cluster, { label: string; dot: string }> = {
@@ -78,13 +79,40 @@ export const Sidebar: FC = () => {
                 Mandara
               </span>
               <span className="text-[10px] text-neutral-500 leading-tight">
-                by HumanRail Protocol
+                Advanced Protocol Explorer
               </span>
             </div>
           )}
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
+        {/* Advanced notice */}
+        {!collapsed && (
+          <div className="mx-3 mt-3 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2">
+            <div className="flex items-center gap-1.5">
+              <FlaskConical className="h-3 w-3 text-amber-400" />
+              <span className="text-[10px] font-medium text-amber-300">Advanced Protocol Explorer</span>
+            </div>
+            <p className="mt-1 text-[9px] text-amber-300/60">
+              These pages require a wallet and access Solana devnet directly. For product onboarding, use the Mandara Console.
+            </p>
+          </div>
+        )}
+
+        {/* Mandara Console link */}
+        <div className="px-2 py-2">
+          <Link
+            href="/mandara/app"
+            className={cn(
+              "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all",
+              "bg-sky-500/10 text-sky-400 ring-1 ring-sky-500/20 hover:bg-sky-500/15"
+            )}
+          >
+            <Globe className="h-[18px] w-[18px] shrink-0" />
+            {!collapsed && <span>Mandara Console</span>}
+          </Link>
+        </div>
+
+        <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-2">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item);
             return (
@@ -151,11 +179,6 @@ export const Sidebar: FC = () => {
             <Github className="h-4 w-4 shrink-0" />
             {!collapsed && <span>GitHub</span>}
           </a>
-          <Link href="/mandara"
-            className={cn("flex items-center gap-3 rounded-md px-3 py-1.5 text-[12px] font-medium text-neutral-600 transition-all hover:text-neutral-400", collapsed && "justify-center")}>
-            <Globe className="h-4 w-4 shrink-0" />
-            {!collapsed && <span>Mandara Console</span>}
-          </Link>
           <a href="https://humanrail.org" target="_blank" rel="noopener noreferrer"
             className={cn("flex items-center gap-3 rounded-md px-3 py-1.5 text-[12px] font-medium text-neutral-600 transition-all hover:text-neutral-400", collapsed && "justify-center")}>
             <Globe className="h-4 w-4 shrink-0" />

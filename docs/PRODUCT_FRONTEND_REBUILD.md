@@ -98,6 +98,45 @@ All new UI surfaces include the standard disclaimer:
    npm run product:frontend:smoke
    ```
 
+## P11A: Routing and Navigation Cleanup
+
+### Goal
+Make Mandara the primary user-facing product experience and move old HumanRail protocol views out of the normal user path.
+
+### Changes
+
+**Root page (`/`):**
+- Primary CTA: "Open Mandara Console" → `/mandara/app`
+- Secondary CTA: "Start Onboarding" → `/mandara/app/onboarding`
+- Technical CTA: "Advanced Technical Proof" → `/vault/dwallets`
+- Removed: "Launch Vault" primary CTA
+- Removed: "View Demo Agent" broken hardcoded CTA
+
+**Top navbar (`components/layout/navbar.tsx`):**
+- Main nav: Mandara, Console, Onboarding
+- Advanced dropdown: Technical Proof, Protocol Human, Protocol Agent, Delegation, Receipts, HumanPay, DataBlink, Documents
+- Hidden from main nav: old protocol links no longer have equal prominence
+
+**Wallet dropdown (`components/wallet/wallet-button.tsx`):**
+- "Mandara Console" → `/mandara/app`
+- "Advanced Protocol Vault" → `/vault`
+
+**Vault sidebar (`components/dashboard/sidebar.tsx`):**
+- Subtitle: "Advanced Protocol Explorer"
+- Added amber notice banner explaining this is protocol explorer mode
+- Added prominent "Mandara Console" link
+- Renamed items: My Identity → Protocol Identity, My Agents → Protocol Agents, etc.
+
+**`/vault/dwallets` banner:**
+- Upgraded to "Advanced Technical Proof" banner with FlaskConical icon
+- Two buttons: Open Mandara Console + Start Onboarding
+
+**New `/advanced` route:**
+- Hub page linking to all protocol proof pages and rails
+- Used by Mandara app shell "Advanced Proof" nav item
+
+**No protocol pages were deleted.** All old routes remain accessible.
+
 ## Files Added/Changed
 
 ### New Routes
@@ -108,6 +147,7 @@ All new UI surfaces include the standard disclaimer:
 - `app/mandara/app/agents/page.tsx`
 - `app/mandara/app/requests/page.tsx`
 - `app/mandara/app/activity/page.tsx`
+- `app/advanced/page.tsx`
 - `app/api/rpc/route.ts`
 
 ### New Components
@@ -122,7 +162,12 @@ All new UI surfaces include the standard disclaimer:
 - `lib/mandara-api/types.ts` — Added create input types
 - `lib/hooks/use-mandara-product.ts` — Added mutations and org state
 - `lib/solana/providers.tsx` — RPC proxy security fix
-- `app/vault/dwallets/page-client.tsx` — Added Mandara Console notice
+- `app/vault/dwallets/page-client.tsx` — Added Advanced Technical Proof banner
+- `app/page-client.tsx` — Mandara-first CTAs
+- `components/layout/navbar.tsx` — Product nav + Advanced dropdown
+- `components/wallet/wallet-button.tsx` — Fixed routes
+- `components/dashboard/sidebar.tsx` — Protocol explorer positioning
+- `components/mandara/app-shell.tsx` — Links to /advanced
 
 ### New Scripts
 - `scripts/product-frontend-smoke.mjs`

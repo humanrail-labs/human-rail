@@ -69,7 +69,7 @@ export default function MandaraAppShell({
 
         <div className="border-t border-white/[0.06] p-3">
           <button
-            onClick={() => router.push("/vault/dwallets")}
+            onClick={() => router.push("/advanced")}
             className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-neutral-500 transition-colors hover:bg-white/[0.04] hover:text-neutral-300"
           >
             <FlaskConical className="h-4 w-4" />
@@ -130,7 +130,7 @@ export default function MandaraAppShell({
               })}
               <button
                 onClick={() => {
-                  router.push("/vault/dwallets");
+                  router.push("/advanced");
                   setMobileOpen(false);
                 }}
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-neutral-500 hover:bg-white/[0.04]"

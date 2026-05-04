@@ -30,7 +30,8 @@
 | P8 | Webhooks + exports | Real-time events + CSV/JSON audit exports | 3 days |
 | P9 | Devnet beta deployment | Dockerfiles, CI, Render deployment, health checks | 2 days |
 | P10 | Product launch package | Launch docs, landing copy, demo script, pricing, audit | 2 days |
-| P11 | Frontend rebuild | Product landing page, console dashboard, onboarding wizard for non-technical users | 2 days |
+| P11A | Frontend nav cleanup | Make Mandara primary entry point, move old protocol pages to Advanced, fix broken CTAs | 1 day |
+| P11B | Frontend rebuild | Product landing page, console dashboard, onboarding wizard for non-technical users | 2 days |
 | P9 | Devnet beta deploy | Hosted deployment on devnet with CI/CD | 2–3 days |
 | P10 | Launch docs | Product docs, developer guide, API reference | 2 days |
 
