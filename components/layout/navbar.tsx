@@ -63,8 +63,8 @@ export const Navbar: FC = () => {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/mandara-logo.png"
-              alt="Mandara"
+              src="/humanrail-logo.png"
+              alt="HumanRail"
               width={32}
               height={32}
               className="h-8 w-8"

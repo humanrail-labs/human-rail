@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { getProgramId, parseHumanProfile, parseAgentProfile } from '@/lib/programs';
 import { useCluster } from '@/lib/solana/cluster-context';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 import {
   Shield, Zap, Eye, Users, ArrowRight, Github, Wallet, Bot, Fingerprint, Activity, FlaskConical,
 } from 'lucide-react';
@@ -199,10 +200,14 @@ export default function AgentVaultLanding() {
           {/* Nav */}
           <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: '#fff' }}>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-                <Shield className="h-5 w-5 text-emerald-500" />
-              </div>
-              <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>Mandara</span>
+              <Image
+                src="/humanrail-logo.png"
+                alt="HumanRail"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-lg"
+              />
+              <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>HumanRail</span>
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
               <a href="https://github.com/humanrail-labs/human-rail" target="_blank" rel="noopener noreferrer"
@@ -225,15 +230,25 @@ export default function AgentVaultLanding() {
                 <span style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)' }}>Live on Solana Devnet</span>
               </div>
 
+              <div style={{ marginBottom: '1.5rem' }}>
+                <Image
+                  src="/humanrail-logo.png"
+                  alt="HumanRail"
+                  width={80}
+                  height={80}
+                  className="mx-auto h-20 w-20 rounded-2xl"
+                />
+              </div>
+
               <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>
-                AI Agents with<br />
+                HumanRail Protocol<br />
                 <span style={{ background: 'linear-gradient(90deg, #34d399, #60a5fa, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  Guardrails
+                  AI Agent Guardrails
                 </span>
               </h1>
 
               <p style={{ fontSize: 'clamp(1.125rem, 3vw, 1.375rem)', color: 'rgba(255,255,255,0.55)', maxWidth: '640px', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
-                Deploy, monitor, and control your AI agents on Solana. Set spending limits, define capabilities, and maintain full oversight — all on-chain.
+                The on-chain protocol for policy-governed AI agents on Solana. Built by HumanRail Labs. Launch Mandara to deploy, monitor, and control your agents with full oversight.
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '4rem' }}>
