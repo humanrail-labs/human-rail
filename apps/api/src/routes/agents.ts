@@ -31,8 +31,12 @@ export default async function agentRoutes(fastify: FastifyInstance) {
     }
 
     const { orgId, status, limit } = query.data;
-    const where: Record<string, unknown> = {};
-    if (orgId) where.organizationId = orgId;
+    const effectiveOrgId = orgId ?? user.organizationIds[0];
+    if (!effectiveOrgId || !user.organizationIds.includes(effectiveOrgId)) {
+      return reply.status(403).send(errorResponse("FORBIDDEN", "Not a member of this organization"));
+    }
+
+    const where: Record<string, unknown> = { organizationId: effectiveOrgId };
     if (status) where.status = status;
 
     const agents = await prisma.agent.findMany({

@@ -27,8 +27,12 @@ export default async function policyRoutes(fastify: FastifyInstance) {
     }
 
     const { orgId, agentId, status, limit } = query.data;
-    const where: Record<string, unknown> = {};
-    if (orgId) where.organizationId = orgId;
+    const effectiveOrgId = orgId ?? user.organizationIds[0];
+    if (!effectiveOrgId || !user.organizationIds.includes(effectiveOrgId)) {
+      return reply.status(403).send(errorResponse("FORBIDDEN", "Not a member of this organization"));
+    }
+
+    const where: Record<string, unknown> = { organizationId: effectiveOrgId };
     if (agentId) where.agentId = agentId;
     if (status) where.status = status;
 

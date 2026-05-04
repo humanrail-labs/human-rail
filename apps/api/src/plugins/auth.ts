@@ -1,10 +1,13 @@
 import fp from "fastify-plugin";
 import type { FastifyInstance, FastifyRequest } from "fastify";
+import { prisma } from "@mandara/db";
 import { env, isDev } from "../config.js";
 
 export interface DevUser {
   email: string;
   id: string;
+  organizationIds: string[];
+  isAdmin: boolean;
 }
 
 export default fp(async function authPlugin(fastify: FastifyInstance) {
@@ -12,6 +15,8 @@ export default fp(async function authPlugin(fastify: FastifyInstance) {
 
   fastify.addHook("onRequest", async (request: FastifyRequest) => {
     const header = request.headers["x-mandara-dev-user"];
+    const secret = request.headers["x-mandara-dev-secret"];
+
     const email =
       typeof header === "string" && header.includes("@")
         ? header
@@ -23,9 +28,32 @@ export default fp(async function authPlugin(fastify: FastifyInstance) {
       return;
     }
 
-    // In P1, every dev user gets a deterministic ID derived from email
+    // In non-dev, require a shared secret to prevent trivial header forgery
+    if (!isDev && env.MANDARA_DEV_AUTH_SECRET && secret !== env.MANDARA_DEV_AUTH_SECRET) {
+      return;
+    }
+
     const id = `dev_${Buffer.from(email).toString("base64url")}`;
-    (request as FastifyRequest & { devUser: DevUser }).devUser = { email, id };
+
+    // Resolve memberships so routes can enforce org scoping
+    const dbUser = await prisma.user.findUnique({
+      where: { externalId: id },
+      include: {
+        memberships: {
+          select: { organizationId: true, role: true },
+        },
+      },
+    });
+
+    const organizationIds = dbUser?.memberships.map((m) => m.organizationId) ?? [];
+    const isAdmin = dbUser?.memberships.some((m) => m.role === "admin") ?? false;
+
+    (request as FastifyRequest & { devUser: DevUser }).devUser = {
+      email,
+      id,
+      organizationIds,
+      isAdmin,
+    };
   });
 });
 

@@ -14,6 +14,24 @@ export interface ResolvedOrgContext {
   organizationId: string;
 }
 
+/**
+ * Lightweight helper to verify the dev user belongs to a given organization.
+ * Throws MandaraError(FORBIDDEN, 403) if not.
+ */
+export function requireOrgAccess(request: FastifyRequest, orgId: string): void {
+  const user = request.devUser;
+  if (!user) {
+    throw new MandaraError("UNAUTHORIZED", 401, "Missing dev auth");
+  }
+  if (!user.organizationIds.includes(orgId)) {
+    throw new MandaraError(
+      "FORBIDDEN",
+      403,
+      "You do not have access to the specified organization."
+    );
+  }
+}
+
 export async function resolveOrganizationContext(
   request: FastifyRequest,
   optionalOrganizationId?: string

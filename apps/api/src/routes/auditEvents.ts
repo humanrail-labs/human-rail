@@ -44,8 +44,12 @@ export default async function auditEventRoutes(fastify: FastifyInstance) {
 
     const { orgId, resourceType, eventType, limit } = query.data;
 
-    const where: Record<string, unknown> = {};
-    if (orgId) where.organizationId = orgId;
+    const effectiveOrgId = orgId ?? user.organizationIds[0];
+    if (!effectiveOrgId || !user.organizationIds.includes(effectiveOrgId)) {
+      return reply.status(403).send(errorResponse("FORBIDDEN", "Not a member of this organization"));
+    }
+
+    const where: Record<string, unknown> = { organizationId: effectiveOrgId };
     if (resourceType) where.resourceType = resourceType;
     if (eventType) where.eventType = eventType;
 

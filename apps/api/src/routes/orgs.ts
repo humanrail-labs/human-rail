@@ -15,8 +15,11 @@ export default async function orgRoutes(fastify: FastifyInstance) {
       return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
     }
 
-    // In P1, list all orgs (dev mode). In future, scope to user memberships.
+    // Only return organizations the user is a member of
     const orgs = await prisma.organization.findMany({
+      where: {
+        id: { in: user.organizationIds },
+      },
       orderBy: { createdAt: "desc" },
       take: 100,
     });
@@ -52,6 +55,19 @@ export default async function orgRoutes(fastify: FastifyInstance) {
     const org = await prisma.organization.create({
       data: { name, slug },
     });
+
+    // Auto-create membership for the creator
+    await prisma.membership.create({
+      data: {
+        userId: user.id,
+        organizationId: org.id,
+        role: "admin",
+      },
+    });
+
+    // Refresh user's organizationIds in memory
+    user.organizationIds.push(org.id);
+    user.isAdmin = true;
 
     await recordAuditEvent({
       organizationId: org.id,

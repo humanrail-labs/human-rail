@@ -35,8 +35,12 @@ export default async function signingRequestRoutes(fastify: FastifyInstance) {
     }
 
     const { orgId, agentId, policyId, status, limit } = query.data;
-    const where: Record<string, unknown> = {};
-    if (orgId) where.organizationId = orgId;
+    const effectiveOrgId = orgId ?? user.organizationIds[0];
+    if (!effectiveOrgId || !user.organizationIds.includes(effectiveOrgId)) {
+      return reply.status(403).send(errorResponse("FORBIDDEN", "Not a member of this organization"));
+    }
+
+    const where: Record<string, unknown> = { organizationId: effectiveOrgId };
     if (agentId) where.agentId = agentId;
     if (policyId) where.policyId = policyId;
     if (status) where.status = status;
@@ -82,6 +86,10 @@ export default async function signingRequestRoutes(fastify: FastifyInstance) {
 
     if (!signingRequest) {
       return reply.status(404).send(errorResponse("NOT_FOUND", "Signing request not found"));
+    }
+
+    if (!user.organizationIds.includes(signingRequest.organizationId)) {
+      return reply.status(403).send(errorResponse("FORBIDDEN", "Not a member of this organization"));
     }
 
     return success(signingRequest);
