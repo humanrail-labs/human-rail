@@ -239,7 +239,7 @@ export default function AgentVaultLanding() {
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '4rem' }}>
                 <Link href="/mandara/app">
                   <Button className="gap-2 rounded-full bg-sky-600 px-8 py-6 text-lg font-semibold text-white hover:bg-sky-700">
-                    Open Mandara Console <ArrowRight className="h-5 w-5" />
+                    Launch App <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="/mandara/app/onboarding">
