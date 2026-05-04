@@ -5,8 +5,8 @@
  */
 
 import { prisma } from "@mandara/db";
-import { signWebhookPayload } from "@mandara/core";
-import { decrypt } from "../../../apps/api/src/lib/encryption.js";
+import { signWebhookPayload, decrypt } from "@mandara/core";
+import { env } from "../config.js";
 import { logger } from "../lib/logger.js";
 import { recordAuditEvent } from "../lib/audit.js";
 
@@ -91,11 +91,14 @@ export async function processWebhookDeliveryJob(data: WebhookDeliveryJobData): P
   // Decrypt webhook secret before signing
   let webhookSecret: string;
   try {
-    webhookSecret = decrypt({
-      value: delivery.webhook.secret,
-      iv: (delivery.webhook as unknown as Record<string, string>).iv,
-      tag: (delivery.webhook as unknown as Record<string, string>).tag,
-    });
+    webhookSecret = decrypt(
+      {
+        value: delivery.webhook.secret,
+        iv: (delivery.webhook as unknown as Record<string, string>).iv,
+        tag: (delivery.webhook as unknown as Record<string, string>).tag,
+      },
+      env.MANDARA_ENCRYPTION_PASSWORD!
+    );
   } catch {
     logger.error("Failed to decrypt webhook secret", { webhookId });
     await prisma.webhookDelivery.update({

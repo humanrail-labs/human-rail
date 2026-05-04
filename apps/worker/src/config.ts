@@ -20,6 +20,7 @@ const EnvSchema = z.object({
   MANDARA_IKA_DWALLET_PROGRAM_ID: z.string().default("87W54kGYFQ1rgWqMeu4XTPHWXWmXSQCcjm8vCTfiq1oY"),
   MANDARA_WORKER_HEALTH_PORT: z.string().optional().transform((v) => (v ? Number(v) : undefined)),
   MANDARA_IKA_CLI_PATH: z.string().default(""),
+  MANDARA_ENCRYPTION_PASSWORD: z.string().min(16).optional(),
 });
 
 export const env = EnvSchema.parse(process.env);

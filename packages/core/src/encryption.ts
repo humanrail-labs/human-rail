@@ -2,19 +2,17 @@
  * Application-layer encryption for sensitive database fields.
  *
  * Uses AES-256-GCM with a server-side secret key derived from
- * MANDARA_ENCRYPTION_PASSWORD via scrypt.
+ * the provided password via scrypt.
  */
 
 import crypto from "node:crypto";
-import { env } from "../config.js";
 
 const ALGO = "aes-256-gcm";
 const SALT = Buffer.from("mandara-static-salt-v1", "utf8");
 
-function getKey(): Buffer {
-  const password = env.MANDARA_ENCRYPTION_PASSWORD;
-  if (!password) {
-    throw new Error("MANDARA_ENCRYPTION_PASSWORD is not configured");
+function getKey(password: string): Buffer {
+  if (!password || password.length < 16) {
+    throw new Error("Encryption password must be at least 16 characters");
   }
   return crypto.scryptSync(password, SALT, 32);
 }
@@ -25,9 +23,9 @@ export interface EncryptedField {
   tag: string;   // hex-encoded auth tag
 }
 
-export function encrypt(plaintext: string): EncryptedField {
+export function encrypt(plaintext: string, password: string): EncryptedField {
   const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(ALGO, getKey(), iv);
+  const cipher = crypto.createCipheriv(ALGO, getKey(password), iv);
   let encrypted = cipher.update(plaintext, "utf8", "hex");
   encrypted += cipher.final("hex");
   return {
@@ -37,10 +35,10 @@ export function encrypt(plaintext: string): EncryptedField {
   };
 }
 
-export function decrypt(encrypted: EncryptedField): string {
+export function decrypt(encrypted: EncryptedField, password: string): string {
   const decipher = crypto.createDecipheriv(
     ALGO,
-    getKey(),
+    getKey(password),
     Buffer.from(encrypted.iv, "hex")
   );
   decipher.setAuthTag(Buffer.from(encrypted.tag, "hex"));

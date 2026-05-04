@@ -89,7 +89,7 @@ function checkRpcRateLimit(ip: string): { allowed: boolean; remaining: number } 
 }
 
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for") || request.ip || "unknown";
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
   const rate = checkRpcRateLimit(ip);
   if (!rate.allowed) {
     return NextResponse.json(

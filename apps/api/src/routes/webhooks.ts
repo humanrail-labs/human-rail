@@ -5,7 +5,8 @@ import { CreateWebhookSchema, UpdateWebhookSchema, generateWebhookSecret } from 
 import { success, errorResponse } from "../lib/response.js";
 import { recordAuditEvent } from "../lib/audit.js";
 import { resolveOrganizationContext } from "../lib/orgContext.js";
-import { encrypt } from "../lib/encryption.js";
+import { encrypt } from "@mandara/core";
+import { env } from "../config.js";
 
 const ListWebhooksQuery = z.object({
   orgId: z.string().cuid2().optional(),
@@ -64,7 +65,7 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
     const { organizationId } = await resolveOrganizationContext(request, explicitOrgId);
 
     const rawSecret = secret ?? generateWebhookSecret();
-    const encrypted = encrypt(rawSecret);
+    const encrypted = encrypt(rawSecret, env.MANDARA_ENCRYPTION_PASSWORD!);
 
     const webhook = await prisma.webhook.create({
       data: {
@@ -178,7 +179,7 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
     if (isActive !== undefined) updateData.status = isActive ? "active" : "paused";
     if (secret !== undefined) {
       newSecret = secret;
-      const encrypted = encrypt(secret);
+      const encrypted = encrypt(secret, env.MANDARA_ENCRYPTION_PASSWORD!);
       updateData.secret = encrypted.value;
       updateData.iv = encrypted.iv;
       updateData.tag = encrypted.tag;
