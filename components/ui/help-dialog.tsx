@@ -155,13 +155,13 @@ export function HelpButton() {
 
           {/* Modal Content */}
           <div
-            className="relative flex h-[85vh] w-full max-w-5xl overflow-hidden rounded-base border-2 border-emerald-400 bg-neutral-900 shadow-shadow"
+            className="relative flex h-[85vh] w-full max-w-5xl overflow-hidden rounded-xl border border-white/[0.08] bg-neutral-900 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Sidebar */}
-            <div className="hidden w-64 flex-shrink-0 border-r-2 border-neutral-700 bg-neutral-950 md:block">
-              <div className="flex h-14 items-center border-b-2 border-neutral-700 px-4">
-                <h2 className="text-lg font-bold text-emerald-400">Documentation</h2>
+            <div className="hidden w-64 flex-shrink-0 border-r border-white/[0.06] bg-neutral-950 md:block">
+              <div className="flex h-14 items-center border-b border-white/[0.06] px-4">
+                <h2 className="text-lg font-bold text-sky-400">Documentation</h2>
               </div>
               <nav className="p-2">
                 {DOCUMENTATION_SECTIONS.map((section) => {
@@ -171,10 +171,10 @@ export function HelpButton() {
                     <button
                       key={section.id}
                       onClick={() => setActiveSection(section.id)}
-                      className={`mb-1 flex w-full items-center gap-3 rounded-base px-3 py-2.5 text-left text-sm transition-all ${
+                      className={`mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all ${
                         isActive
-                          ? "border-2 border-emerald-400 bg-emerald-600/20 text-emerald-400"
-                          : "border-2 border-transparent text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                          ? "bg-sky-500/10 text-sky-400 ring-1 ring-sky-500/20"
+                          : "text-neutral-400 hover:bg-white/[0.03] hover:text-white"
                       }`}
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" />
@@ -189,11 +189,11 @@ export function HelpButton() {
             {/* Main Content */}
             <div className="flex flex-1 flex-col">
               {/* Header */}
-              <div className="flex h-14 items-center justify-between border-b-2 border-neutral-700 px-4 md:px-6">
+              <div className="flex h-14 items-center justify-between border-b border-white/[0.06] px-4 md:px-6">
                 <div className="flex items-center gap-3">
                   {currentSection && (
                     <>
-                      <currentSection.icon className="h-5 w-5 text-emerald-400" />
+                      <currentSection.icon className="h-5 w-5 text-sky-400" />
                       <h3 className="text-lg font-bold text-white">{currentSection.title}</h3>
                     </>
                   )}
@@ -210,11 +210,11 @@ export function HelpButton() {
               </div>
 
               {/* Mobile Section Selector */}
-              <div className="border-b-2 border-neutral-700 p-3 md:hidden">
+              <div className="border-b border-white/[0.06] p-3 md:hidden">
                 <select
                   value={activeSection}
                   onChange={(e) => setActiveSection(e.target.value)}
-                  className="w-full rounded-base border-2 border-neutral-600 bg-neutral-800 px-3 py-2 text-white focus:border-emerald-400 focus:outline-none"
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white outline-none focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/30"
                 >
                   {DOCUMENTATION_SECTIONS.map((section) => (
                     <option key={section.id} value={section.id}>
@@ -228,7 +228,7 @@ export function HelpButton() {
               <div className="flex-1 overflow-y-auto p-4 md:p-6">
                 {currentSection && (
                   <div className="prose prose-invert max-w-none">
-                    <pre className="whitespace-pre-wrap rounded-base border-2 border-neutral-700 bg-neutral-950 p-4 font-sans text-sm leading-relaxed text-neutral-300">
+                    <pre className="whitespace-pre-wrap rounded-lg border border-white/[0.06] bg-neutral-950 p-4 font-sans text-sm leading-relaxed text-neutral-300">
                       {currentSection.content}
                     </pre>
                   </div>
@@ -239,7 +239,7 @@ export function HelpButton() {
                   <div className="mt-6 grid gap-3 sm:grid-cols-2">
                     <a
                       href="/human"
-                      className="flex items-center gap-3 rounded-base border-2 border-neutral-600 bg-neutral-800 p-4 text-white transition-all hover:border-emerald-400 hover:bg-neutral-700"
+                      className="flex items-center gap-3 rounded-lg border border-white/[0.06] bg-white/[0.03] p-4 text-white transition-colors hover:border-sky-500/30 hover:bg-white/[0.05]"
                     >
                       <Users className="h-5 w-5 text-emerald-400" />
                       <div>
@@ -249,7 +249,7 @@ export function HelpButton() {
                     </a>
                     <a
                       href="/agent"
-                      className="flex items-center gap-3 rounded-base border-2 border-neutral-600 bg-neutral-800 p-4 text-white transition-all hover:border-emerald-400 hover:bg-neutral-700"
+                      className="flex items-center gap-3 rounded-lg border border-white/[0.06] bg-white/[0.03] p-4 text-white transition-colors hover:border-sky-500/30 hover:bg-white/[0.05]"
                     >
                       <Bot className="h-5 w-5 text-purple-400" />
                       <div>
@@ -262,7 +262,7 @@ export function HelpButton() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between border-t-2 border-neutral-700 px-4 py-3 md:px-6">
+              <div className="flex items-center justify-between border-t border-white/[0.06] px-4 py-3 md:px-6">
                 <div className="text-xs text-neutral-500">
                   HumanRail Protocol • Devnet Demo
                 </div>
