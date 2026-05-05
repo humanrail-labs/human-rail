@@ -63,18 +63,20 @@ export function WalletButton() {
         return;
       }
 
-      // Try adapter path first — connect directly through the adapter instance
-      // to bypass React state timing issues
+      // Primary: direct injected provider connect (bypasses adapter library)
+      await injected.connect();
+
+      // Sync the React context so useWallet() picks up the connection
       const adapterWallet = wallets.find(
         (w) => w.adapter.name === wallet.adapterName
       );
       if (adapterWallet) {
-        await adapterWallet.adapter.connect();
-        return;
+        try {
+          await adapterWallet.adapter.connect();
+        } catch {
+          // Ignore — direct connect already succeeded
+        }
       }
-
-      // Fallback: direct injected connect
-      await injected.connect();
     } catch (err: any) {
       // User rejection is normal — don't toast it
       if (
