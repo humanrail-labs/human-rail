@@ -34,6 +34,30 @@ function getWsEndpoint(cluster: Cluster): string {
   return cluster === "localnet" ? "ws://localhost:8899" : "wss://api.devnet.solana.com";
 }
 
+/**
+ * Client-only wallet wrapper so adapters are never created during SSR /
+ * hydration. This avoids the empty-wallets → populated-wallets race that
+ * triggers WalletConnectionError in React 19 + Next.js App Router.
+ */
+function ClientWalletProviders({ children }: { children: ReactNode }) {
+  const wallets = useMemo(
+    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+    []
+  );
+
+  return (
+    <WalletProvider
+      wallets={wallets}
+      autoConnect={false}
+      onError={(err) => {
+        console.error("[WalletAdapter] Error:", err);
+      }}
+    >
+      <WalletModalProvider>{children}</WalletModalProvider>
+    </WalletProvider>
+  );
+}
+
 export const SolanaProviders: FC<SolanaProvidersProps> = ({
   children,
   cluster,
@@ -100,25 +124,16 @@ export const SolanaProviders: FC<SolanaProvidersProps> = ({
     setMounted(true);
   }, []);
 
-  const wallets = useMemo(
-    () => (mounted ? [new PhantomWalletAdapter(), new SolflareWalletAdapter()] : []),
-    [mounted]
-  );
-
   return (
     <ConnectionProvider
       endpoint={endpoint}
       config={{ commitment: "confirmed", fetch: fetchWithFallback, wsEndpoint }}
     >
-      <WalletProvider
-        wallets={wallets}
-        autoConnect={false}
-        onError={(err) => {
-          console.error("[WalletAdapter] Error:", err);
-        }}
-      >
-        <WalletModalProvider>{children}</WalletModalProvider>
-      </WalletProvider>
+      {mounted ? (
+        <ClientWalletProviders>{children}</ClientWalletProviders>
+      ) : (
+        children
+      )}
     </ConnectionProvider>
   );
 };
