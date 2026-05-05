@@ -208,7 +208,7 @@ export default function AgentChatPageClient() {
                             <span className="font-medium capitalize">{tc.name.replace(/_/g, " ")}</span>
                           </div>
                           {tc.result && (
-                            <div className="mt-1 text-[11px] text-neutral-500">
+                            <div className="mt-1 text-xs text-neutral-500">
                               {(() => {
                                 try {
                                   const parsed = JSON.parse(tc.result);
@@ -244,13 +244,13 @@ export default function AgentChatPageClient() {
                             href={`https://explorer.solana.com/tx/${sig}?cluster=${cluster}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] text-sky-400 hover:underline"
+                            className="inline-flex items-center gap-1 text-xs text-sky-400 hover:underline"
                           >
                             <ExternalLink className="h-3 w-3" />
                             View TX {sig.slice(0, 4)}…{sig.slice(-4)}
                           </a>
                         ) : (
-                          <span key={idx} className="text-[11px] text-neutral-500">{sig.slice(0, 20)}…</span>
+                          <span key={idx} className="text-xs text-neutral-500">{sig.slice(0, 20)}…</span>
                         )
                       ))}
                     </div>
@@ -276,7 +276,7 @@ export default function AgentChatPageClient() {
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </div>
-          <div className="mt-2 flex items-center justify-between text-[10px] text-neutral-600">
+          <div className="mt-2 flex items-center justify-between text-xs text-neutral-600">
             <span>{connected ? "Connected to agent server" : "Disconnected from agent server"}</span>
             <span>Agent Server: {AGENT_SERVER_URL}</span>
           </div>
@@ -312,7 +312,7 @@ export default function AgentChatPageClient() {
               <CardContent className="p-4">
                 <p className="text-xs font-medium text-neutral-500">Daily Budget Remaining</p>
                 <p className="text-lg font-semibold text-white">{(Number(dailyRemaining) / 1e9).toFixed(4)} SOL</p>
-                <p className="text-[10px] text-neutral-600">Across {capabilities.length} capabilities</p>
+                <p className="text-xs text-neutral-600">Across {capabilities.length} capabilities</p>
               </CardContent>
             </Card>
 
@@ -323,11 +323,11 @@ export default function AgentChatPageClient() {
                   {capabilities.length === 0 && <p className="text-xs text-neutral-600">No capabilities</p>}
                   {capabilities.map((cap) => (
                     <div key={cap.pda.toBase58()} className="rounded-lg border border-white/[0.04] bg-white/[0.02] p-2">
-                      <div className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center justify-between text-xs">
                         <span className="text-neutral-400">{cap.allowedPrograms.toString() === "18446744073709551615" ? "Full" : "Scoped"}</span>
                         <span className={cap.isFrozen ? "text-sky-400" : "text-emerald-400"}>{cap.isFrozen ? "Frozen" : cap.status}</span>
                       </div>
-                      <div className="mt-1 text-[10px] text-neutral-500">
+                      <div className="mt-1 text-xs text-neutral-500">
                         Per-tx: {(Number(cap.perTxLimit) / 1e9).toFixed(3)} · Daily: {(Number(cap.dailyLimit) / 1e9).toFixed(3)}
                       </div>
                     </div>

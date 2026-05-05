@@ -148,19 +148,19 @@ export default function PublicHumanProfilePage() {
               <CardContent className="p-5">
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Trust Score</p>
+                    <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Trust Score</p>
                     <p className="mt-1 text-xl font-bold text-white">{profile.humanScore}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Attestations</p>
+                    <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Attestations</p>
                     <p className="mt-1 text-xl font-bold text-white">{profile.activeAttestationCount}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Agents Registered</p>
+                    <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Agents Registered</p>
                     <p className="mt-1 text-xl font-bold text-white">{profile.agentsRegistered}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Member Since</p>
+                    <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Member Since</p>
                     <p className="mt-1 text-sm font-semibold text-white">{new Date(profile.createdAt * 1000).toLocaleDateString()}</p>
                   </div>
                 </div>
@@ -203,15 +203,15 @@ export default function PublicHumanProfilePage() {
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-white">{agent.name || "Unnamed Agent"}</p>
-                            <p className="text-[11px] text-neutral-500">{agent.pda.toBase58().slice(0, 8)}…</p>
+                            <p className="text-xs text-neutral-500">{agent.pda.toBase58().slice(0, 8)}…</p>
                           </div>
                         </div>
                         <Badge variant="outline" className={
                           agent.status === "Active"
-                            ? "border-emerald-500/20 bg-emerald-500/5 text-[10px] text-emerald-400"
+                            ? "border-emerald-500/20 bg-emerald-500/5 text-xs text-emerald-400"
                             : agent.status === "Suspended"
-                            ? "border-amber-500/20 bg-amber-500/5 text-[10px] text-amber-400"
-                            : "border-red-500/20 bg-red-500/5 text-[10px] text-red-400"
+                            ? "border-amber-500/20 bg-amber-500/5 text-xs text-amber-400"
+                            : "border-red-500/20 bg-red-500/5 text-xs text-red-400"
                         }>
                           {agent.status}
                         </Badge>

@@ -101,7 +101,7 @@ export default function RequestsPage() {
       </div>
 
       {signingRequests.length === 0 ? (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardContent className="py-8 text-center text-sm text-neutral-500">
             No signature requests yet. Create one in the{" "}
             <a href="/mandara/app/onboarding" className="text-sky-400 hover:underline">
@@ -124,7 +124,7 @@ export default function RequestsPage() {
                   className={`cursor-pointer rounded-lg border p-3 transition-colors ${
                     selectedId === sr.id
                       ? "border-sky-500/30 bg-sky-500/5"
-                      : "border-white/[0.06] bg-black/20 hover:bg-black/30"
+                      : "border-white/[0.06] bg-white/[0.02] hover:bg-black/30"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -136,11 +136,11 @@ export default function RequestsPage() {
                         {truncate(sr.id, 6)}
                       </span>
                     </div>
-                    <span className="text-[11px] text-neutral-500">
+                    <span className="text-xs text-neutral-500">
                       {new Date(sr.createdAt).toLocaleString()}
                     </span>
                   </div>
-                  <div className="mt-1.5 flex flex-wrap gap-x-3 text-[11px] text-neutral-400">
+                  <div className="mt-1.5 flex flex-wrap gap-x-3 text-xs text-neutral-400">
                     <span>Amount: {sr.amount}</span>
                     <span>Chain: {sr.destinationChainId}</span>
                     {sr.agent?.name && <span>Agent: {sr.agent.name}</span>}
@@ -148,7 +148,7 @@ export default function RequestsPage() {
                 </div>
 
                 {selectedId === sr.id && execution && (
-                  <Card className="mt-2 border-white/[0.06] bg-neutral-900/50">
+                  <Card className="mt-2 border-white/[0.06] bg-white/[0.03]">
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2 text-sm text-white">
                         <FileKey className="h-4 w-4 text-purple-400" />
@@ -183,7 +183,7 @@ export default function RequestsPage() {
                       {execution.signingRequest.signatureHex && (
                         <div className="space-y-1">
                           <span className="text-xs text-neutral-500">Signature</span>
-                          <code className="block truncate rounded bg-black/30 px-2 py-1 text-[10px] text-neutral-300">
+                          <code className="block truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
                             {execution.signingRequest.signatureHex}
                           </code>
                         </div>
@@ -194,7 +194,7 @@ export default function RequestsPage() {
                           {execution.auditEvents.map((ev) => (
                             <div
                               key={ev.id}
-                              className="flex items-center justify-between rounded bg-black/20 px-2 py-1 text-[11px]"
+                              className="flex items-center justify-between rounded bg-white/[0.02] px-2 py-1 text-xs"
                             >
                               <span className="text-neutral-400">{ev.eventType}</span>
                               <span className="text-neutral-500">

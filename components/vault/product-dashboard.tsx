@@ -274,7 +274,7 @@ export default function ProductDashboard() {
   return (
     <div className="space-y-6">
       {/* API Status */}
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <Activity className="h-4 w-4 text-emerald-400" />
@@ -308,7 +308,7 @@ export default function ProductDashboard() {
               </div>
             </>
           )}
-          <div className="flex items-start gap-2 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2 text-[11px] text-purple-200/70">
+          <div className="flex items-start gap-2 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2 text-xs text-purple-200/70">
             <Radio className="mt-0.5 h-3.5 w-3.5 shrink-0 text-purple-400" />
             Ika pre-alpha uses a single mock signer. Not production MPC custody.
           </div>
@@ -325,18 +325,18 @@ export default function ProductDashboard() {
           { label: "Signed", value: signedCount, icon: CheckCircle2 },
           { label: "Approvals", value: messageApprovals.length, icon: Shield },
         ].map((item) => (
-          <Card key={item.label} className="border-white/[0.06] bg-neutral-900/50">
+          <Card key={item.label} className="border-white/[0.06] bg-white/[0.03]">
             <CardContent className="flex flex-col items-center justify-center py-4">
               <item.icon className="mb-1 h-5 w-5 text-neutral-400" />
               <p className="text-xl font-semibold text-white">{item.value}</p>
-              <p className="text-[11px] text-neutral-500">{item.label}</p>
+              <p className="text-xs text-neutral-500">{item.label}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Create Signing Request */}
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <Send className="h-4 w-4 text-sky-400" />
@@ -351,7 +351,7 @@ export default function ProductDashboard() {
             <div className="space-y-1.5">
               <Label className="text-xs text-neutral-400">Agent</Label>
               <select
-                className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-sm text-neutral-300 outline-none focus:border-sky-500/30"
+                className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 outline-none focus:border-sky-500/30"
                 value={formAgentId}
                 onChange={(e) => setFormAgentId(e.target.value)}
               >
@@ -366,7 +366,7 @@ export default function ProductDashboard() {
             <div className="space-y-1.5">
               <Label className="text-xs text-neutral-400">Policy</Label>
               <select
-                className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-sm text-neutral-300 outline-none focus:border-sky-500/30"
+                className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 outline-none focus:border-sky-500/30"
                 value={formPolicyId}
                 onChange={(e) => setFormPolicyId(e.target.value)}
               >
@@ -380,24 +380,24 @@ export default function ProductDashboard() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-neutral-400">Destination Chain ID</Label>
-              <Input value={formChainId} onChange={(e) => setFormChainId(e.target.value)} className="border-white/[0.06] bg-black/20 text-sm text-neutral-300" />
+              <Input value={formChainId} onChange={(e) => setFormChainId(e.target.value)} className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-neutral-400">Amount</Label>
-              <Input value={formAmount} onChange={(e) => setFormAmount(e.target.value)} className="border-white/[0.06] bg-black/20 text-sm text-neutral-300" />
+              <Input value={formAmount} onChange={(e) => setFormAmount(e.target.value)} className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-neutral-400">Asset</Label>
-              <Input value={formAsset} onChange={(e) => setFormAsset(e.target.value)} className="border-white/[0.06] bg-black/20 text-sm text-neutral-300" />
+              <Input value={formAsset} onChange={(e) => setFormAsset(e.target.value)} className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-neutral-400">Recipient</Label>
-              <Input value={formRecipient} onChange={(e) => setFormRecipient(e.target.value)} className="border-white/[0.06] bg-black/20 text-sm text-neutral-300" />
+              <Input value={formRecipient} onChange={(e) => setFormRecipient(e.target.value)} className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300" />
             </div>
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-neutral-400">Message</Label>
-            <Input value={formMessage} onChange={(e) => setFormMessage(e.target.value)} className="border-white/[0.06] bg-black/20 text-sm text-neutral-300" />
+            <Input value={formMessage} onChange={(e) => setFormMessage(e.target.value)} className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300" />
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -425,14 +425,14 @@ export default function ProductDashboard() {
           )}
 
           {previewResult && (
-            <div className="space-y-2 rounded-lg bg-black/20 p-3">
+            <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
               <p className="text-xs font-medium text-neutral-400">Preview Result</p>
               <Badge variant="outline" className={previewResult.allowed ? "border-emerald-500/30 text-emerald-300" : "border-red-500/30 text-red-300"}>
                 {previewResult.allowed ? "Allowed" : "Rejected"}
               </Badge>
               <p className="text-xs text-neutral-400">{previewResult.reason}</p>
               {previewResult.computed && (
-                <div className="grid grid-cols-1 gap-1 text-[11px]">
+                <div className="grid grid-cols-1 gap-1 text-xs">
                   <div className="flex justify-between"><span className="text-neutral-500">Asset hash</span><code className="text-neutral-400">{truncate(previewResult.computed.assetHash, 8)}</code></div>
                   <div className="flex justify-between"><span className="text-neutral-500">Recipient hash</span><code className="text-neutral-400">{truncate(previewResult.computed.recipientHash, 8)}</code></div>
                   <div className="flex justify-between"><span className="text-neutral-500">Message digest</span><code className="text-neutral-400">{truncate(previewResult.computed.messageDigest, 8)}</code></div>
@@ -444,15 +444,15 @@ export default function ProductDashboard() {
           {createdSr && (
             <div className="space-y-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
               <p className="text-xs font-medium text-emerald-200">Request Created</p>
-              <div className="flex justify-between text-[11px]">
+              <div className="flex justify-between text-xs">
                 <span className="text-emerald-200/60">ID</span>
                 <code className="text-emerald-200/80">{createdSr.signingRequest.id}</code>
               </div>
-              <div className="flex justify-between text-[11px]">
+              <div className="flex justify-between text-xs">
                 <span className="text-emerald-200/60">Status</span>
                 <span className="text-emerald-200/80">{createdSr.signingRequest.status}</span>
               </div>
-              <p className="text-[11px] text-emerald-200/60">
+              <p className="text-xs text-emerald-200/60">
                 Queueing creates a worker job. Live signing requires the backend worker with live-devnet gates enabled.
               </p>
             </div>
@@ -461,7 +461,7 @@ export default function ProductDashboard() {
       </Card>
 
       {/* API Key Management */}
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <FileKey className="h-4 w-4 text-amber-400" />
@@ -476,7 +476,7 @@ export default function ProductDashboard() {
             <div className="space-y-1.5">
               <Label className="text-xs text-neutral-400">Agent</Label>
               <select
-                className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-sm text-neutral-300 outline-none focus:border-sky-500/30"
+                className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 outline-none focus:border-sky-500/30"
                 value={apiKeyAgentId}
                 onChange={(e) => {
                   setApiKeyAgentId(e.target.value);
@@ -498,7 +498,7 @@ export default function ProductDashboard() {
                 value={apiKeyName}
                 onChange={(e) => setApiKeyName(e.target.value)}
                 placeholder="e.g. production-agent"
-                className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
               />
             </div>
             <div className="flex items-end gap-2">
@@ -534,7 +534,7 @@ export default function ProductDashboard() {
           {createdApiKey && (
             <div className="space-y-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3">
               <p className="text-xs font-medium text-amber-200">API Key Created</p>
-              <p className="text-[11px] text-amber-200/70">
+              <p className="text-xs text-amber-200/70">
                 Copy the raw key now. It will not be shown again.
               </p>
               <div className="flex items-center gap-2">
@@ -548,7 +548,7 @@ export default function ProductDashboard() {
                   <Copy className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <div className="flex justify-between text-[11px]">
+              <div className="flex justify-between text-xs">
                 <span className="text-amber-200/60">Prefix</span>
                 <span className="text-amber-200/80">{createdApiKey.prefix}</span>
               </div>
@@ -562,25 +562,25 @@ export default function ProductDashboard() {
                 {apiKeys.map((k) => (
                   <div
                     key={k.id}
-                    className="flex items-center justify-between rounded bg-black/20 px-2 py-1.5 text-xs"
+                    className="flex items-center justify-between rounded bg-white/[0.02] px-2 py-1.5 text-xs"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-neutral-300">{k.name}</span>
-                      <code className="text-[10px] text-neutral-500">{k.prefix}</code>
+                      <code className="text-xs text-neutral-500">{k.prefix}</code>
                       {k.revokedAt && (
-                        <Badge variant="outline" className="border-red-500/30 text-red-300 text-[10px]">
+                        <Badge variant="outline" className="border-red-500/30 text-red-300 text-xs">
                           Revoked
                         </Badge>
                       )}
                       {k.expiresAt && !k.revokedAt && new Date(k.expiresAt) < new Date() && (
-                        <Badge variant="outline" className="border-amber-500/30 text-amber-300 text-[10px]">
+                        <Badge variant="outline" className="border-amber-500/30 text-amber-300 text-xs">
                           Expired
                         </Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
                       {k.lastUsedAt && (
-                        <span className="text-[10px] text-neutral-500">
+                        <span className="text-xs text-neutral-500">
                           Used {new Date(k.lastUsedAt).toLocaleDateString()}
                         </span>
                       )}
@@ -590,7 +590,7 @@ export default function ProductDashboard() {
                           size="sm"
                           onClick={() => handleRevokeApiKey(k.id)}
                           disabled={apiKeyLoading}
-                          className="h-6 text-[10px] border-red-500/20 text-red-300 hover:bg-red-500/10"
+                          className="h-6 text-xs border-red-500/20 text-red-300 hover:bg-red-500/10"
                         >
                           Revoke
                         </Button>
@@ -615,7 +615,7 @@ export default function ProductDashboard() {
       <AuditExport exportAuditEvents={exportAuditEvents} />
 
       {/* Signing Requests */}
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <FileKey className="h-4 w-4 text-sky-400" />
@@ -634,7 +634,7 @@ export default function ProductDashboard() {
                   className={`cursor-pointer rounded-lg border p-3 transition-colors ${
                     selectedSrId === sr.id
                       ? "border-sky-500/30 bg-sky-500/5"
-                      : "border-white/[0.06] bg-black/20 hover:bg-black/30"
+                      : "border-white/[0.06] bg-white/[0.02] hover:bg-black/30"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -644,17 +644,17 @@ export default function ProductDashboard() {
                       </Badge>
                       <span className="text-xs text-neutral-400">{truncate(sr.id, 6)}</span>
                     </div>
-                    <span className="text-[11px] text-neutral-500">
+                    <span className="text-xs text-neutral-500">
                       {new Date(sr.createdAt).toLocaleString()}
                     </span>
                   </div>
-                  <div className="mt-1.5 flex flex-wrap gap-x-3 text-[11px] text-neutral-400">
+                  <div className="mt-1.5 flex flex-wrap gap-x-3 text-xs text-neutral-400">
                     <span>Amount: {sr.amount}</span>
                     <span>Chain: {sr.destinationChainId}</span>
                     {sr.message && <span className="truncate max-w-[200px]">Msg: {sr.message}</span>}
                   </div>
                   {sr.onChainMessageApprovalPda && (
-                    <div className="mt-1 text-[11px] text-neutral-500">
+                    <div className="mt-1 text-xs text-neutral-500">
                       MA: {truncate(sr.onChainMessageApprovalPda, 8)}
                     </div>
                   )}
@@ -667,7 +667,7 @@ export default function ProductDashboard() {
 
       {/* Execution Detail */}
       {selectedSrId && execution && (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base text-white">
               <Eye className="h-4 w-4 text-purple-400" />
@@ -729,18 +729,18 @@ export default function ProductDashboard() {
             )}
 
             {execution.signingRequest.signatureHex && (
-              <div className="space-y-2 rounded-lg bg-black/20 p-3">
+              <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                 <p className="text-xs font-medium text-neutral-400">Signature</p>
                 <div className="space-y-1">
-                  <span className="text-[11px] text-neutral-500">Hex</span>
-                  <code className="block truncate rounded bg-black/30 px-2 py-1 text-[10px] text-neutral-300">
+                  <span className="text-xs text-neutral-500">Hex</span>
+                  <code className="block truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
                     {execution.signingRequest.signatureHex}
                   </code>
                 </div>
                 {execution.signingRequest.signatureBase64 && (
                   <div className="space-y-1">
-                    <span className="text-[11px] text-neutral-500">Base64</span>
-                    <code className="block truncate rounded bg-black/30 px-2 py-1 text-[10px] text-neutral-300">
+                    <span className="text-xs text-neutral-500">Base64</span>
+                    <code className="block truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
                       {execution.signingRequest.signatureBase64}
                     </code>
                   </div>
@@ -753,7 +753,7 @@ export default function ProductDashboard() {
                 <p className="text-xs font-medium text-neutral-400">Audit Events</p>
                 <div className="space-y-1.5">
                   {execution.auditEvents.map((ev) => (
-                    <div key={ev.id} className="flex items-center justify-between rounded bg-black/20 px-2 py-1.5 text-[11px]">
+                    <div key={ev.id} className="flex items-center justify-between rounded bg-white/[0.02] px-2 py-1.5 text-xs">
                       <span className="text-neutral-400">{ev.eventType}</span>
                       <span className="text-neutral-500">{new Date(ev.createdAt).toLocaleTimeString()}</span>
                     </div>
@@ -767,7 +767,7 @@ export default function ProductDashboard() {
 
       {/* Agents / Wallets / Policies tables */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm text-white">
               <Bot className="h-4 w-4 text-sky-400" />
@@ -779,7 +779,7 @@ export default function ProductDashboard() {
               <p className="text-xs text-neutral-500">No agents.</p>
             ) : (
               agents.map((a) => (
-                <div key={a.id} className="flex items-center justify-between rounded bg-black/20 px-2 py-1.5 text-xs">
+                <div key={a.id} className="flex items-center justify-between rounded bg-white/[0.02] px-2 py-1.5 text-xs">
                   <span className="text-neutral-300">{a.name}</span>
                   <Badge variant="outline" className={a.status === "active" ? "border-emerald-500/30 text-emerald-300" : "border-amber-500/30 text-amber-300"}>
                     {a.status}
@@ -790,7 +790,7 @@ export default function ProductDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm text-white">
               <Wallet className="h-4 w-4 text-purple-400" />
@@ -802,21 +802,21 @@ export default function ProductDashboard() {
               <p className="text-xs text-neutral-500">No wallets.</p>
             ) : (
               wallets.map((w) => (
-                <div key={w.id} className="space-y-0.5 rounded bg-black/20 px-2 py-1.5 text-xs">
+                <div key={w.id} className="space-y-0.5 rounded bg-white/[0.02] px-2 py-1.5 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-neutral-300">{w.name || "Unnamed"}</span>
                     <Badge variant="outline" className={w.state === "Active" ? "border-emerald-500/30 text-emerald-300" : "border-amber-500/30 text-amber-300"}>
                       {w.state}
                     </Badge>
                   </div>
-                  <code className="block truncate text-[10px] text-neutral-500">{truncate(w.onChainPda, 8)}</code>
+                  <code className="block truncate text-xs text-neutral-500">{truncate(w.onChainPda, 8)}</code>
                 </div>
               ))
             )}
           </CardContent>
         </Card>
 
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm text-white">
               <Lock className="h-4 w-4 text-amber-400" />
@@ -828,14 +828,14 @@ export default function ProductDashboard() {
               <p className="text-xs text-neutral-500">No policies.</p>
             ) : (
               policies.map((p) => (
-                <div key={p.id} className="space-y-0.5 rounded bg-black/20 px-2 py-1.5 text-xs">
+                <div key={p.id} className="space-y-0.5 rounded bg-white/[0.02] px-2 py-1.5 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-neutral-300">{p.name || "Unnamed"}</span>
                     <Badge variant="outline" className={p.status === "active" ? "border-emerald-500/30 text-emerald-300" : "border-amber-500/30 text-amber-300"}>
                       {p.status}
                     </Badge>
                   </div>
-                  <div className="flex justify-between text-[10px] text-neutral-500">
+                  <div className="flex justify-between text-xs text-neutral-500">
                     <span>Chain: {p.allowedChainId}</span>
                     <span>Tx: {p.perTxLimit}</span>
                   </div>

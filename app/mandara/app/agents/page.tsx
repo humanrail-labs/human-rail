@@ -47,7 +47,7 @@ export default function AgentsPage() {
       </div>
 
       {agents.length === 0 ? (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardContent className="py-8 text-center text-sm text-neutral-500">
             No agents yet. Create one in the{" "}
             <a href="/mandara/app/onboarding" className="text-sky-400 hover:underline">
@@ -59,7 +59,7 @@ export default function AgentsPage() {
       ) : (
         <div className="grid gap-3">
           {agents.map((agent) => (
-            <Card key={agent.id} className="border-white/[0.06] bg-neutral-900/50">
+            <Card key={agent.id} className="border-white/[0.06] bg-white/[0.03]">
               <CardContent className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-3">
                   <Bot className="h-5 w-5 text-sky-400" />

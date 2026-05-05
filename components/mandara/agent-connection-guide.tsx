@@ -68,7 +68,7 @@ if (preview.allowed) {
         </p>
       </div>
 
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <Bot className="h-4 w-4 text-sky-400" />
@@ -88,7 +88,7 @@ if (preview.allowed) {
         </CardContent>
       </Card>
 
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <Shield className="h-4 w-4 text-emerald-400" />
@@ -107,7 +107,7 @@ if (preview.allowed) {
         </CardContent>
       </Card>
 
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <FileKey className="h-4 w-4 text-amber-400" />
@@ -115,7 +115,7 @@ if (preview.allowed) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <pre className="overflow-x-auto rounded bg-black/30 p-3 text-[11px] text-neutral-300">
+          <pre className="overflow-x-auto rounded bg-black/30 p-3 text-xs text-neutral-300">
             {envSnippet}
           </pre>
           <Button
@@ -130,12 +130,12 @@ if (preview.allowed) {
         </CardContent>
       </Card>
 
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader>
           <CardTitle className="text-base text-white">SDK snippet</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <pre className="overflow-x-auto rounded bg-black/30 p-3 text-[11px] text-neutral-300">
+          <pre className="overflow-x-auto rounded bg-black/30 p-3 text-xs text-neutral-300">
             {sdkSnippet}
           </pre>
           <Button
@@ -150,12 +150,12 @@ if (preview.allowed) {
         </CardContent>
       </Card>
 
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader>
           <CardTitle className="text-base text-white">Hermes / OpenClaw tool</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <pre className="overflow-x-auto rounded bg-black/30 p-3 text-[11px] text-neutral-300">
+          <pre className="overflow-x-auto rounded bg-black/30 p-3 text-xs text-neutral-300">
             {hermesSnippet}
           </pre>
           <Button

@@ -68,7 +68,7 @@ export default function AuditExport({ exportAuditEvents }: AuditExportProps) {
   );
 
   return (
-    <Card className="border-white/[0.06] bg-neutral-900/50">
+    <Card className="border-white/[0.06] bg-white/[0.03]">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base text-white">
           <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
@@ -86,7 +86,7 @@ export default function AuditExport({ exportAuditEvents }: AuditExportProps) {
               value={eventType}
               onChange={(e) => setEventType(e.target.value)}
               placeholder="e.g. signing_request_created"
-              className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+              className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
             />
           </div>
           <div className="space-y-1.5">
@@ -95,7 +95,7 @@ export default function AuditExport({ exportAuditEvents }: AuditExportProps) {
               value={resourceType}
               onChange={(e) => setResourceType(e.target.value)}
               placeholder="e.g. signing_request"
-              className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+              className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
             />
           </div>
           <div className="space-y-1.5">
@@ -104,7 +104,7 @@ export default function AuditExport({ exportAuditEvents }: AuditExportProps) {
               type="datetime-local"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+              className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
             />
           </div>
           <div className="space-y-1.5">
@@ -113,7 +113,7 @@ export default function AuditExport({ exportAuditEvents }: AuditExportProps) {
               type="datetime-local"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+              className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
             />
           </div>
           <div className="space-y-1.5">
@@ -121,7 +121,7 @@ export default function AuditExport({ exportAuditEvents }: AuditExportProps) {
             <Input
               value={limit}
               onChange={(e) => setLimit(e.target.value)}
-              className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+              className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
             />
           </div>
         </div>

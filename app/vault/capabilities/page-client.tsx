@@ -130,21 +130,21 @@ export default function DelegationPage() {
                         <Badge variant="outline" className={st.cls}><span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${st.dot}`} />{cap.status}{cap.isFrozen && " (Frozen)"}</Badge>
                         {isExpired && <Badge variant="outline" className="border-red-500/20 bg-red-500/5 text-red-400">Expired</Badge>}
                       </div>
-                      <div className="mt-0.5 flex items-center gap-2"><code className="text-[11px] text-neutral-600">{addr.slice(0, 8)}…{addr.slice(-6)}</code><CopyBtn text={addr} /></div>
+                      <div className="mt-0.5 flex items-center gap-2"><code className="text-xs text-neutral-600">{addr.slice(0, 8)}…{addr.slice(-6)}</code><CopyBtn text={addr} /></div>
                     </div>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2 rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]">
-                  <Bot className="h-4 w-4 text-sky-500" /><span className="text-[11px] text-neutral-500">Agent:</span>
-                  <code className="text-[11px] text-neutral-400">{agentAddr.slice(0, 12)}…{agentAddr.slice(-6)}</code><CopyBtn text={agentAddr} />
+                <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]">
+                  <Bot className="h-4 w-4 text-sky-500" /><span className="text-xs text-neutral-500">Agent:</span>
+                  <code className="text-xs text-neutral-400">{agentAddr.slice(0, 12)}…{agentAddr.slice(-6)}</code><CopyBtn text={agentAddr} />
                   <a href={`https://explorer.solana.com/address/${agentAddr}?cluster=${cluster}`} target="_blank" rel="noopener noreferrer" className="text-neutral-700 hover:text-sky-400"><ExternalLink className="h-3 w-3" /></a>
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-3">
-                  <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]"><p className="text-[10px] font-medium uppercase tracking-wider text-neutral-600">Per TX</p><p className="mt-1 text-sm font-bold text-white">{lamportsToSol(cap.perTxLimit)} SOL</p></div>
-                  <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]"><p className="text-[10px] font-medium uppercase tracking-wider text-neutral-600">Daily ({dailyPct}%)</p><p className="mt-1 text-sm font-bold text-white">{lamportsToSol(cap.dailySpent)} / {lamportsToSol(cap.dailyLimit)}</p><Progress value={dailyPct} className="mt-2 h-1" /></div>
-                  <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]"><p className="text-[10px] font-medium uppercase tracking-wider text-neutral-600">Total ({totalPct}%)</p><p className="mt-1 text-sm font-bold text-white">{lamportsToSol(cap.totalSpent)} / {lamportsToSol(cap.totalLimit)}</p><Progress value={totalPct} className="mt-2 h-1" /></div>
+                  <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]"><p className="text-xs font-medium uppercase tracking-wider text-neutral-600">Per TX</p><p className="mt-1 text-sm font-bold text-white">{lamportsToSol(cap.perTxLimit)} SOL</p></div>
+                  <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]"><p className="text-xs font-medium uppercase tracking-wider text-neutral-600">Daily ({dailyPct}%)</p><p className="mt-1 text-sm font-bold text-white">{lamportsToSol(cap.dailySpent)} / {lamportsToSol(cap.dailyLimit)}</p><Progress value={dailyPct} className="mt-2 h-1" /></div>
+                  <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]"><p className="text-xs font-medium uppercase tracking-wider text-neutral-600">Total ({totalPct}%)</p><p className="mt-1 text-sm font-bold text-white">{lamportsToSol(cap.totalSpent)} / {lamportsToSol(cap.totalLimit)}</p><Progress value={totalPct} className="mt-2 h-1" /></div>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-neutral-600"><span>Uses: {cap.useCount.toString()}</span><span>·</span><span>Slippage: {cap.maxSlippageBps}bps</span><span>·</span><span>Risk: T{cap.riskTier}</span><span>·</span><span>Expires: {expiresAt.toLocaleDateString()}</span></div>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs text-neutral-600"><span>Uses: {cap.useCount.toString()}</span><span>·</span><span>Slippage: {cap.maxSlippageBps}bps</span><span>·</span><span>Risk: T{cap.riskTier}</span><span>·</span><span>Expires: {expiresAt.toLocaleDateString()}</span></div>
                 {cap.status !== "Revoked" && (
                   <div className="mt-4 flex items-center gap-2 border-t border-white/[0.04] pt-4">
                     {!cap.isFrozen && cap.status === "Active" && <Button variant="outline" size="sm" className="gap-1.5 border-sky-500/20 text-sky-400 hover:bg-sky-500/10" onClick={() => doAction("freeze", cap)} disabled={!!actionLoading}>{isActLoading("freeze") ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Snowflake className="h-3.5 w-3.5" />} Freeze</Button>}

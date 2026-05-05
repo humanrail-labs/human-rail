@@ -76,7 +76,7 @@ export default function HumanDashboard() {
 
           {/* Not Connected */}
           {!connected && (
-            <Card className="border-neutral-800 bg-neutral-900/50">
+            <Card className="border-neutral-800 bg-white/[0.03]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <User className="mb-4 h-16 w-16 text-neutral-600" />
                 <h2 className="mb-2 text-xl font-semibold">Connect Your Wallet</h2>
@@ -88,7 +88,7 @@ export default function HumanDashboard() {
 
           {/* Connected - No Profile */}
           {connected && !hasProfile && !loading && (
-            <Card className="border-neutral-800 bg-neutral-900/50">
+            <Card className="border-neutral-800 bg-white/[0.03]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Fingerprint className="mb-4 h-16 w-16 text-emerald-500" />
                 <h2 className="mb-2 text-xl font-semibold">Create Your Profile</h2>
@@ -115,7 +115,7 @@ export default function HumanDashboard() {
           {/* Profile Exists */}
           {connected && hasProfile && profile && (
             <div className="space-y-6">
-              <Card className="border-neutral-800 bg-neutral-900/50">
+              <Card className="border-neutral-800 bg-white/[0.03]">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -164,7 +164,7 @@ export default function HumanDashboard() {
               </Card>
 
               {/* Agent Registration Status */}
-              <Card className="border-neutral-800 bg-neutral-900/50">
+              <Card className="border-neutral-800 bg-white/[0.03]">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">Agent Registration</CardTitle>
@@ -181,7 +181,7 @@ export default function HumanDashboard() {
               </Card>
 
               {/* Attestations */}
-              <Card className="border-neutral-800 bg-neutral-900/50">
+              <Card className="border-neutral-800 bg-white/[0.03]">
                 <CardHeader>
                   <CardTitle className="text-lg">Attestations</CardTitle>
                   <CardDescription>Identity proofs from trusted issuers</CardDescription>

@@ -131,12 +131,12 @@ export function LiveActivityFeed() {
                       <span className="text-sm font-medium text-white">{actionLabel}</span>
                       <span className="text-xs text-sky-400">{agentName}</span>
                       {receipt.value > BigInt(0) && (
-                        <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-[10px] text-amber-400">
+                        <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-xs text-amber-400">
                           {valueSol} SOL
                         </Badge>
                       )}
                     </div>
-                    <p className="text-[11px] text-neutral-500">
+                    <p className="text-xs text-neutral-500">
                       {formatRelativeTime(receipt.timestamp)} · Seq #{receipt.sequence.toString()}
                     </p>
                   </div>

@@ -60,7 +60,7 @@ export default function ActivityPage() {
       </div>
 
       {auditEvents.length === 0 ? (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardContent className="py-8 text-center text-sm text-neutral-500">
             No activity yet. Complete the{" "}
             <a href="/mandara/app/onboarding" className="text-sky-400 hover:underline">
@@ -74,7 +74,7 @@ export default function ActivityPage() {
           {auditEvents.map((ev) => (
             <div
               key={ev.id}
-              className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2"
+              className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2"
             >
               <div className="flex items-center gap-3">
                 <Activity className="h-4 w-4 text-emerald-400" />
@@ -83,14 +83,14 @@ export default function ActivityPage() {
                     {ev.summary ?? eventTypeHuman[ev.eventType] ?? ev.eventType}
                   </p>
                   {ev.resourceType && (
-                    <p className="text-[11px] text-neutral-500">
+                    <p className="text-xs text-neutral-500">
                       {ev.resourceType}
                       {ev.resourceId ? ` · ${ev.resourceId.slice(0, 8)}…` : ""}
                     </p>
                   )}
                 </div>
               </div>
-              <span className="text-[11px] text-neutral-500">
+              <span className="text-xs text-neutral-500">
                 {new Date(ev.createdAt).toLocaleString()}
               </span>
             </div>

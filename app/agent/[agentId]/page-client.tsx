@@ -226,7 +226,7 @@ export default function PublicAgentProfilePage() {
                 <CardContent className="p-5">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Principal</p>
+                      <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Principal</p>
                       <div className="mt-1 flex items-center gap-2">
                         <Link href={`/human/${agent.ownerPrincipal.toBase58()}`}>
                           <code className="text-sm text-sky-400 hover:underline">{agent.ownerPrincipal.toBase58().slice(0, 8)}…{agent.ownerPrincipal.toBase58().slice(-6)}</code>
@@ -235,18 +235,18 @@ export default function PublicAgentProfilePage() {
                       </div>
                     </div>
                     <div>
-                      <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Signing Key</p>
+                      <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Signing Key</p>
                       <div className="mt-1 flex items-center gap-2">
                         <code className="text-sm text-neutral-400">{agent.signingKey.toBase58().slice(0, 8)}…{agent.signingKey.toBase58().slice(-6)}</code>
                         <CopyBtn text={agent.signingKey.toBase58()} />
                       </div>
                     </div>
                     <div>
-                      <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Registered</p>
+                      <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Registered</p>
                       <p className="mt-1 text-sm text-white">{new Date(agent.createdAt * 1000).toLocaleDateString()}</p>
                     </div>
                     <div>
-                      <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Human Trust Score</p>
+                      <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Human Trust Score</p>
                       <p className="mt-1 text-sm text-white">
                         {humanLoading ? "—" : humanProfile ? `${humanProfile.humanScore} / 100` : "Not available"}
                       </p>
@@ -282,15 +282,15 @@ export default function PublicAgentProfilePage() {
                             <div className="flex items-start justify-between">
                               <div>
                                 <p className="text-sm font-semibold text-white">{scopeLabel}</p>
-                                <p className="text-[11px] text-neutral-500">
+                                <p className="text-xs text-neutral-500">
                                   Per-tx: {(Number(cap.perTxLimit) / 1e9).toFixed(4)} SOL · Daily: {(Number(cap.dailyLimit) / 1e9).toFixed(4)} SOL · Total: {(Number(cap.totalLimit) / 1e9).toFixed(4)} SOL
                                 </p>
                               </div>
-                              <Badge variant="outline" className="border-violet-500/20 bg-violet-500/5 text-[10px] text-violet-400">
+                              <Badge variant="outline" className="border-violet-500/20 bg-violet-500/5 text-xs text-violet-400">
                                 {cap.status}
                               </Badge>
                             </div>
-                            <p className="mt-2 text-[11px] text-neutral-500">
+                            <p className="mt-2 text-xs text-neutral-500">
                               Expires: {cap.expiresAt > 0 ? new Date(cap.expiresAt * 1000).toLocaleDateString() : "Never"} · Risk Tier: T{cap.riskTier}
                             </p>
                           </CardContent>
@@ -329,10 +329,10 @@ export default function PublicAgentProfilePage() {
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-sm font-medium text-white">{actionLabel}</span>
                                 {receipt.value > BigInt(0) && (
-                                  <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-[10px] text-amber-400">{valueSol} SOL</Badge>
+                                  <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-xs text-amber-400">{valueSol} SOL</Badge>
                                 )}
                               </div>
-                              <p className="text-[11px] text-neutral-500">{new Date(receipt.timestamp * 1000).toLocaleString()}</p>
+                              <p className="text-xs text-neutral-500">{new Date(receipt.timestamp * 1000).toLocaleString()}</p>
                             </div>
                             <div className="flex shrink-0 items-center gap-2">
                               <CopyBtn text={receipt.pda.toBase58()} />

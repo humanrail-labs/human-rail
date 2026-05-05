@@ -191,7 +191,7 @@ function KycSection({ walletPubkey, onAttested }: { walletPubkey: string; onAtte
                 <ArrowRight className="h-3.5 w-3.5" /> Re-open Veriff
               </Button>
             )}
-            <p className="text-[10px] text-neutral-600 animate-pulse">Polling every 5 seconds...</p>
+            <p className="text-xs text-neutral-600 animate-pulse">Polling every 5 seconds...</p>
           </div>
         )}
 
@@ -217,10 +217,10 @@ function KycSection({ walletPubkey, onAttested }: { walletPubkey: string; onAtte
               </div>
             </div>
             {kyc.txSignature && (
-              <div className="flex items-center justify-between rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.04]">
+              <div className="flex items-center justify-between rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.04]">
                 <div>
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-600">Transaction</p>
-                  <code className="text-[11px] text-neutral-400">{kyc.txSignature.slice(0, 16)}...{kyc.txSignature.slice(-8)}</code>
+                  <p className="text-xs font-medium uppercase tracking-wider text-neutral-600">Transaction</p>
+                  <code className="text-xs text-neutral-400">{kyc.txSignature.slice(0, 16)}...{kyc.txSignature.slice(-8)}</code>
                 </div>
                 <div className="flex items-center gap-2">
                   <CopyBtn text={kyc.txSignature} />
@@ -286,7 +286,7 @@ function AttestationCard({ att }: { att: AttestationWithPda }) {
   const formatTs = (ts: number) => !ts ? "Never" : new Date(ts * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="rounded-lg bg-neutral-900/50 p-4 ring-1 ring-white/[0.04] space-y-3">
+    <div className="rounded-lg bg-white/[0.03] p-4 ring-1 ring-white/[0.04] space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={`flex h-9 w-9 items-center justify-center rounded-full ${att.isActive && !isExpired ? "bg-emerald-500/10" : "bg-neutral-800"}`}>
@@ -298,23 +298,23 @@ function AttestationCard({ att }: { att: AttestationWithPda }) {
             <p className="text-sm font-medium text-neutral-300">
               {attestationTypeName(att.attestationType)} Attestation
             </p>
-            <p className="text-[10px] text-neutral-600">
+            <p className="text-xs text-neutral-600">
               Weight: {att.weight} · Nonce: {att.nonce.toString()}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {att.isActive && !isExpired ? (
-            <Badge variant="outline" className="border-emerald-500/20 text-emerald-500 text-[10px]">Active</Badge>
+            <Badge variant="outline" className="border-emerald-500/20 text-emerald-500 text-xs">Active</Badge>
           ) : isExpired ? (
-            <Badge variant="outline" className="border-amber-500/20 text-amber-500 text-[10px]">Expired</Badge>
+            <Badge variant="outline" className="border-amber-500/20 text-amber-500 text-xs">Expired</Badge>
           ) : (
-            <Badge variant="outline" className="border-red-500/20 text-red-500 text-[10px]">Revoked</Badge>
+            <Badge variant="outline" className="border-red-500/20 text-red-500 text-xs">Revoked</Badge>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
         <div>
           <span className="text-neutral-600">Issued</span>
           <p className="text-neutral-400">{formatTs(att.issuedAt)}</p>
@@ -417,7 +417,7 @@ export default function IdentityPage() {
             <p className="mb-2 text-sm text-neutral-500">Initialize your HumanRail identity on {cluster}. This creates a PDA account tied to your wallet.</p>
             {profilePda && (
               <div className="mb-6 flex items-center gap-2">
-                <code className="text-[11px] text-neutral-600">PDA: {profilePda.toBase58().slice(0, 8)}...{profilePda.toBase58().slice(-6)}</code>
+                <code className="text-xs text-neutral-600">PDA: {profilePda.toBase58().slice(0, 8)}...{profilePda.toBase58().slice(-6)}</code>
                 <CopyBtn text={profilePda.toBase58()} />
               </div>
             )}
@@ -453,7 +453,7 @@ export default function IdentityPage() {
                     </Badge>
                   </div>
                   <div className="mt-1 flex items-center gap-2">
-                    <code className="text-[11px] text-neutral-500">{profilePda?.toBase58()}</code>
+                    <code className="text-xs text-neutral-500">{profilePda?.toBase58()}</code>
                     {profilePda && <CopyBtn text={profilePda.toBase58()} />}
                     {profilePda && <ExplorerBtn address={profilePda.toBase58()} />}
                   </div>
@@ -465,7 +465,7 @@ export default function IdentityPage() {
             </div>
             <div className="mt-6 rounded-xl bg-neutral-900/60 p-5 ring-1 ring-white/[0.04]">
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Human Score</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500">Human Score</span>
                 <span className={`text-2xl font-bold tabular-nums ${scoreColor(profile!.humanScore)}`}>
                   {profile!.humanScore}<span className="text-sm font-normal text-neutral-600"> / 100</span>
                 </span>
@@ -474,7 +474,7 @@ export default function IdentityPage() {
                 <div className={`h-full rounded-full bg-gradient-to-r transition-all duration-700 ${scoreBg(profile!.humanScore)}`}
                   style={{ width: `${Math.min(profile!.humanScore, 100)}%` }} />
               </div>
-              <p className="mt-2 text-[11px] text-neutral-600">
+              <p className="mt-2 text-xs text-neutral-600">
                 Computed from {profile!.activeAttestationCount} active attestation{profile!.activeAttestationCount !== 1 ? "s" : ""}
               </p>
             </div>
@@ -490,11 +490,11 @@ export default function IdentityPage() {
           { icon: Bot, label: "Agents Registered", value: profile!.agentsRegistered, color: "text-violet-500", bg: "bg-violet-500/10" },
           { icon: Clock, label: "Created", value: formatTimestamp(profile!.createdAt), color: "text-amber-500", bg: "bg-amber-500/10" },
         ].map((stat) => (
-          <Card key={stat.label} className="border-white/[0.04] bg-white/[0.015]">
+          <Card key={stat.label} >
             <CardContent className="p-4">
               <div className="mb-2 flex items-center gap-2">
                 <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${stat.bg}`}><stat.icon className={`h-3.5 w-3.5 ${stat.color}`} /></div>
-                <span className="text-[10px] font-medium uppercase tracking-wider text-neutral-600">{stat.label}</span>
+                <span className="text-xs font-medium uppercase tracking-wider text-neutral-600">{stat.label}</span>
               </div>
               <p className="text-lg font-bold text-white">{stat.value}</p>
             </CardContent>
@@ -512,7 +512,7 @@ export default function IdentityPage() {
 
       {/* Trust Tier Card -- DUPLICATE REMOVED */}
       <motion.div variants={fadeUp}>
-        <Card className="border-white/[0.04] bg-white/[0.015]">
+        <Card >
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-sm">
@@ -566,7 +566,7 @@ export default function IdentityPage() {
 
       {/* Agent Registration Card */}
       <motion.div variants={fadeUp}>
-        <Card className="border-white/[0.04] bg-white/[0.015]">
+        <Card >
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm">Agent Registration</CardTitle>
@@ -584,13 +584,13 @@ export default function IdentityPage() {
 
       {/* Real Attestations */}
       <motion.div variants={fadeUp}>
-        <Card className="border-white/[0.04] bg-white/[0.015]">
+        <Card >
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm">Attestations</CardTitle>
               <div className="flex items-center gap-2">
                 {attestations.length > 0 && (
-                  <Badge variant="outline" className="border-emerald-500/20 text-emerald-400 text-[10px]">
+                  <Badge variant="outline" className="border-emerald-500/20 text-emerald-400 text-xs">
                     {attestations.filter(a => a.isActive).length} active
                   </Badge>
                 )}

@@ -150,7 +150,7 @@ export default function AgentDashboard() {
 
           {/* Not Connected */}
           {!connected && (
-            <Card className="border-neutral-800 bg-neutral-900/50">
+            <Card className="border-neutral-800 bg-white/[0.03]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Bot className="mb-4 h-16 w-16 text-neutral-600" />
                 <h2 className="mb-2 text-xl font-semibold">Connect Your Wallet</h2>
@@ -191,7 +191,7 @@ export default function AgentDashboard() {
 
           {/* No Agents */}
           {connected && !loading && agents.length === 0 && hasProfile && (
-            <Card className="border-neutral-800 bg-neutral-900/50">
+            <Card className="border-neutral-800 bg-white/[0.03]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Bot className="mb-4 h-16 w-16 text-blue-500" />
                 <h2 className="mb-2 text-xl font-semibold">No Agents Registered</h2>
@@ -210,7 +210,7 @@ export default function AgentDashboard() {
                 const pdaStr = agent.pda.toBase58();
                 const isActionLoading = actionLoading === pdaStr;
                 return (
-                  <Card key={pdaStr} className="border-neutral-800 bg-neutral-900/50">
+                  <Card key={pdaStr} className="border-neutral-800 bg-white/[0.03]">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

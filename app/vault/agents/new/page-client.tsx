@@ -471,7 +471,7 @@ export default function NewAgentWizardPage() {
                 s.num
               )}
             </div>
-            <span className={`mt-1 text-[10px] font-medium ${(typeof step === "number" && step >= s.num) || step === "success" ? "text-emerald-400" : "text-neutral-500"}`}>
+            <span className={`mt-1 text-xs font-medium ${(typeof step === "number" && step >= s.num) || step === "success" ? "text-emerald-400" : "text-neutral-500"}`}>
               {s.label}
             </span>
           </div>
@@ -524,10 +524,10 @@ export default function NewAgentWizardPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-white">{t.name}</span>
-                          <Badge variant="outline" className="text-[10px] border-white/[0.08] text-neutral-400">{t.category}</Badge>
+                          <Badge variant="outline" className="text-xs border-white/[0.08] text-neutral-400">{t.category}</Badge>
                         </div>
                         <p className="mt-1 text-xs text-neutral-500">{t.description}</p>
-                        <p className="mt-2 text-[10px] text-neutral-600">
+                        <p className="mt-2 text-xs text-neutral-600">
                           {t.capabilities.length} capability{t.capabilities.length === 1 ? "" : "ies"} · {t.identity.type.replace("_", " ")}
                         </p>
                       </div>
@@ -553,7 +553,7 @@ export default function NewAgentWizardPage() {
                 <div className="space-y-2">
                   <Label>Agent Name</Label>
                   <Input value={identity.name} onChange={(e) => setIdentity({ ...identity, name: e.target.value })} placeholder="e.g. trading-bot-v1" className="border-neutral-800 bg-neutral-900" />
-                  <p className="text-[11px] text-neutral-500">Max 32 characters. Letters, numbers, hyphens, and underscores only.</p>
+                  <p className="text-xs text-neutral-500">Max 32 characters. Letters, numbers, hyphens, and underscores only.</p>
                 </div>
 
                 <div className="space-y-2">
@@ -572,7 +572,7 @@ export default function NewAgentWizardPage() {
                   <Label>Description <span className="text-neutral-500">(optional)</span></Label>
                   <textarea value={identity.description} onChange={(e) => setIdentity({ ...identity, description: sanitizeDisplayString(e.target.value) })} maxLength={256} placeholder="What does this agent do?"
                     className="min-h-[80px] w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-700" />
-                  <p className="text-[11px] text-neutral-500">{identity.description.length}/256</p>
+                  <p className="text-xs text-neutral-500">{identity.description.length}/256</p>
                 </div>
 
                 <div className="space-y-3">
@@ -586,13 +586,13 @@ export default function NewAgentWizardPage() {
                     </Button>
                   </div>
                   {identity.walletMode === "generate" && generatedKeypair && (
-                    <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]">
-                      <p className="text-[11px] text-neutral-500">Generated Public Key</p>
+                    <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]">
+                      <p className="text-xs text-neutral-500">Generated Public Key</p>
                       <div className="mt-1 flex items-center gap-2">
                         <code className="text-sm text-neutral-300">{generatedKeypair.publicKey.toBase58()}</code>
                         <CopyBtn text={generatedKeypair.publicKey.toBase58()} />
                       </div>
-                      <p className="mt-2 text-[10px] text-amber-400/80">
+                      <p className="mt-2 text-xs text-amber-400/80">
                         <AlertTriangle className="mr-1 inline h-3 w-3" />
                         Save this keypair securely. It is stored only in memory for this session.
                       </p>
@@ -612,13 +612,13 @@ export default function NewAgentWizardPage() {
                   {identity.showTee && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-2">
                       <Input value={identity.tee} onChange={(e) => setIdentity({ ...identity, tee: e.target.value })} placeholder="Paste 64-character hex hash" className="border-neutral-800 bg-neutral-900 font-mono text-xs" />
-                      <p className="text-[10px] text-neutral-500">If your agent runs in a trusted execution environment, paste the attestation hash here.</p>
+                      <p className="text-xs text-neutral-500">If your agent runs in a trusted execution environment, paste the attestation hash here.</p>
                     </motion.div>
                   )}
                 </div>
 
                 {identityErrors.length > 0 && (
-                  <div className="rounded-lg bg-red-500/5 p-3 text-[11px] text-red-400 ring-1 ring-red-500/10">
+                  <div className="rounded-lg bg-red-500/5 p-3 text-xs text-red-400 ring-1 ring-red-500/10">
                     {identityErrors.map((e, i) => <div key={i}>• {e}</div>)}
                   </div>
                 )}
@@ -697,7 +697,7 @@ export default function NewAgentWizardPage() {
 
                       <div className="rounded-lg bg-neutral-950/50 p-3 ring-1 ring-white/[0.03]">
                         <p className="text-sm font-medium text-white">📋 {cap.name || "Untitled Capability"}</p>
-                        <p className="text-[11px] text-neutral-400">
+                        <p className="text-xs text-neutral-400">
                           Max per tx: {cap.perTxLimit || "0"} SOL | Daily: {cap.dailyLimit || "0"} SOL | Total: {cap.totalLimit || "0"} SOL
                           <br />
                           Expires: {cap.noExpiry ? "Never" : cap.expiryDate || "—"}
@@ -714,7 +714,7 @@ export default function NewAgentWizardPage() {
                 </Button>
 
                 {capabilityErrors.length > 0 && (
-                  <div className="rounded-lg bg-red-500/5 p-3 text-[11px] text-red-400 ring-1 ring-red-500/10">
+                  <div className="rounded-lg bg-red-500/5 p-3 text-xs text-red-400 ring-1 ring-red-500/10">
                     {capabilityErrors.map((e, i) => <div key={i}>• {e}</div>)}
                   </div>
                 )}
@@ -735,8 +735,8 @@ export default function NewAgentWizardPage() {
                   <p className="text-sm text-neutral-500">Send SOL to the agent wallet so it can pay for transactions.</p>
                 </div>
 
-                <div className="rounded-lg bg-neutral-900/50 p-4 ring-1 ring-white/[0.03]">
-                  <p className="text-[11px] text-neutral-500">Agent Wallet Address</p>
+                <div className="rounded-lg bg-white/[0.03] p-4 ring-1 ring-white/[0.03]">
+                  <p className="text-xs text-neutral-500">Agent Wallet Address</p>
                   <div className="mt-1 flex items-center gap-2">
                     <code className="text-sm text-neutral-300">{agentWalletKey}</code>
                     <CopyBtn text={agentWalletKey} />
@@ -745,11 +745,11 @@ export default function NewAgentWizardPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-lg bg-neutral-900/30 p-3 ring-1 ring-white/[0.03]">
-                    <p className="text-[10px] text-neutral-500">Total Capability Budget</p>
+                    <p className="text-xs text-neutral-500">Total Capability Budget</p>
                     <p className="text-lg font-semibold text-white">{totalCapabilityBudget.toFixed(4)} SOL</p>
                   </div>
                   <div className="rounded-lg bg-neutral-900/30 p-3 ring-1 ring-white/[0.03]">
-                    <p className="text-[10px] text-neutral-500">Est. TX Fees</p>
+                    <p className="text-xs text-neutral-500">Est. TX Fees</p>
                     <p className="text-lg font-semibold text-white">~0.01 SOL</p>
                   </div>
                 </div>
@@ -757,7 +757,7 @@ export default function NewAgentWizardPage() {
                 <div className="rounded-lg border border-emerald-500/10 bg-emerald-500/[0.02] p-3">
                   <p className="text-sm font-medium text-emerald-200">Recommended funding</p>
                   <p className="text-xl font-bold text-white">{recommendedFunding.toFixed(4)} SOL</p>
-                  <p className="text-[11px] text-emerald-400/60">Total budget + 0.05 SOL for fees</p>
+                  <p className="text-xs text-emerald-400/60">Total budget + 0.05 SOL for fees</p>
                 </div>
 
                 <div className="space-y-3">
@@ -807,7 +807,7 @@ export default function NewAgentWizardPage() {
                       {capabilities.map((cap, i) => (
                         <div key={i} className="rounded bg-neutral-950/50 p-2 text-sm">
                           <p className="font-medium text-neutral-300">{cap.name}</p>
-                          <p className="text-[11px] text-neutral-500">
+                          <p className="text-xs text-neutral-500">
                             {SCOPE_LABELS[cap.scope]} · {cap.perTxLimit} SOL/tx · {cap.dailyLimit} SOL/day · {cap.totalLimit} SOL total · {cap.noExpiry ? "No expiry" : `Expires ${cap.expiryDate}`}
                           </p>
                         </div>
@@ -835,11 +835,11 @@ export default function NewAgentWizardPage() {
                           {s.status === "pending" && <div className="h-4 w-4 rounded-full border border-neutral-700" />}
                           <span className={s.status === "error" ? "text-red-400" : s.status === "done" ? "text-emerald-400" : "text-neutral-300"}>{s.label}</span>
                           {s.tx && (
-                            <a href={`https://explorer.solana.com/tx/${s.tx}?cluster=${cluster}`} target="_blank" rel="noopener noreferrer" className="text-[10px] text-sky-400 hover:underline">
+                            <a href={`https://explorer.solana.com/tx/${s.tx}?cluster=${cluster}`} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-400 hover:underline">
                               View TX
                             </a>
                           )}
-                          {s.error && <span className="text-[10px] text-red-400">{s.error}</span>}
+                          {s.error && <span className="text-xs text-red-400">{s.error}</span>}
                         </div>
                       ))}
                     </div>
@@ -878,8 +878,8 @@ export default function NewAgentWizardPage() {
                 <h2 className="text-xl font-bold text-white">Agent Deployed!</h2>
                 <p className="mb-6 text-sm text-neutral-500">Your agent is now registered on-chain with its capabilities.</p>
 
-                <div className="mb-6 w-full max-w-sm rounded-lg bg-neutral-900/50 p-4 ring-1 ring-white/[0.03]">
-                  <p className="text-[11px] text-neutral-500">Agent PDA</p>
+                <div className="mb-6 w-full max-w-sm rounded-lg bg-white/[0.03] p-4 ring-1 ring-white/[0.03]">
+                  <p className="text-xs text-neutral-500">Agent PDA</p>
                   <div className="mt-1 flex items-center justify-center gap-2">
                     <code className="text-sm text-neutral-300">{deployState.agentPda}</code>
                     <CopyBtn text={deployState.agentPda || ""} />

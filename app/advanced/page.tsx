@@ -105,7 +105,7 @@ export default function AdvancedPage() {
           <Radio className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
           <div className="space-y-1">
             <p className="text-xs font-medium text-red-200">Devnet beta · Ika pre-alpha mock signer · Not production custody</p>
-            <p className="text-[11px] text-red-200/60">
+            <p className="text-xs text-red-200/60">
               All on-chain data is on Solana devnet and may be reset. Ika uses a single mock signer,
               not real MPC.
             </p>
@@ -133,7 +133,7 @@ export default function AdvancedPage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-neutral-900/50 p-4 transition-colors hover:bg-neutral-900/80"
+                className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 transition-colors hover:bg-neutral-900/80"
               >
                 <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
                 <div>
@@ -152,7 +152,7 @@ export default function AdvancedPage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-neutral-900/50 p-4 transition-colors hover:bg-neutral-900/80"
+                className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 transition-colors hover:bg-neutral-900/80"
               >
                 <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" />
                 <div>

@@ -525,7 +525,7 @@ export default function DwalletGuardPageClient() {
               SBF build complete; deploy pending devnet SOL. All transaction buttons are disabled until deployment is confirmed on-chain.
             </p>
             {guardProgramId && (
-              <code className="mt-1 block rounded bg-black/30 px-2 py-1 text-[11px] text-amber-100/80">
+              <code className="mt-1 block rounded bg-black/30 px-2 py-1 text-xs text-amber-100/80">
                 Program ID: {guardProgramId.toBase58()}
               </code>
             )}
@@ -558,11 +558,11 @@ export default function DwalletGuardPageClient() {
       </div>
 
       {/* Mandara product branding */}
-      <div className="space-y-3 rounded-xl border border-white/[0.06] bg-neutral-900/50 p-4">
+      <div className="space-y-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
         <div className="flex items-center gap-2">
           <Globe className="h-5 w-5 text-purple-400" />
           <h2 className="text-lg font-semibold text-white">Mandara by HumanRail</h2>
-          <Badge variant="outline" className="border-purple-500/30 text-purple-300 text-[10px]">
+          <Badge variant="outline" className="border-purple-500/30 text-purple-300 text-xs">
             Ika Grant Demo
           </Badge>
         </div>
@@ -570,15 +570,15 @@ export default function DwalletGuardPageClient() {
           Programmable mandates for cross-chain AI agents, powered by Ika dWallets.
         </p>
         <div className="flex flex-wrap gap-2">
-          <div className="flex items-center gap-1.5 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200/80">
+          <div className="flex items-center gap-1.5 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-200/80">
             <CheckCircle2 className="h-3 w-3" />
             1. Guard policy
           </div>
-          <div className="flex items-center gap-1.5 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200/80">
+          <div className="flex items-center gap-1.5 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-200/80">
             <CheckCircle2 className="h-3 w-3" />
             2. Ika approval
           </div>
-          <div className="flex items-center gap-1.5 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200/80">
+          <div className="flex items-center gap-1.5 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-200/80">
             <CheckCircle2 className="h-3 w-3" />
             3. Signed MessageApproval
           </div>
@@ -605,7 +605,7 @@ export default function DwalletGuardPageClient() {
         {/* Config & PDAs tab */}
         <TabsContent value="config" className="space-y-4 pt-4">
           {/* Program config card */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Shield className="h-4 w-4 text-emerald-400" />
@@ -652,7 +652,7 @@ export default function DwalletGuardPageClient() {
           </Card>
 
           {/* Ika config card */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Globe className="h-4 w-4 text-purple-400" />
@@ -694,7 +694,7 @@ export default function DwalletGuardPageClient() {
 
           {/* Derived PDAs */}
           {derivedPdas && (
-            <Card className="border-white/[0.06] bg-neutral-900/50">
+            <Card >
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base text-white">
                   <Fingerprint className="h-4 w-4 text-sky-400" />
@@ -756,7 +756,7 @@ export default function DwalletGuardPageClient() {
           )}
 
           {/* Devnet Proof */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Eye className="h-4 w-4 text-sky-400" />
@@ -803,7 +803,7 @@ export default function DwalletGuardPageClient() {
           </Card>
 
           {/* Fetch Phase 4B accounts */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Play className="h-4 w-4 text-emerald-400" />
@@ -838,9 +838,9 @@ export default function DwalletGuardPageClient() {
               </div>
 
               {fetchedGuarded && (
-                <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                   <p className="text-xs font-medium text-neutral-400">GuardedDwallet</p>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="text-neutral-500">Principal</div>
                     <code className="truncate text-neutral-400">{fetchedGuarded.principal.toBase58()}</code>
                     <div className="text-neutral-500">Agent</div>
@@ -864,9 +864,9 @@ export default function DwalletGuardPageClient() {
               )}
 
               {fetchedRequest && (
-                <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                   <p className="text-xs font-medium text-neutral-400">GuardSigningRequest</p>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="text-neutral-500">Status</div>
                     <code className="truncate text-neutral-400">{fetchedRequest.status}</code>
                     <div className="text-neutral-500">Rejection Code</div>
@@ -884,7 +884,7 @@ export default function DwalletGuardPageClient() {
           </Card>
 
           {/* Phase 5A Ika Readiness Panel */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Activity className="h-4 w-4 text-purple-400" />
@@ -902,7 +902,7 @@ export default function DwalletGuardPageClient() {
                   <p className="text-xs font-medium text-purple-200">
                     Phase 5 status: read-only helpers added
                   </p>
-                  <p className="text-[11px] text-purple-200/60">
+                  <p className="text-xs text-purple-200/60">
                     dWallet DKG and gRPC signing not yet executed. Inspect Ika program state, derive PDAs, and fetch accounts below.
                   </p>
                 </div>
@@ -986,7 +986,7 @@ export default function DwalletGuardPageClient() {
                     placeholder="Paste dWallet public key bytes (base58)"
                     value={ikaDwalletPubkeyInput}
                     onChange={(e) => setIkaDwalletPubkeyInput(e.target.value)}
-                    className="border-white/[0.06] bg-black/20 text-sm text-neutral-300 placeholder:text-neutral-600"
+                    className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300 placeholder:text-neutral-600"
                   />
                 </div>
 
@@ -994,7 +994,7 @@ export default function DwalletGuardPageClient() {
                 <div className="space-y-1.5">
                   <Label className="text-xs text-neutral-400">Curve</Label>
                   <select
-                    className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-sm text-neutral-300 outline-none focus:border-purple-500/30"
+                    className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 outline-none focus:border-purple-500/30"
                     value={ikaDwalletCurve}
                     onChange={(e) => setIkaDwalletCurve(Number(e.target.value) as DWalletCurve)}
                   >
@@ -1084,9 +1084,9 @@ export default function DwalletGuardPageClient() {
                 </Button>
 
                 {fetchedIkaDwallet && (
-                  <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                  <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                     <p className="text-xs font-medium text-neutral-400">IkaDwallet</p>
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="text-neutral-500">Authority</div>
                       <code className="truncate text-neutral-400">{fetchedIkaDwallet.authority.toBase58()}</code>
                       <div className="text-neutral-500">Curve</div>
@@ -1114,7 +1114,7 @@ export default function DwalletGuardPageClient() {
                     placeholder="Paste MessageApproval PDA"
                     value={ikaMessageApprovalInput}
                     onChange={(e) => setIkaMessageApprovalInput(e.target.value)}
-                    className="border-white/[0.06] bg-black/20 text-sm text-neutral-300 placeholder:text-neutral-600"
+                    className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300 placeholder:text-neutral-600"
                   />
                 </div>
 
@@ -1148,9 +1148,9 @@ export default function DwalletGuardPageClient() {
                 </Button>
 
                 {fetchedIkaMessageApproval && (
-                  <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                  <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                     <p className="text-xs font-medium text-neutral-400">IkaMessageApproval</p>
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="text-neutral-500">dWallet</div>
                       <code className="truncate text-neutral-400">{fetchedIkaMessageApproval.dwallet.toBase58()}</code>
                       <div className="text-neutral-500">Message Digest</div>
@@ -1184,7 +1184,7 @@ export default function DwalletGuardPageClient() {
           </Card>
 
           {/* Phase 5C Real Ika dWallet Card */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Wallet className="h-4 w-4 text-emerald-400" />
@@ -1199,7 +1199,7 @@ export default function DwalletGuardPageClient() {
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-emerald-200">Authority transferred ✅</p>
-                  <p className="text-[11px] text-emerald-200/60">
+                  <p className="text-xs text-emerald-200/60">
                     dWallet authority moved from deployer to HumanRail Guard CPI PDA.
                   </p>
                 </div>
@@ -1228,7 +1228,7 @@ export default function DwalletGuardPageClient() {
                   </code>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="text-neutral-500">Authority before</div>
                   <code className="truncate text-neutral-400">{REAL_IKA_AUTHORITY_BEFORE.slice(0, 16)}…</code>
                   <div className="text-neutral-500">Authority after</div>
@@ -1276,9 +1276,9 @@ export default function DwalletGuardPageClient() {
               </Button>
 
               {realIkaDwallet && (
-                <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                   <p className="text-xs font-medium text-neutral-400">On-chain dWallet</p>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="text-neutral-500">Authority</div>
                     <code className="truncate text-neutral-400">{realIkaDwallet.authority.toBase58().slice(0, 16)}…</code>
                     <div className="text-neutral-500">State</div>
@@ -1296,7 +1296,7 @@ export default function DwalletGuardPageClient() {
           </Card>
 
           {/* Phase 5C Real Ika Policy Card */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Shield className="h-4 w-4 text-sky-400" />
@@ -1311,7 +1311,7 @@ export default function DwalletGuardPageClient() {
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-sky-400" />
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-sky-200">Policy created ✅</p>
-                  <p className="text-[11px] text-sky-200/60">
+                  <p className="text-xs text-sky-200/60">
                     GuardedDwallet PDA initialized with real Ika dWallet and demo HumanRail refs.
                   </p>
                 </div>
@@ -1333,7 +1333,7 @@ export default function DwalletGuardPageClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="text-neutral-500">Linked dWallet</div>
                   <code className="truncate text-neutral-400">{REAL_IKA_DWALLET_PDA.slice(0, 16)}…</code>
                   <div className="text-neutral-500">Chain ID</div>
@@ -1366,9 +1366,9 @@ export default function DwalletGuardPageClient() {
               </Button>
 
               {realGuardedDwallet && (
-                <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                   <p className="text-xs font-medium text-neutral-400">On-chain Policy</p>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="text-neutral-500">Principal</div>
                     <code className="truncate text-neutral-400">{realGuardedDwallet.principal.toBase58().slice(0, 16)}…</code>
                     <div className="text-neutral-500">dWallet</div>
@@ -1390,7 +1390,7 @@ export default function DwalletGuardPageClient() {
           </Card>
 
           {/* Phase 5D Approved Signing Request Card */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <FileKey className="h-4 w-4 text-emerald-400" />
@@ -1408,7 +1408,7 @@ export default function DwalletGuardPageClient() {
                     <code>npm run ika:approve-message</code>:
                   </p>
                   <textarea
-                    className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-xs text-neutral-300 placeholder:text-neutral-600 outline-none focus:border-emerald-500/30"
+                    className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-xs text-neutral-300 placeholder:text-neutral-600 outline-none focus:border-emerald-500/30"
                     rows={4}
                     placeholder={`{"guardSigningRequestPda":"...","ikaMessageApprovalPda":"..."}`}
                     onChange={(e) => {
@@ -1424,7 +1424,7 @@ export default function DwalletGuardPageClient() {
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-emerald-200">Artifact loaded ✅</p>
-                      <p className="text-[11px] text-emerald-200/60">
+                      <p className="text-xs text-emerald-200/60">
                         {phase5dMessageApproval?.status === 1 || phase5dArtifact.ikaSignatureHex
                           ? "Phase 5E complete — Ika signature committed on-chain"
                           : phase5dMessageApproval?.status === 0
@@ -1447,7 +1447,7 @@ export default function DwalletGuardPageClient() {
                         {phase5dArtifact.messageDigestHex}
                       </code>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="text-neutral-500">Signature Scheme</div>
                       <code className="truncate text-neutral-400">{phase5dArtifact.signatureScheme}</code>
                       <div className="text-neutral-500">Amount</div>
@@ -1521,9 +1521,9 @@ export default function DwalletGuardPageClient() {
                   )}
 
                   {phase5dGuardSigningRequest && (
-                    <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                    <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                       <p className="text-xs font-medium text-neutral-400">GuardSigningRequest on-chain</p>
-                      <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="text-neutral-500">Status</div>
                         <code className="truncate text-neutral-400">
                           {phase5dGuardSigningRequest.status === 1 ? "approved" : phase5dGuardSigningRequest.status === 2 ? "rejected" : "unknown"} ({phase5dGuardSigningRequest.status})
@@ -1537,9 +1537,9 @@ export default function DwalletGuardPageClient() {
                   )}
 
                   {phase5dMessageApproval && (
-                    <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                    <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                       <p className="text-xs font-medium text-neutral-400">Ika MessageApproval on-chain</p>
-                      <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="text-neutral-500">Status</div>
                         <code className="truncate text-neutral-400">
                           {phase5dMessageApproval.status === 0 ? "Pending" : phase5dMessageApproval.status === 1 ? "Signed" : "?"} ({phase5dMessageApproval.status})
@@ -1550,24 +1550,24 @@ export default function DwalletGuardPageClient() {
                         <code className="truncate text-neutral-400">{phase5dMessageApproval.dwallet.toBase58().slice(0, 16)}…</code>
                       </div>
                       {phase5dMessageApproval.status === 0 && (
-                        <div className="mt-2 rounded border border-purple-500/20 bg-purple-500/10 p-2 text-[11px] text-purple-200/80">
+                        <div className="mt-2 rounded border border-purple-500/20 bg-purple-500/10 p-2 text-xs text-purple-200/80">
                           Pending Ika signature. Run: npm run ika:sign-approved-message
                         </div>
                       )}
                       {phase5dMessageApproval.status === 1 && phase5dMessageApproval.signatureLen > 0 && (
                         <div className="mt-2 space-y-1">
-                          <div className="rounded border border-emerald-500/20 bg-emerald-500/10 p-2 text-[11px] text-emerald-200/80">
+                          <div className="rounded border border-emerald-500/20 bg-emerald-500/10 p-2 text-xs text-emerald-200/80">
                             ✅ Phase 5E complete — Ika signature committed on-chain
                           </div>
                           <div className="space-y-1">
-                            <span className="text-[11px] text-neutral-500">Signature (hex)</span>
-                            <code className="block truncate rounded bg-black/30 px-2 py-1 text-[10px] text-neutral-300">
+                            <span className="text-xs text-neutral-500">Signature (hex)</span>
+                            <code className="block truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
                               {Buffer.from(phase5dMessageApproval.signature).toString("hex")}
                             </code>
                           </div>
                           <div className="space-y-1">
-                            <span className="text-[11px] text-neutral-500">Signature (base64)</span>
-                            <code className="block truncate rounded bg-black/30 px-2 py-1 text-[10px] text-neutral-300">
+                            <span className="text-xs text-neutral-500">Signature (base64)</span>
+                            <code className="block truncate rounded bg-black/30 px-2 py-1 text-xs text-neutral-300">
                               {Buffer.from(phase5dMessageApproval.signature).toString("base64")}
                             </code>
                           </div>
@@ -1595,7 +1595,7 @@ export default function DwalletGuardPageClient() {
           </Card>
 
           {/* Phase 6 Agent Runtime Tool Card */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Globe className="h-4 w-4 text-purple-400" />
@@ -1610,14 +1610,14 @@ export default function DwalletGuardPageClient() {
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-purple-400" />
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-purple-200">Tool Registered ✅</p>
-                  <p className="text-[11px] text-purple-200/60">
+                  <p className="text-xs text-purple-200/60">
                     Agents can request policy-governed cross-chain signatures via Ika dWallets.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2 text-xs text-neutral-400">
-                <div className="grid grid-cols-[100px_1fr] gap-2 text-[11px]">
+                <div className="grid grid-cols-[100px_1fr] gap-2 text-xs">
                   <span className="text-neutral-500">Tool name</span>
                   <code className="text-neutral-300">request_cross_chain_signature</code>
                   <span className="text-neutral-500">Mode: preview</span>
@@ -1629,7 +1629,7 @@ export default function DwalletGuardPageClient() {
                 </div>
               </div>
 
-              <div className="rounded border border-white/[0.06] bg-black/20 p-2 text-[11px] text-neutral-400">
+              <div className="rounded border border-white/[0.06] bg-white/[0.02] p-2 text-xs text-neutral-400">
                 <span className="text-neutral-500">Example agent prompt:</span>
                 <p className="mt-1 text-neutral-300">
                   &ldquo;Request a Base Sepolia USDC signature for 42,000,000 units to 0x1111...&rdquo;
@@ -1637,12 +1637,12 @@ export default function DwalletGuardPageClient() {
               </div>
 
               {phase5dArtifact?.ikaSignatureHex && (
-                <div className="rounded border border-emerald-500/20 bg-emerald-500/10 p-2 text-[11px] text-emerald-200/80">
+                <div className="rounded border border-emerald-500/20 bg-emerald-500/10 p-2 text-xs text-emerald-200/80">
                   ✅ Phase 5E artifact is signed — agent can read signature via devnet_existing_artifact mode
                 </div>
               )}
 
-              <div className="text-[11px] text-neutral-500">
+              <div className="text-xs text-neutral-500">
                 Safety: devnet execution is guarded by{" "}
                 <code className="text-neutral-400">HUMANRAIL_AGENT_ALLOW_DEVNET_SIGNING=true</code>{" "}
                 and constrained to the demo policy.
@@ -1654,7 +1654,7 @@ export default function DwalletGuardPageClient() {
         {/* Policy Creation tab */}
         <TabsContent value="policy" className="space-y-4 pt-4">
           {/* Devnet Demo Mode */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Flame className="h-4 w-4 text-amber-400" />
@@ -1722,7 +1722,7 @@ export default function DwalletGuardPageClient() {
                 <div className="space-y-1 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
                   <p className="text-xs font-medium text-emerald-200">Transaction sent</p>
                   <div className="flex items-center gap-2">
-                    <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-[11px] text-emerald-100/80">
+                    <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-xs text-emerald-100/80">
                       {txSig}
                     </code>
                     <a
@@ -1755,7 +1755,7 @@ export default function DwalletGuardPageClient() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Lock className="h-4 w-4 text-emerald-400" />
@@ -1769,7 +1769,7 @@ export default function DwalletGuardPageClient() {
               {/* Principal */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-neutral-400">Principal</Label>
-                <div className="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2 text-sm text-neutral-300">
+                <div className="flex items-center gap-2 rounded-lg bg-white/[0.02] px-3 py-2 text-sm text-neutral-300">
                   <Wallet className="h-4 w-4 text-neutral-500" />
                   <span className="truncate">
                     {publicKey?.toBase58() ?? "Connect wallet"}
@@ -1781,7 +1781,7 @@ export default function DwalletGuardPageClient() {
               <div className="space-y-1.5">
                 <Label className="text-xs text-neutral-400">Agent</Label>
                 <select
-                  className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-sm text-neutral-300 outline-none focus:border-emerald-500/30"
+                  className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 outline-none focus:border-emerald-500/30"
                   value={selectedAgent}
                   onChange={(e) => setSelectedAgent(e.target.value)}
                 >
@@ -1806,7 +1806,7 @@ export default function DwalletGuardPageClient() {
                   placeholder="Paste Ika dWallet public key"
                   value={dwalletInput}
                   onChange={(e) => setDwalletInput(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300 placeholder:text-neutral-600"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300 placeholder:text-neutral-600"
                 />
                 <p className="text-xs text-neutral-600">
                   Demo input: the Ika dWallet that will be guarded
@@ -1821,7 +1821,7 @@ export default function DwalletGuardPageClient() {
                     type="number"
                     value={perTxLimit}
                     onChange={(e) => setPerTxLimit(e.target.value)}
-                    className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                    className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -1830,7 +1830,7 @@ export default function DwalletGuardPageClient() {
                     type="number"
                     value={dailyLimit}
                     onChange={(e) => setDailyLimit(e.target.value)}
-                    className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                    className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -1839,7 +1839,7 @@ export default function DwalletGuardPageClient() {
                     type="number"
                     value={totalLimit}
                     onChange={(e) => setTotalLimit(e.target.value)}
-                    className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                    className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                   />
                 </div>
               </div>
@@ -1852,7 +1852,7 @@ export default function DwalletGuardPageClient() {
                     type="number"
                     value={allowedChainId}
                     onChange={(e) => setAllowedChainId(e.target.value)}
-                    className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                    className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -1860,7 +1860,7 @@ export default function DwalletGuardPageClient() {
                   <Input
                     value={assetInput}
                     onChange={(e) => setAssetInput(e.target.value)}
-                    className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                    className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                   />
                 </div>
               </div>
@@ -1870,7 +1870,7 @@ export default function DwalletGuardPageClient() {
                 <Input
                   value={recipientInput}
                   onChange={(e) => setRecipientInput(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
 
@@ -1880,22 +1880,22 @@ export default function DwalletGuardPageClient() {
                   type="datetime-local"
                   value={expiresAt || "2026-05-08T08:00"}
                   onChange={(e) => setExpiresAt(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
 
               {/* Hash preview */}
               {policyHashes && (
-                <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                   <p className="text-xs font-medium text-neutral-400">Demo policy hashes</p>
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-neutral-500">Asset hash</span>
-                      <code className="text-[11px] text-neutral-400">{policyHashes.assetHash.slice(0, 16)}…</code>
+                      <span className="text-xs text-neutral-500">Asset hash</span>
+                      <code className="text-xs text-neutral-400">{policyHashes.assetHash.slice(0, 16)}…</code>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-neutral-500">Recipient hash</span>
-                      <code className="text-[11px] text-neutral-400">{policyHashes.recipientHash.slice(0, 16)}…</code>
+                      <span className="text-xs text-neutral-500">Recipient hash</span>
+                      <code className="text-xs text-neutral-400">{policyHashes.recipientHash.slice(0, 16)}…</code>
                     </div>
                   </div>
                 </div>
@@ -1924,7 +1924,7 @@ export default function DwalletGuardPageClient() {
           </Card>
 
           {/* Production Policy */}
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <Shield className="h-4 w-4 text-purple-400" />
@@ -1941,7 +1941,7 @@ export default function DwalletGuardPageClient() {
                   <p className="text-xs text-purple-200/80">
                     Production initializer requires real HumanRail accounts with canRegisterAgents=true. Use the Devnet Demo Mode above for testing.
                   </p>
-                  <ul className="list-disc pl-4 text-[11px] text-purple-200/60">
+                  <ul className="list-disc pl-4 text-xs text-purple-200/60">
                     <li>human_profile owner must be Human Registry</li>
                     <li>agent owner must be Agent Registry</li>
                     <li>capability owner must be Delegation</li>
@@ -1956,7 +1956,7 @@ export default function DwalletGuardPageClient() {
                   value={prodHumanProfile}
                   onChange={(e) => setProdHumanProfile(e.target.value)}
                   disabled
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300 placeholder:text-neutral-600 disabled:opacity-50"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300 placeholder:text-neutral-600 disabled:opacity-50"
                 />
               </div>
 
@@ -1967,7 +1967,7 @@ export default function DwalletGuardPageClient() {
                   value={prodAgent}
                   onChange={(e) => setProdAgent(e.target.value)}
                   disabled
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300 placeholder:text-neutral-600 disabled:opacity-50"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300 placeholder:text-neutral-600 disabled:opacity-50"
                 />
               </div>
 
@@ -1978,7 +1978,7 @@ export default function DwalletGuardPageClient() {
                   value={prodCapability}
                   onChange={(e) => setProdCapability(e.target.value)}
                   disabled
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300 placeholder:text-neutral-600 disabled:opacity-50"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300 placeholder:text-neutral-600 disabled:opacity-50"
                 />
               </div>
 
@@ -1989,7 +1989,7 @@ export default function DwalletGuardPageClient() {
                   value={prodDwallet}
                   onChange={(e) => setProdDwallet(e.target.value)}
                   disabled
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300 placeholder:text-neutral-600 disabled:opacity-50"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300 placeholder:text-neutral-600 disabled:opacity-50"
                 />
               </div>
 
@@ -2007,7 +2007,7 @@ export default function DwalletGuardPageClient() {
 
         {/* Signing Request tab */}
         <TabsContent value="request" className="space-y-4 pt-4">
-          <Card className="border-white/[0.06] bg-neutral-900/50">
+          <Card >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base text-white">
                 <FileKey className="h-4 w-4 text-sky-400" />
@@ -2025,7 +2025,7 @@ export default function DwalletGuardPageClient() {
                   placeholder="Enter message to sign (e.g. Ethereum tx payload)"
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300 placeholder:text-neutral-600"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300 placeholder:text-neutral-600"
                 />
                 <p className="text-xs text-neutral-600">
                   Demo input: the raw message that will be hashed with keccak256 for Ika
@@ -2045,9 +2045,9 @@ export default function DwalletGuardPageClient() {
               </div>
 
               {messageDigest && (
-                <div className="space-y-1 rounded-lg bg-black/20 p-3">
+                <div className="space-y-1 rounded-lg bg-white/[0.02] p-3">
                   <span className="text-xs text-neutral-500">Message Digest (keccak256)</span>
-                  <code className="block break-all text-[11px] text-neutral-400">
+                  <code className="block break-all text-xs text-neutral-400">
                     {messageDigest}
                   </code>
                 </div>
@@ -2057,7 +2057,7 @@ export default function DwalletGuardPageClient() {
               <div className="space-y-1.5">
                 <Label className="text-xs text-neutral-400">Signature Scheme</Label>
                 <select
-                  className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-sm text-neutral-300 outline-none focus:border-emerald-500/30"
+                  className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 outline-none focus:border-emerald-500/30"
                   value={signatureScheme}
                   onChange={(e) => setSignatureScheme(Number(e.target.value) as IkaSignatureScheme)}
                 >
@@ -2078,7 +2078,7 @@ export default function DwalletGuardPageClient() {
                   type="number"
                   value={requestAmount}
                   onChange={(e) => setRequestAmount(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
 
@@ -2100,25 +2100,25 @@ export default function DwalletGuardPageClient() {
 
               {/* Status cards (demo) */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col items-center gap-2 rounded-lg border border-white/[0.06] bg-black/20 p-4 text-center">
+                <div className="flex flex-col items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 text-center">
                   <Clock className="h-5 w-5 text-neutral-500" />
                   <p className="text-xs font-medium text-neutral-400">Pending</p>
-                  <p className="text-[10px] text-neutral-600">Waiting for principal approval</p>
+                  <p className="text-xs text-neutral-600">Waiting for principal approval</p>
                 </div>
                 <div className="flex flex-col items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 text-center">
                   <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                   <p className="text-xs font-medium text-emerald-400">Approved</p>
-                  <p className="text-[10px] text-emerald-400/60">Policy passed, Ika CPI invoked</p>
+                  <p className="text-xs text-emerald-400/60">Policy passed, Ika CPI invoked</p>
                 </div>
                 <div className="flex flex-col items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-center">
                   <XCircle className="h-5 w-5 text-red-400" />
                   <p className="text-xs font-medium text-red-400">Rejected</p>
-                  <p className="text-[10px] text-red-400/60">Policy check failed, no CPI</p>
+                  <p className="text-xs text-red-400/60">Policy check failed, no CPI</p>
                 </div>
                 <div className="flex flex-col items-center gap-2 rounded-lg border border-purple-500/20 bg-purple-500/5 p-4 text-center">
                   <Radio className="h-5 w-5 text-purple-400" />
                   <p className="text-xs font-medium text-purple-400">Ika Signed</p>
-                  <p className="text-[10px] text-purple-400/60">MessageApproval status = Signed</p>
+                  <p className="text-xs text-purple-400/60">MessageApproval status = Signed</p>
                 </div>
               </div>
 

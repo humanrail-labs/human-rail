@@ -397,7 +397,7 @@ export default function AgentDetailPage() {
                         </Badge>
                       )}
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-neutral-500">
+                    <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-neutral-500">
                       <span className="flex items-center gap-1"><code className="text-neutral-400">{addr.slice(0, 8)}…{addr.slice(-6)}</code><CopyBtn text={addr} /></span>
                       <span>·</span>
                       <span>Created {new Date(agent.createdAt * 1000).toLocaleDateString()}</span>
@@ -540,10 +540,10 @@ export default function AgentDetailPage() {
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="font-medium text-white">{actionLabel}</span>
                             {receipt.value > BigInt(0) && (
-                              <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-[10px] text-amber-400">{valueSol} SOL</Badge>
+                              <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-xs text-amber-400">{valueSol} SOL</Badge>
                             )}
                           </div>
-                          <div className="mt-1 grid grid-cols-1 gap-x-4 gap-y-1 text-[11px] sm:grid-cols-2">
+                          <div className="mt-1 grid grid-cols-1 gap-x-4 gap-y-1 text-xs sm:grid-cols-2">
                             <div><span className="text-neutral-500">Capability:</span> <code className="text-neutral-400">{receipt.capabilityId.toBase58().slice(0, 8)}…</code></div>
                             <div><span className="text-neutral-500">Time:</span> <span className="text-neutral-400">{new Date(receipt.timestamp * 1000).toLocaleString()}</span></div>
                             <div><span className="text-neutral-500">Destination:</span> <code className="text-neutral-400">{receipt.destination.toBase58().slice(0, 8)}…</code></div>
@@ -632,7 +632,7 @@ export default function AgentDetailPage() {
                           <div className={`h-2 rounded-full ${color}`} style={{ width: `${totalPct}%` }} />
                         </div>
                         {warn && (
-                          <div className="flex items-center gap-1 text-[11px] text-amber-400">
+                          <div className="flex items-center gap-1 text-xs text-amber-400">
                             <AlertTriangle className="h-3 w-3" />
                             {totalPct > 90 ? "Budget nearly exhausted" : "Expiring within 24 hours"}
                           </div>
@@ -698,7 +698,7 @@ export default function AgentDetailPage() {
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <Label className="text-xs">Expiry</Label>
-                <label className="flex items-center gap-1.5 text-[11px] text-neutral-400">
+                <label className="flex items-center gap-1.5 text-xs text-neutral-400">
                   <input type="checkbox" checked={issueForm.noExpiry} onChange={(e) => setIssueForm({ ...issueForm, noExpiry: e.target.checked })} className="rounded border-neutral-700 bg-neutral-900" />
                   No expiry
                 </label>
@@ -712,7 +712,7 @@ export default function AgentDetailPage() {
               <textarea value={issueForm.allowedPrograms} onChange={(e) => setIssueForm({ ...issueForm, allowedPrograms: e.target.value })}
                 placeholder="Paste program pubkeys, one per line or comma-separated"
                 className="min-h-[80px] w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-700" />
-              <p className="text-[10px] text-neutral-500">Leave empty to allow all HumanRail programs. Unknown programs will be mapped to a custom bit.</p>
+              <p className="text-xs text-neutral-500">Leave empty to allow all HumanRail programs. Unknown programs will be mapped to a custom bit.</p>
             </div>
             <Button onClick={handleIssue} disabled={issuing} className="w-full gap-2 bg-violet-600 hover:bg-violet-700">
               {issuing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />} {issuing ? "Issuing…" : "Issue Capability"}
@@ -773,7 +773,7 @@ function CapabilityCard({
                 </Badge>
                 {isExpired && <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-amber-400">Expired</Badge>}
               </div>
-              <div className="mt-0.5 flex items-center gap-2 text-[11px] text-neutral-500">
+              <div className="mt-0.5 flex items-center gap-2 text-xs text-neutral-500">
                 <code className="text-neutral-400">{addr.slice(0, 8)}…{addr.slice(-6)}</code>
                 <CopyBtn text={addr} />
               </div>
@@ -804,24 +804,24 @@ function CapabilityCard({
         </div>
 
         <div className="mt-3 grid grid-cols-3 gap-3">
-          <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-600">Per TX</p>
+          <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]">
+            <p className="text-xs font-medium uppercase tracking-wider text-neutral-600">Per TX</p>
             <p className="mt-1 text-sm font-bold text-white">{(Number(cap.perTxLimit) / 1e9).toFixed(4)} SOL</p>
           </div>
-          <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-600">Daily ({dailyPct}%)</p>
+          <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]">
+            <p className="text-xs font-medium uppercase tracking-wider text-neutral-600">Daily ({dailyPct}%)</p>
             <p className="mt-1 text-sm font-bold text-white">{(Number(cap.dailySpent) / 1e9).toFixed(4)} / {(Number(cap.dailyLimit) / 1e9).toFixed(4)}</p>
             <Progress value={dailyPct} className="mt-2 h-1" />
           </div>
-          <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-600">Total ({totalPct}%)</p>
+          <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]">
+            <p className="text-xs font-medium uppercase tracking-wider text-neutral-600">Total ({totalPct}%)</p>
             <p className="mt-1 text-sm font-bold text-white">{(Number(cap.totalSpent) / 1e9).toFixed(4)} / {(Number(cap.totalLimit) / 1e9).toFixed(4)}</p>
             <Progress value={totalPct} className="mt-2 h-1" />
           </div>
         </div>
 
         {expanded && (
-          <div className="mt-3 rounded-lg bg-neutral-900/30 p-3 text-[11px] text-neutral-400 ring-1 ring-white/[0.03]">
+          <div className="mt-3 rounded-lg bg-neutral-900/30 p-3 text-xs text-neutral-400 ring-1 ring-white/[0.03]">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div><span className="text-neutral-500">Allowed Programs Mask:</span> {cap.allowedPrograms.toString(16)}</div>
               <div><span className="text-neutral-500">Allowed Assets Mask:</span> {cap.allowedAssets.toString(16)}</div>

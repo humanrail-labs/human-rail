@@ -37,7 +37,7 @@ export default function MandaraAppShell({
   return (
     <div className="flex min-h-screen bg-neutral-950 text-neutral-100">
       {/* Desktop sidebar */}
-      <aside className="hidden w-60 flex-col border-r border-white/[0.06] bg-neutral-900/50 md:flex">
+      <aside className="hidden w-60 flex-col border-r border-white/[0.06] bg-white/[0.03] md:flex">
         <div className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-4">
           <Image
             src="/mandara-icon.png"
@@ -48,7 +48,7 @@ export default function MandaraAppShell({
           />
           <div>
             <p className="text-sm font-semibold text-white">Mandara</p>
-            <p className="text-[10px] text-neutral-500">Devnet Console</p>
+            <p className="text-xs text-neutral-500">Devnet Console</p>
           </div>
         </div>
 
@@ -80,7 +80,7 @@ export default function MandaraAppShell({
             <FlaskConical className="h-4 w-4" />
             Advanced Proof
           </button>
-          <div className="mt-3 flex items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-[10px] text-red-200/70">
+          <div className="mt-3 flex items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-200/70">
             <Radio className="h-3 w-3 text-red-400" />
             Not production custody
           </div>
@@ -89,7 +89,7 @@ export default function MandaraAppShell({
 
       {/* Mobile header */}
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-white/[0.06] bg-neutral-900/50 px-4 py-3 md:hidden">
+        <header className="flex items-center justify-between border-b border-white/[0.06] bg-white/[0.03] px-4 py-3 md:hidden">
           <div className="flex items-center gap-2">
             <Image
               src="/mandara-icon.png"
@@ -99,7 +99,7 @@ export default function MandaraAppShell({
               className="h-8 w-8 rounded-lg"
             />
             <span className="text-sm font-semibold text-white">Mandara</span>
-            <span className="rounded border border-amber-500/30 px-1.5 py-0.5 text-[10px] text-amber-300">
+            <span className="rounded border border-amber-500/30 px-1.5 py-0.5 text-xs text-amber-300">
               Devnet beta
             </span>
           </div>
@@ -157,11 +157,11 @@ export default function MandaraAppShell({
             <h1 className="text-sm font-semibold text-white">
               {navItems.find((n) => n.href === pathname)?.label ?? "Mandara"}
             </h1>
-            <span className="rounded border border-amber-500/30 px-1.5 py-0.5 text-[10px] text-amber-300">
+            <span className="rounded border border-amber-500/30 px-1.5 py-0.5 text-xs text-amber-300">
               Devnet beta
             </span>
           </div>
-          <div className="text-[10px] text-neutral-500">
+          <div className="text-xs text-neutral-500">
             Ika pre-alpha mock signer · Not production custody
           </div>
         </header>

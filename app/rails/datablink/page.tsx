@@ -137,7 +137,7 @@ function TaskCard({
   const progress = task.maxResponses > 0 ? (task.responseCount / task.maxResponses) * 100 : 0;
 
   return (
-    <Card className="border-neutral-800 bg-neutral-900/50 transition-all hover:border-neutral-700">
+    <Card className="border-neutral-800 bg-white/[0.03] transition-all hover:border-neutral-700">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -624,7 +624,7 @@ export default function DataBlinkPage() {
 
           {/* Not Connected State */}
           {!connected && (
-            <Card className="border-neutral-800 bg-neutral-900/50">
+            <Card className="border-neutral-800 bg-white/[0.03]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Cpu className="mb-4 h-16 w-16 text-neutral-600" />
                 <h2 className="mb-2 text-xl font-semibold">Connect Your Wallet</h2>
@@ -659,28 +659,28 @@ export default function DataBlinkPage() {
             <>
               {/* Stats Cards */}
               <div className="mb-8 grid gap-4 md:grid-cols-4">
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <Target className="mb-2 h-8 w-8 text-cyan-500" />
                     <p className="text-sm text-neutral-400">Open Tasks</p>
                     <p className="text-2xl font-bold">{stats.totalOpenTasks}</p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <List className="mb-2 h-8 w-8 text-purple-500" />
                     <p className="text-sm text-neutral-400">My Tasks</p>
                     <p className="text-2xl font-bold">{stats.myTaskCount}</p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <CheckCircle2 className="mb-2 h-8 w-8 text-emerald-500" />
                     <p className="text-sm text-neutral-400">My Responses</p>
                     <p className="text-2xl font-bold">{stats.myResponseCount}</p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <Coins className="mb-2 h-8 w-8 text-yellow-500" />
                     <p className="text-sm text-neutral-400">Tasks Completed</p>
@@ -711,7 +711,7 @@ export default function DataBlinkPage() {
 
               {/* Loading State */}
               {tasksLoading && (
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="flex items-center justify-center py-16">
                     <Loader2 className="h-8 w-8 animate-spin text-cyan-500" />
                     <span className="ml-3 text-neutral-400">Loading tasks...</span>
@@ -751,7 +751,7 @@ export default function DataBlinkPage() {
 
               {/* Empty State */}
               {!tasksLoading && !tasksError && displayTasks.length === 0 && (
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="flex flex-col items-center justify-center py-16">
                     <Cpu className="mb-4 h-16 w-16 text-cyan-500" />
                     <h2 className="mb-2 text-xl font-semibold">
@@ -772,21 +772,21 @@ export default function DataBlinkPage() {
 
               {/* Feature Cards */}
               <div className="mt-8 grid gap-4 md:grid-cols-3">
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <Users className="mb-3 h-8 w-8 text-emerald-500" />
                     <h3 className="font-semibold">Verified Humans</h3>
                     <p className="mt-1 text-sm text-neutral-400">Only verified humans can complete tasks</p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <Coins className="mb-3 h-8 w-8 text-yellow-500" />
                     <h3 className="font-semibold">Instant Rewards</h3>
                     <p className="mt-1 text-sm text-neutral-400">Get paid immediately upon completion</p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <List className="mb-3 h-8 w-8 text-purple-500" />
                     <h3 className="font-semibold">Quality Data</h3>

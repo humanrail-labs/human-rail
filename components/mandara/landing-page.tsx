@@ -103,7 +103,7 @@ export default function MandaraLandingPage() {
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-xl border border-white/[0.06] bg-neutral-900/50 p-5"
+                  className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-5"
                 >
                   <item.icon className="mb-3 h-6 w-6 text-sky-400" />
                   <h3 className="text-sm font-semibold text-white">
@@ -165,9 +165,9 @@ export default function MandaraLandingPage() {
               ].map((item) => (
                 <div
                   key={item.step}
-                  className="relative rounded-xl border border-white/[0.06] bg-neutral-900/50 p-5"
+                  className="relative rounded-xl border border-white/[0.06] bg-white/[0.03] p-5"
                 >
-                  <div className="absolute -top-3 left-4 rounded-full bg-sky-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                  <div className="absolute -top-3 left-4 rounded-full bg-sky-600 px-2 py-0.5 text-xs font-bold text-white">
                     {item.step}
                   </div>
                   <item.icon className="mb-3 mt-2 h-5 w-5 text-sky-400" />
@@ -210,7 +210,7 @@ export default function MandaraLandingPage() {
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-neutral-900/50 p-5"
+                  className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-5"
                 >
                   <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-sky-400" />
                   <div>

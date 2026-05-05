@@ -74,7 +74,7 @@ export default function WebhookManagement({ listWebhooks, createWebhook, deleteW
   }, [deleteWebhook, load]);
 
   return (
-    <Card className="border-white/[0.06] bg-neutral-900/50">
+    <Card className="border-white/[0.06] bg-white/[0.03]">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base text-white">
           <Webhook className="h-4 w-4 text-purple-400" />
@@ -92,7 +92,7 @@ export default function WebhookManagement({ listWebhooks, createWebhook, deleteW
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="https://example.com/webhooks/mandara"
-              className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+              className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
             />
           </div>
           <div className="space-y-1.5">
@@ -100,7 +100,7 @@ export default function WebhookManagement({ listWebhooks, createWebhook, deleteW
             <Input
               value={newEvents}
               onChange={(e) => setNewEvents(e.target.value)}
-              className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+              className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
             />
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function WebhookManagement({ listWebhooks, createWebhook, deleteW
         {createdSecret && (
           <div className="space-y-2 rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
             <p className="text-xs font-medium text-purple-200">Webhook Secret</p>
-            <p className="text-[11px] text-purple-200/70">Copy now — it will not be shown again.</p>
+            <p className="text-xs text-purple-200/70">Copy now — it will not be shown again.</p>
             <div className="flex items-center gap-2">
               <code className="block flex-1 truncate rounded bg-black/30 px-2 py-1 text-xs text-purple-200/90">
                 {createdSecret}
@@ -153,7 +153,7 @@ export default function WebhookManagement({ listWebhooks, createWebhook, deleteW
               {webhooks.map((wh) => (
                 <div
                   key={wh.id}
-                  className="flex items-center justify-between rounded bg-black/20 px-2 py-1.5 text-xs"
+                  className="flex items-center justify-between rounded bg-white/[0.02] px-2 py-1.5 text-xs"
                 >
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <div className="flex items-center gap-2">
@@ -162,8 +162,8 @@ export default function WebhookManagement({ listWebhooks, createWebhook, deleteW
                         variant="outline"
                         className={
                           wh.status === "active"
-                            ? "border-emerald-500/30 text-emerald-300 text-[10px]"
-                            : "border-amber-500/30 text-amber-300 text-[10px]"
+                            ? "border-emerald-500/30 text-emerald-300 text-xs"
+                            : "border-amber-500/30 text-amber-300 text-xs"
                         }
                       >
                         {wh.status}
@@ -171,7 +171,7 @@ export default function WebhookManagement({ listWebhooks, createWebhook, deleteW
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {wh.events.map((ev) => (
-                        <span key={ev} className="text-[10px] text-neutral-500">
+                        <span key={ev} className="text-xs text-neutral-500">
                           {ev}
                         </span>
                       ))}
@@ -182,7 +182,7 @@ export default function WebhookManagement({ listWebhooks, createWebhook, deleteW
                     size="sm"
                     onClick={() => handleDelete(wh.id)}
                     disabled={loading}
-                    className="ml-2 h-6 text-[10px] border-red-500/20 text-red-300 hover:bg-red-500/10"
+                    className="ml-2 h-6 text-xs border-red-500/20 text-red-300 hover:bg-red-500/10"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

@@ -193,7 +193,7 @@ export default function DelegationDashboard() {
           </div>
 
           {!connected && (
-            <Card className="border-neutral-800 bg-neutral-900/50">
+            <Card className="border-neutral-800 bg-white/[0.03]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Shield className="mb-4 h-16 w-16 text-neutral-600" />
                 <h2 className="mb-2 text-xl font-semibold">Connect Your Wallet</h2>
@@ -207,7 +207,7 @@ export default function DelegationDashboard() {
           {error && <Card className="mb-6 border-red-900 bg-red-950/20"><CardContent className="py-4"><p className="text-red-400">{error}</p></CardContent></Card>}
 
           {connected && !loading && capabilities.length === 0 && (
-            <Card className="border-neutral-800 bg-neutral-900/50">
+            <Card className="border-neutral-800 bg-white/[0.03]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Shield className="mb-4 h-16 w-16 text-purple-500" />
                 <h2 className="mb-2 text-xl font-semibold">No Capabilities Issued</h2>
@@ -226,7 +226,7 @@ export default function DelegationDashboard() {
                 const isActionLoading = actionLoading === pdaStr || actionLoading === cap.agent.toBase58();
                 const agentInfo = agents.find((a) => a.pda.equals(cap.agent));
                 return (
-                  <Card key={pdaStr} className="border-neutral-800 bg-neutral-900/50">
+                  <Card key={pdaStr} className="border-neutral-800 bg-white/[0.03]">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

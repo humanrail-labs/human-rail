@@ -264,7 +264,7 @@ export default function DocumentsPage() {
 
           {/* Not Connected State */}
           {!connected && (
-            <Card className="border-neutral-800 bg-neutral-900/50">
+            <Card className="border-neutral-800 bg-white/[0.03]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <FileCheck className="mb-4 h-16 w-16 text-neutral-600" />
                 <h2 className="mb-2 text-xl font-semibold">Connect Your Wallet</h2>
@@ -298,7 +298,7 @@ export default function DocumentsPage() {
           {connected && hasProfile && (
             <>
               <div className="mb-8 grid gap-4 md:grid-cols-3">
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <Shield className="mb-3 h-8 w-8 text-emerald-500" />
                     <h3 className="font-semibold">Verified Signatures</h3>
@@ -307,7 +307,7 @@ export default function DocumentsPage() {
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <Clock className="mb-3 h-8 w-8 text-blue-500" />
                     <h3 className="font-semibold">Timestamped</h3>
@@ -316,7 +316,7 @@ export default function DocumentsPage() {
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <Upload className="mb-3 h-8 w-8 text-purple-500" />
                     <h3 className="font-semibold">Agent Delegation</h3>
@@ -333,7 +333,7 @@ export default function DocumentsPage() {
                   <h2 className="mb-4 text-xl font-semibold">Your Signatures</h2>
                   <div className="space-y-3">
                     {signatures.map((sig) => (
-                      <Card key={sig.pubkey.toBase58()} className="border-neutral-800 bg-neutral-900/50">
+                      <Card key={sig.pubkey.toBase58()} className="border-neutral-800 bg-white/[0.03]">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -379,7 +379,7 @@ export default function DocumentsPage() {
                   <h2 className="mb-4 text-xl font-semibold">Documents You Created</h2>
                   <div className="space-y-3">
                     {documents.map((doc) => (
-                      <Card key={doc.pubkey.toBase58()} className="border-neutral-800 bg-neutral-900/50">
+                      <Card key={doc.pubkey.toBase58()} className="border-neutral-800 bg-white/[0.03]">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -416,7 +416,7 @@ export default function DocumentsPage() {
 
               {/* Empty State */}
               {signatures.length === 0 && documents.length === 0 && (
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="flex flex-col items-center justify-center py-16">
                     <FileCheck className="mb-4 h-16 w-16 text-emerald-500" />
                     <h2 className="mb-2 text-xl font-semibold">No Signed Documents</h2>

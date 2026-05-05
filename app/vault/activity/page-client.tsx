@@ -184,7 +184,7 @@ export default function ReceiptsPage() {
                 <Receipt className="h-5 w-5 text-teal-500" />
               </div>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Total Receipts</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Total Receipts</p>
                 <p className="text-lg font-bold text-white">{stats.totalReceipts}</p>
               </div>
             </CardContent>
@@ -195,7 +195,7 @@ export default function ReceiptsPage() {
                 <Zap className="h-5 w-5 text-amber-500" />
               </div>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Total Value</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Total Value</p>
                 <p className="text-lg font-bold text-white">{(Number(stats.totalValue) / 1e9).toFixed(3)} SOL</p>
               </div>
             </CardContent>
@@ -206,7 +206,7 @@ export default function ReceiptsPage() {
                 <Bot className="h-5 w-5 text-sky-500" />
               </div>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Unique Agents</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Unique Agents</p>
                 <p className="text-lg font-bold text-white">{stats.uniqueAgents}</p>
               </div>
             </CardContent>
@@ -217,7 +217,7 @@ export default function ReceiptsPage() {
                 <FileText className="h-5 w-5 text-violet-500" />
               </div>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Action Types</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Action Types</p>
                 <p className="text-lg font-bold text-white">{Object.keys(stats.actionTypes).length}</p>
               </div>
             </CardContent>
@@ -228,7 +228,7 @@ export default function ReceiptsPage() {
       {/* Filters Panel */}
       {showFilters && (
         <motion.div variants={fadeUp}>
-          <Card className="border-neutral-800 bg-neutral-900/50">
+          <Card className="border-neutral-800 bg-white/[0.03]">
             <CardContent className="space-y-4 p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">Filter Receipts</h3>
@@ -357,15 +357,15 @@ export default function ReceiptsPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium text-white">{actionLabel}</span>
                         {receipt.value > BigInt(0) && (
-                          <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-[10px] text-amber-400">
+                          <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-xs text-amber-400">
                             {valueSol} SOL
                           </Badge>
                         )}
-                        <Badge variant="outline" className="border-neutral-700 text-[10px] text-neutral-500">
+                        <Badge variant="outline" className="border-neutral-700 text-xs text-neutral-500">
                           Seq #{receipt.sequence.toString()}
                         </Badge>
                       </div>
-                      <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] sm:grid-cols-4">
+                      <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
                         <div className="flex items-center gap-1.5">
                           <User className="h-3 w-3 text-neutral-600" />
                           <span className="text-neutral-500">Principal:</span>
@@ -390,7 +390,7 @@ export default function ReceiptsPage() {
                           <span className="text-neutral-400">{new Date(receipt.timestamp * 1000).toLocaleString()}</span>
                         </div>
                       </div>
-                      <div className="mt-1 text-[10px] text-neutral-600">
+                      <div className="mt-1 text-xs text-neutral-600">
                         Slot {receipt.slot.toString()} · PDA: {pdaAddr.slice(0, 8)}…{pdaAddr.slice(-6)}
                       </div>
                     </div>

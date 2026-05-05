@@ -165,7 +165,7 @@ export default function PaymentsPage() {
               <Receipt className="h-5 w-5 text-amber-500" />
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Total Invoices</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Total Invoices</p>
               {loading ? <Skeleton className="mt-1 h-5 w-10 bg-neutral-800" /> :
                 <p className="text-lg font-bold text-white">{stats.total}</p>}
             </div>
@@ -177,7 +177,7 @@ export default function PaymentsPage() {
               <Clock className="h-5 w-5 text-yellow-500" />
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Pending</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Pending</p>
               {loading ? <Skeleton className="mt-1 h-5 w-10 bg-neutral-800" /> :
                 <p className="text-lg font-bold text-white">{stats.pending}</p>}
             </div>
@@ -189,7 +189,7 @@ export default function PaymentsPage() {
               <CheckCircle2 className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Paid</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Paid</p>
               {loading ? <Skeleton className="mt-1 h-5 w-10 bg-neutral-800" /> :
                 <p className="text-lg font-bold text-white">{stats.paid}</p>}
             </div>
@@ -201,7 +201,7 @@ export default function PaymentsPage() {
               <TrendingUp className="h-5 w-5 text-violet-500" />
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Total Value</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Total Value</p>
               {loading ? <Skeleton className="mt-1 h-5 w-16 bg-neutral-800" /> :
                 <p className="text-lg font-bold text-white">{formatAmount(stats.totalValue)} <span className="text-xs text-neutral-500">tokens</span></p>}
             </div>
@@ -245,7 +245,7 @@ export default function PaymentsPage() {
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">Recent Invoices</h3>
           {stats.myInvoices > 0 && (
-            <Badge variant="outline" className="border-amber-500/20 text-amber-400 text-[10px]">
+            <Badge variant="outline" className="border-amber-500/20 text-amber-400 text-xs">
               {stats.myInvoices} from you
             </Badge>
           )}
@@ -287,7 +287,7 @@ export default function PaymentsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-white">{formatAmount(invoice.amount)} tokens</span>
-                      <Badge variant="outline" className={`text-[10px] ${
+                      <Badge variant="outline" className={`text-xs ${
                         invoice.status === "pending" ? "border-yellow-500/20 text-yellow-400" :
                         invoice.status === "paid" ? "border-emerald-500/20 text-emerald-400" :
                         "border-neutral-700 text-neutral-500"
@@ -295,11 +295,11 @@ export default function PaymentsPage() {
                         {invoice.status}
                       </Badge>
                       {publicKey && invoice.merchant.equals(publicKey) && (
-                        <Badge variant="outline" className="border-amber-500/20 text-amber-400 text-[10px]">Yours</Badge>
+                        <Badge variant="outline" className="border-amber-500/20 text-amber-400 text-xs">Yours</Badge>
                       )}
                     </div>
                     <p className="truncate text-xs text-neutral-500">{invoice.memo || "No memo"}</p>
-                    <p className="text-[10px] text-neutral-600">
+                    <p className="text-xs text-neutral-600">
                       {new Date(invoice.createdAt * 1000).toLocaleDateString()}
                     </p>
                   </div>

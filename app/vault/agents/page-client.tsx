@@ -94,7 +94,7 @@ export default function AgentsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="agent-name">Agent Name</Label>
                   <Input id="agent-name" placeholder="e.g. trading-bot-v1" value={agentName} onChange={(e) => setAgentName(e.target.value)} maxLength={32} className="border-neutral-800 bg-neutral-900" />
-                  <p className="text-[11px] text-neutral-600">Max 32 characters. Stored on-chain.</p>
+                  <p className="text-xs text-neutral-600">Max 32 characters. Stored on-chain.</p>
                 </div>
                 <Button onClick={handleRegister} disabled={registering || !agentName.trim()} className="w-full gap-2 bg-sky-600 hover:bg-sky-700">
                   {registering ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />} {registering ? "Registering…" : "Register Agent"}
@@ -132,7 +132,7 @@ export default function AgentsPage() {
                         <Badge variant="outline" className={s.badge}><span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${s.dot}`} />{agent.status}</Badge>
                       </div>
                       <div className="mt-0.5 flex items-center gap-2">
-                        <code className="text-[11px] text-neutral-600">{addr.slice(0, 8)}…{addr.slice(-6)}</code>
+                        <code className="text-xs text-neutral-600">{addr.slice(0, 8)}…{addr.slice(-6)}</code>
                         <CopyBtn text={addr} />
                         <a href={`https://explorer.solana.com/address/${addr}?cluster=${cluster}`} target="_blank" rel="noopener noreferrer" className="text-neutral-700 hover:text-sky-400"><ExternalLink className="h-3 w-3" /></a>
                       </div>
@@ -140,20 +140,20 @@ export default function AgentsPage() {
                   </div>
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-                  <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]">
-                    <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-neutral-600"><Key className="h-3 w-3" /> Signing Key</div>
-                    <div className="mt-1 flex items-center gap-1"><code className="text-[11px] text-neutral-400">{sigKey.slice(0, 8)}…</code><CopyBtn text={sigKey} /></div>
+                  <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]">
+                    <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-600"><Key className="h-3 w-3" /> Signing Key</div>
+                    <div className="mt-1 flex items-center gap-1"><code className="text-xs text-neutral-400">{sigKey.slice(0, 8)}…</code><CopyBtn text={sigKey} /></div>
                   </div>
-                  <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]">
-                    <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-neutral-600"><Shield className="h-3 w-3" /> Capabilities</div>
+                  <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]">
+                    <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-600"><Shield className="h-3 w-3" /> Capabilities</div>
                     <p className="mt-1 text-sm font-semibold text-white">{agent.capabilityCount}</p>
                   </div>
-                  <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]">
-                    <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-neutral-600"><Activity className="h-3 w-3" /> Actions</div>
+                  <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]">
+                    <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-600"><Activity className="h-3 w-3" /> Actions</div>
                     <p className="mt-1 text-sm font-semibold text-white">{agent.actionCount}</p>
                   </div>
-                  <div className="rounded-lg bg-neutral-900/50 p-3 ring-1 ring-white/[0.03]">
-                    <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-neutral-600"><Clock className="h-3 w-3" /> Created</div>
+                  <div className="rounded-lg bg-white/[0.03] p-3 ring-1 ring-white/[0.03]">
+                    <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-600"><Clock className="h-3 w-3" /> Created</div>
                     <p className="mt-1 text-[12px] font-medium text-neutral-400">{new Date(agent.createdAt * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
                   </div>
                 </div>

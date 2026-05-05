@@ -167,7 +167,7 @@ function ReceiptCard({ receipt, cluster }: { receipt: ActionReceipt; cluster: st
   const isAgentAction = !receipt.agentId.equals(receipt.principalId);
 
   return (
-    <Card className="border-neutral-800 bg-neutral-900/50 transition-all hover:border-neutral-700">
+    <Card className="border-neutral-800 bg-white/[0.03] transition-all hover:border-neutral-700">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -365,7 +365,7 @@ export default function ReceiptsDashboard() {
 
           {/* Not Connected State */}
           {!connected && (
-            <Card className="border-neutral-800 bg-neutral-900/50">
+            <Card className="border-neutral-800 bg-white/[0.03]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Receipt className="mb-4 h-16 w-16 text-neutral-600" />
                 <h2 className="mb-2 text-xl font-semibold">Connect Your Wallet</h2>
@@ -380,28 +380,28 @@ export default function ReceiptsDashboard() {
             <>
               {/* Stats Cards */}
               <div className="mb-8 grid gap-4 md:grid-cols-4">
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <FileText className="mb-2 h-8 w-8 text-orange-500" />
                     <p className="text-sm text-neutral-400">Total Receipts</p>
                     <p className="text-2xl font-bold">{stats.total}</p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <User className="mb-2 h-8 w-8 text-blue-500" />
                     <p className="text-sm text-neutral-400">As Principal</p>
                     <p className="text-2xl font-bold">{stats.myPrincipal}</p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <Bot className="mb-2 h-8 w-8 text-purple-500" />
                     <p className="text-sm text-neutral-400">As Agent</p>
                     <p className="text-2xl font-bold">{stats.myAgent}</p>
                   </CardContent>
                 </Card>
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="p-6">
                     <Coins className="mb-2 h-8 w-8 text-emerald-500" />
                     <p className="text-sm text-neutral-400">Total Value</p>
@@ -450,7 +450,7 @@ export default function ReceiptsDashboard() {
 
               {/* Loading State */}
               {loading && (
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="flex items-center justify-center py-16">
                     <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
                     <span className="ml-3 text-neutral-400">Loading receipts...</span>
@@ -469,7 +469,7 @@ export default function ReceiptsDashboard() {
 
               {/* No Receipts */}
               {!loading && !error && filteredReceipts.length === 0 && (
-                <Card className="border-neutral-800 bg-neutral-900/50">
+                <Card className="border-neutral-800 bg-white/[0.03]">
                   <CardContent className="flex flex-col items-center justify-center py-16">
                     <Receipt className="mb-4 h-16 w-16 text-orange-500" />
                     <h2 className="mb-2 text-xl font-semibold">No Receipts Found</h2>

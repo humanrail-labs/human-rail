@@ -87,7 +87,7 @@ export default function ConsoleDashboard() {
             <p className="text-xs text-amber-200/70">{error}</p>
           </div>
         </div>
-        <div className="rounded-lg border border-white/[0.06] bg-neutral-900/50 p-4 text-sm text-neutral-400">
+        <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-4 text-sm text-neutral-400">
           <p className="font-medium text-white">To start the API locally:</p>
           <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs">
             <li>npm run product:docker:up</li>
@@ -107,7 +107,7 @@ export default function ConsoleDashboard() {
   return (
     <div className="space-y-6">
       {/* Getting Started card */}
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <Compass className="h-4 w-4 text-sky-400" />
@@ -134,7 +134,7 @@ export default function ConsoleDashboard() {
                 className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${
                   step.done
                     ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                    : "border-white/[0.06] bg-black/20 text-neutral-500"
+                    : "border-white/[0.06] bg-white/[0.02] text-neutral-500"
                 }`}
               >
                 <step.icon className="h-3.5 w-3.5" />
@@ -165,18 +165,18 @@ export default function ConsoleDashboard() {
           { label: "Signed", value: signedCount, icon: CheckCircle2, color: "text-emerald-400" },
           { label: "Rejections", value: rejectedCount, icon: XCircle, color: "text-red-400" },
         ].map((item) => (
-          <Card key={item.label} className="border-white/[0.06] bg-neutral-900/50">
+          <Card key={item.label} className="border-white/[0.06] bg-white/[0.03]">
             <CardContent className="flex flex-col items-center justify-center py-4">
               <item.icon className={`mb-1 h-5 w-5 ${item.color}`} />
               <p className="text-xl font-semibold text-white">{item.value}</p>
-              <p className="text-[11px] text-neutral-500">{item.label}</p>
+              <p className="text-xs text-neutral-500">{item.label}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Recent Signature Requests */}
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <FileKey className="h-4 w-4 text-purple-400" />
@@ -205,7 +205,7 @@ export default function ConsoleDashboard() {
                 return (
                   <div
                     key={sr.id}
-                    className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2"
+                    className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2"
                   >
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center gap-2">
@@ -216,7 +216,7 @@ export default function ConsoleDashboard() {
                           {truncate(sr.id, 6)}
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-x-3 text-[11px] text-neutral-400">
+                      <div className="flex flex-wrap gap-x-3 text-xs text-neutral-400">
                         <span>Amount: {sr.amount}</span>
                         <span>Chain: {sr.destinationChainId}</span>
                         {sr.agent?.name && (
@@ -224,7 +224,7 @@ export default function ConsoleDashboard() {
                         )}
                       </div>
                     </div>
-                    <span className="ml-3 text-[11px] text-neutral-500">
+                    <span className="ml-3 text-xs text-neutral-500">
                       {new Date(sr.createdAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -236,7 +236,7 @@ export default function ConsoleDashboard() {
       </Card>
 
       {/* Activity Log */}
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base text-white">
             <Activity className="h-4 w-4 text-emerald-400" />
@@ -250,10 +250,10 @@ export default function ConsoleDashboard() {
             auditEvents.slice(0, 5).map((ev) => (
               <div
                 key={ev.id}
-                className="flex items-center justify-between rounded bg-black/20 px-2 py-1.5 text-xs"
+                className="flex items-center justify-between rounded bg-white/[0.02] px-2 py-1.5 text-xs"
               >
                 <span className="text-neutral-400">{ev.summary ?? ev.eventType}</span>
-                <span className="text-[10px] text-neutral-500">
+                <span className="text-xs text-neutral-500">
                   {new Date(ev.createdAt).toLocaleTimeString()}
                 </span>
               </div>
@@ -263,7 +263,7 @@ export default function ConsoleDashboard() {
       </Card>
 
       {/* Advanced link */}
-      <Card className="border-white/[0.06] bg-neutral-900/50">
+      <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardContent className="flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <FlaskConical className="h-5 w-5 text-neutral-400" />

@@ -292,7 +292,7 @@ export default function OnboardingWizard() {
             <p className="text-xs text-amber-200/70">{error}</p>
           </div>
         </div>
-        <div className="rounded-lg border border-white/[0.06] bg-neutral-900/50 p-4 text-sm text-neutral-400">
+        <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-4 text-sm text-neutral-400">
           <p className="font-medium text-white">To start the API locally:</p>
           <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs">
             <li>npm run product:docker:up</li>
@@ -317,14 +317,14 @@ export default function OnboardingWizard() {
           <button
             key={s.id}
             onClick={() => goTo(idx)}
-            className={`flex flex-1 flex-col items-center gap-1 border-b-2 pb-2 text-[10px] transition-colors ${
+            className={`flex flex-1 flex-col items-center gap-1 border-b-2 pb-2 text-xs transition-colors ${
               idx <= stepIndex
                 ? "border-sky-500 text-sky-400"
                 : "border-neutral-800 text-neutral-600"
             }`}
           >
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+              className={`flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${
                 idx < stepIndex
                   ? "bg-emerald-500 text-white"
                   : idx === stepIndex
@@ -341,7 +341,7 @@ export default function OnboardingWizard() {
 
       {/* Step: Welcome */}
       {step === "welcome" && (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <Compass className="h-5 w-5 text-sky-400" />
@@ -376,7 +376,7 @@ export default function OnboardingWizard() {
 
       {/* Step: Agent */}
       {step === "agent" && (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <Bot className="h-5 w-5 text-sky-400" />
@@ -393,7 +393,7 @@ export default function OnboardingWizard() {
                 value={agentName}
                 onChange={(e) => setAgentName(e.target.value)}
                 placeholder="e.g. Treasury Bot"
-                className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
               />
             </div>
             <div className="space-y-1.5">
@@ -402,7 +402,7 @@ export default function OnboardingWizard() {
                 value={agentDesc}
                 onChange={(e) => setAgentDesc(e.target.value)}
                 placeholder="What does this agent do?"
-                className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
               />
             </div>
             {agentError && (
@@ -412,7 +412,7 @@ export default function OnboardingWizard() {
               </div>
             )}
             {agents.length > 0 && !createdAgent && (
-              <div className="rounded-lg border border-white/[0.06] bg-black/20 p-3">
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
                 <p className="text-xs text-neutral-500">Existing agents:</p>
                 <div className="mt-1 space-y-1">
                   {agents.map((a) => (
@@ -428,7 +428,7 @@ export default function OnboardingWizard() {
                     </button>
                   ))}
                 </div>
-                <p className="mt-1 text-[10px] text-neutral-500">Click to select, or create a new one above.</p>
+                <p className="mt-1 text-xs text-neutral-500">Click to select, or create a new one above.</p>
               </div>
             )}
             <div className="flex gap-2">
@@ -457,7 +457,7 @@ export default function OnboardingWizard() {
 
       {/* Step: Wallet */}
       {step === "wallet" && (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <Wallet className="h-5 w-5 text-purple-400" />
@@ -469,7 +469,7 @@ export default function OnboardingWizard() {
           </CardHeader>
           <CardContent className="space-y-4">
             {wallets.length > 0 && !createdWallet && (
-              <div className="rounded-lg border border-white/[0.06] bg-black/20 p-3">
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
                 <p className="text-xs text-neutral-500">Existing wallets:</p>
                 <div className="mt-1 space-y-1">
                   {wallets.map((w) => (
@@ -485,7 +485,7 @@ export default function OnboardingWizard() {
                     </button>
                   ))}
                 </div>
-                <p className="mt-1 text-[10px] text-neutral-500">Click to select, or import a new one below.</p>
+                <p className="mt-1 text-xs text-neutral-500">Click to select, or import a new one below.</p>
               </div>
             )}
 
@@ -495,7 +495,7 @@ export default function OnboardingWizard() {
                 value={walletPda}
                 onChange={(e) => setWalletPda(e.target.value)}
                 placeholder="On-chain PDA address"
-                className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
               />
             </div>
             <div className="space-y-1.5">
@@ -504,7 +504,7 @@ export default function OnboardingWizard() {
                 value={walletPubkey}
                 onChange={(e) => setWalletPubkey(e.target.value)}
                 placeholder="Public key bytes"
-                className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
               />
             </div>
             <div className="space-y-1.5">
@@ -512,7 +512,7 @@ export default function OnboardingWizard() {
               <select
                 value={walletCurve}
                 onChange={(e) => setWalletCurve(e.target.value)}
-                className="w-full rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-sm text-neutral-300 outline-none"
+                className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 outline-none"
               >
                 <option value="Secp256k1">Secp256k1</option>
                 <option value="Secp256r1">Secp256r1</option>
@@ -526,7 +526,7 @@ export default function OnboardingWizard() {
                 value={walletAuthority}
                 onChange={(e) => setWalletAuthority(e.target.value)}
                 placeholder="Wallet authority address"
-                className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
               />
             </div>
             {walletError && (
@@ -561,7 +561,7 @@ export default function OnboardingWizard() {
 
       {/* Step: Mandate */}
       {step === "mandate" && (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <Lock className="h-5 w-5 text-amber-400" />
@@ -578,7 +578,7 @@ export default function OnboardingWizard() {
                 <Input
                   value={mandateChainId}
                   onChange={(e) => setMandateChainId(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
               <div className="space-y-1.5">
@@ -586,7 +586,7 @@ export default function OnboardingWizard() {
                 <Input
                   value={mandateAsset}
                   onChange={(e) => setMandateAsset(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
             </div>
@@ -595,7 +595,7 @@ export default function OnboardingWizard() {
               <Input
                 value={mandateRecipient}
                 onChange={(e) => setMandateRecipient(e.target.value)}
-                className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
               />
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -604,7 +604,7 @@ export default function OnboardingWizard() {
                 <Input
                   value={mandatePerTx}
                   onChange={(e) => setMandatePerTx(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
               <div className="space-y-1.5">
@@ -612,7 +612,7 @@ export default function OnboardingWizard() {
                 <Input
                   value={mandateDaily}
                   onChange={(e) => setMandateDaily(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
               <div className="space-y-1.5">
@@ -620,7 +620,7 @@ export default function OnboardingWizard() {
                 <Input
                   value={mandateTotal}
                   onChange={(e) => setMandateTotal(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
             </div>
@@ -656,7 +656,7 @@ export default function OnboardingWizard() {
 
       {/* Step: API Key */}
       {step === "apikey" && (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <FileKey className="h-5 w-5 text-amber-400" />
@@ -673,7 +673,7 @@ export default function OnboardingWizard() {
                 value={apiKeyName}
                 onChange={(e) => setApiKeyName(e.target.value)}
                 placeholder="e.g. production-agent"
-                className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
               />
             </div>
             {apiKeyError && (
@@ -685,7 +685,7 @@ export default function OnboardingWizard() {
             {createdApiKeyData && (
               <div className="space-y-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3">
                 <p className="text-xs font-medium text-amber-200">API Key Created</p>
-                <p className="text-[11px] text-amber-200/70">
+                <p className="text-xs text-amber-200/70">
                   Copy the raw key now. It will not be shown again. Do not store in localStorage.
                 </p>
                 <div className="flex items-center gap-2">
@@ -729,7 +729,7 @@ export default function OnboardingWizard() {
 
       {/* Step: Test */}
       {step === "test" && (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <Send className="h-5 w-5 text-sky-400" />
@@ -746,7 +746,7 @@ export default function OnboardingWizard() {
                 <Input
                   value={testAmount}
                   onChange={(e) => setTestAmount(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
               <div className="space-y-1.5">
@@ -754,7 +754,7 @@ export default function OnboardingWizard() {
                 <Input
                   value={testMessage}
                   onChange={(e) => setTestMessage(e.target.value)}
-                  className="border-white/[0.06] bg-black/20 text-sm text-neutral-300"
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
             </div>
@@ -798,7 +798,7 @@ export default function OnboardingWizard() {
               </div>
             )}
             {previewResult && (
-              <div className="space-y-2 rounded-lg bg-black/20 p-3">
+              <div className="space-y-2 rounded-lg bg-white/[0.02] p-3">
                 <p className="text-xs font-medium text-neutral-400">Preview</p>
                 <Badge
                   variant="outline"
@@ -816,11 +816,11 @@ export default function OnboardingWizard() {
             {createdSr && (
               <div className="space-y-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
                 <p className="text-xs font-medium text-emerald-200">Request Created</p>
-                <div className="flex justify-between text-[11px]">
+                <div className="flex justify-between text-xs">
                   <span className="text-emerald-200/60">ID</span>
                   <code className="text-emerald-200/80">{createdSr.signingRequest.id}</code>
                 </div>
-                <div className="flex justify-between text-[11px]">
+                <div className="flex justify-between text-xs">
                   <span className="text-emerald-200/60">Status</span>
                   <span className="text-emerald-200/80">{createdSr.signingRequest.status}</span>
                 </div>
@@ -838,7 +838,7 @@ export default function OnboardingWizard() {
 
       {/* Step: Done */}
       {step === "done" && (
-        <Card className="border-white/[0.06] bg-neutral-900/50">
+        <Card className="border-white/[0.06] bg-white/[0.03]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <CheckCircle2 className="h-5 w-5 text-emerald-400" />
@@ -879,12 +879,12 @@ export default function OnboardingWizard() {
               )}
             </div>
 
-            <div className="rounded-lg border border-white/[0.06] bg-black/20 p-3">
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
               <p className="text-xs font-medium text-neutral-400">Next step</p>
               <p className="mt-1 text-sm text-neutral-300">
                 Add this API key to your real agent environment.
               </p>
-              <pre className="mt-2 overflow-x-auto rounded bg-black/30 p-2 text-[11px] text-neutral-300">
+              <pre className="mt-2 overflow-x-auto rounded bg-black/30 p-2 text-xs text-neutral-300">
 {`export MANDARA_API_URL="${process.env.NEXT_PUBLIC_MANDARA_API_URL || "http://localhost:4000"}"
 export MANDARA_AGENT_API_KEY="${createdApiKeyData?.rawKey ?? "YOUR_KEY"}"`}
               </pre>
@@ -902,9 +902,9 @@ export MANDARA_AGENT_API_KEY="${createdApiKeyData.rawKey}"`)}
               )}
             </div>
 
-            <div className="rounded-lg border border-white/[0.06] bg-black/20 p-3">
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
               <p className="text-xs font-medium text-neutral-400">SDK snippet</p>
-              <pre className="mt-2 overflow-x-auto rounded bg-black/30 p-2 text-[11px] text-neutral-300">
+              <pre className="mt-2 overflow-x-auto rounded bg-black/30 p-2 text-xs text-neutral-300">
 {`import { MandaraClient } from "@mandara/sdk";
 
 const client = new MandaraClient({
