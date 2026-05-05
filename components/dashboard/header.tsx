@@ -37,15 +37,15 @@ export const DashboardHeader: FC = () => {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.06] bg-neutral-950/60 px-6 backdrop-blur-sm">
       <div className="flex items-center gap-3">
-        <RouteIcon className="h-5 w-5 text-emerald-400/70" />
-        <h1 className="text-[15px] font-semibold tracking-tight text-white">{route.label}</h1>
-        <Badge variant="outline" className="ml-2 border-amber-500/20 bg-amber-500/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-400">
+        <RouteIcon className="h-5 w-5 text-sky-400/70" />
+        <h1 className="text-base font-semibold tracking-tight text-white">{route.label}</h1>
+        <Badge variant="warning" className="ml-2 text-xs font-medium uppercase tracking-wider">
           {cluster}
         </Badge>
       </div>
       <div className="flex items-center gap-3">
         {connected && publicKey && (
-          <span className="hidden text-[11px] font-mono text-neutral-600 sm:block">
+          <span className="hidden text-xs font-mono text-neutral-500 sm:block">
             {publicKey.toBase58().slice(0, 6)}…{publicKey.toBase58().slice(-4)}
           </span>
         )}

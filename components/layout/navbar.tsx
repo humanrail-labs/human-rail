@@ -13,7 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { Cluster } from "@/lib/solana/providers";
 import {
   ChevronDown,
@@ -46,28 +45,27 @@ const ADVANCED_NAV_ITEMS = [
 ];
 
 const CLUSTERS: { value: Cluster; label: string; color: string }[] = [
-  { value: "devnet", label: "Devnet", color: "bg-yellow-500" },
-  { value: "localnet", label: "Localnet", color: "bg-blue-500" },
-  { value: "mainnet-beta", label: "Mainnet", color: "bg-green-500" },
+  { value: "devnet", label: "Devnet", color: "bg-amber-400" },
+  { value: "localnet", label: "Localnet", color: "bg-sky-400" },
+  { value: "mainnet-beta", label: "Mainnet", color: "bg-emerald-400" },
 ];
 
 export const Navbar: FC = () => {
-  const { connected } = useWallet();
   const { cluster, setCluster } = useCluster();
 
   const currentCluster = CLUSTERS.find((c) => c.value === cluster);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-sm">
+    <nav className="sticky top-0 z-50 border-b border-white/[0.06] bg-neutral-950/80 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2.5">
             <Image
               src="/humanrail-logo.png"
               alt="HumanRail"
               width={32}
               height={32}
-              className="h-8 w-8"
+              className="h-8 w-8 rounded-lg"
             />
             <span className="text-lg font-semibold text-white">Mandara</span>
           </Link>
@@ -90,7 +88,7 @@ export const Navbar: FC = () => {
                   <ChevronDown className="ml-1 h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-neutral-900 border-neutral-700">
+              <DropdownMenuContent align="start" className="bg-neutral-900 border-neutral-800">
                 {ADVANCED_NAV_ITEMS.map((item) => (
                   <DropdownMenuItem key={item.href} asChild className="cursor-pointer">
                     <Link href={item.href} className="flex items-center gap-2 text-neutral-300">
@@ -107,7 +105,7 @@ export const Navbar: FC = () => {
         <div className="flex items-center gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="secondary" size="sm" className="gap-2">
                 <span className={`h-2 w-2 rounded-full ${currentCluster?.color}`} />
                 {currentCluster?.label}
                 <ChevronDown className="h-3 w-3" />
@@ -122,11 +120,6 @@ export const Navbar: FC = () => {
                 >
                   <span className={`h-2 w-2 rounded-full ${c.color}`} />
                   {c.label}
-                  {cluster === c.value && (
-                    <Badge variant="secondary" className="ml-auto text-xs">
-                      Active
-                    </Badge>
-                  )}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

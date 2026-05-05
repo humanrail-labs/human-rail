@@ -97,7 +97,7 @@ function DottedSurface() {
   return (
     <div
       ref={containerRef}
-      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}
+      className="fixed inset-0 z-0 pointer-events-none"
     />
   );
 }
@@ -145,9 +145,9 @@ function useCountUp(end: number, duration = 2000) {
 function StatCard({ value, label, suffix = "" }: { value: number; label: string; suffix?: string }) {
   const { count, ref } = useCountUp(value);
   return (
-    <div ref={ref} style={{ padding: '1.5rem', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '1rem', textAlign: 'center' }}>
-      <div style={{ fontSize: '2rem', fontWeight: 700, color: '#fff' }}>{count.toLocaleString()}{suffix}</div>
-      <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.25rem' }}>{label}</div>
+    <div ref={ref} className="p-6 bg-white/[0.03] border border-white/[0.06] rounded-xl text-center">
+      <div className="text-3xl font-bold text-white">{count.toLocaleString()}{suffix}</div>
+      <div className="text-sm text-white/40 mt-1">{label}</div>
     </div>
   );
 }
@@ -184,22 +184,28 @@ export default function AgentVaultLanding() {
   }, [connection, cluster]);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#000', color: '#fff', overflowX: 'hidden' }}>
+    <div className="min-h-screen bg-neutral-950 text-white overflow-x-hidden">
       <DottedSurface />
 
       {/* Gradient Overlays */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1 }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0.9) 100%)' }} />
-        <div style={{ position: 'absolute', top: '-200px', left: '50%', transform: 'translateX(-50%)', width: '800px', height: '600px', background: 'radial-gradient(ellipse, rgba(16, 185, 129, 0.12) 0%, transparent 70%)', filter: 'blur(60px)' }} />
+      <div className="fixed inset-0 pointer-events-none z-[1]">
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0.9) 100%)' }}
+        />
+        <div
+          className="absolute -top-[200px] left-1/2 -translate-x-1/2 w-[800px] h-[600px] blur-[60px]"
+          style={{ background: 'radial-gradient(ellipse, rgba(16, 185, 129, 0.12) 0%, transparent 70%)' }}
+        />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 10 }}>
+      <div className="relative z-10">
 
         {/* HERO */}
-        <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '0 1.5rem' }}>
+        <section className="min-h-screen flex flex-col px-6">
           {/* Nav */}
-          <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: '#fff' }}>
+          <div className="w-full max-w-[1200px] mx-auto py-6 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-3 no-underline text-white">
               <Image
                 src="/humanrail-logo.png"
                 alt="HumanRail"
@@ -207,15 +213,19 @@ export default function AgentVaultLanding() {
                 height={36}
                 className="h-9 w-9 rounded-lg"
               />
-              <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>HumanRail</span>
+              <span className="text-xl font-bold">HumanRail</span>
             </Link>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-              <a href="https://github.com/humanrail-labs/human-rail" target="_blank" rel="noopener noreferrer"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+            <div className="flex items-center gap-6">
+              <a
+                href="https://github.com/humanrail-labs/human-rail"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:flex items-center gap-2 text-white/70 no-underline hover:text-white transition-colors text-sm"
+              >
                 <Github className="h-5 w-5" /><span>GitHub</span>
               </a>
               <Link href="/mandara/app">
-                <Button className="gap-2 rounded-full bg-sky-600 px-6 text-white hover:bg-sky-700">
+                <Button size="sm" className="gap-2 rounded-full">
                   Open Console <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -223,38 +233,38 @@ export default function AgentVaultLanding() {
           </div>
 
           {/* Hero content */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', paddingBottom: '4rem' }}>
-            <div style={{ maxWidth: '900px' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '9999px', marginBottom: '2rem' }}>
-                <span style={{ width: '8px', height: '8px', backgroundColor: '#22c55e', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
-                <span style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)' }}>Live on Solana Devnet</span>
+          <div className="flex-1 flex flex-col items-center justify-center text-center pb-16">
+            <div className="max-w-[900px]">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.05] border border-white/10 rounded-full mb-8">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-[pulse-dot_2s_ease-in-out_infinite]" />
+                <span className="text-sm text-white/70">Live on Solana Devnet</span>
               </div>
 
-              <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>
+              <h1 className="text-[clamp(2.5rem,8vw,4.5rem)] font-extrabold leading-[1.1] mb-6 tracking-tight">
                 HumanRail Protocol<br />
-                <span style={{ background: 'linear-gradient(90deg, #34d399, #60a5fa, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                <span className="bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-400 bg-clip-text text-transparent">
                   AI Agent Guardrails
                 </span>
               </h1>
 
-              <p style={{ fontSize: 'clamp(1.125rem, 3vw, 1.375rem)', color: 'rgba(255,255,255,0.55)', maxWidth: '640px', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
+              <p className="text-[clamp(1.125rem,3vw,1.375rem)] text-white/55 max-w-[640px] mx-auto mb-10 leading-relaxed">
                 The on-chain protocol for policy-governed AI agents on Solana. Built by HumanRail Labs. Launch Mandara to deploy, monitor, and control your agents with full oversight.
               </p>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '4rem' }}>
+              <div className="flex flex-wrap items-center justify-center gap-4 mb-16">
                 <Link href="/mandara/app">
-                  <Button className="gap-2 rounded-full bg-sky-600 px-8 py-6 text-lg font-semibold text-white hover:bg-sky-700">
+                  <Button size="lg" className="gap-2 rounded-full">
                     Launch Mandara <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="/vault/dwallets">
-                  <Button variant="outline" className="gap-2 rounded-full border-white/15 px-8 py-6 text-lg font-medium text-white hover:bg-white/5">
+                  <Button variant="outline" size="lg" className="gap-2 rounded-full">
                     <FlaskConical className="h-5 w-5" /> Advanced Technical Proof
                   </Button>
                 </Link>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', maxWidth: '700px', margin: '0 auto' }}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-[700px] mx-auto">
                 {[
                   { value: stats.humans, label: 'Verified Humans' },
                   { value: stats.agents, label: 'Registered Agents' },
@@ -269,27 +279,27 @@ export default function AgentVaultLanding() {
         </section>
 
         {/* HOW IT WORKS */}
-        <section style={{ padding: '6rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-              <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, color: '#fff' }}>How It Works</h2>
-              <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.45)', marginTop: '0.5rem' }}>From identity to deployment in three simple steps</p>
+        <section className="py-24 px-6 border-t border-white/5">
+          <div className="max-w-[1000px] mx-auto">
+            <div className="text-center mb-14">
+              <h2 className="text-[clamp(1.75rem,4vw,2.25rem)] font-bold text-white">How It Works</h2>
+              <p className="text-base text-white/45 mt-2">From identity to deployment in three simple steps</p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 { step: '01', icon: <Fingerprint className="h-6 w-6" />, title: 'Verify Your Identity', desc: 'Create an on-chain human profile that serves as the root of trust for every agent you deploy.' },
                 { step: '02', icon: <Bot className="h-6 w-6" />, title: 'Deploy Your Agent', desc: 'Register an AI agent with a unique wallet, bounded capabilities, and programmable guardrails.' },
                 { step: '03', icon: <Shield className="h-6 w-6" />, title: 'Stay in Control', desc: 'Monitor real-time activity, adjust limits, and emergency-freeze any agent with one click.' },
               ].map((item, i) => (
-                <div key={i} style={{ padding: '1.75rem', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <div style={{ width: '44px', height: '44px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.15)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34d399' }}>
+                <div key={i} className="p-7 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-11 h-11 bg-emerald-500/10 border border-emerald-500/15 rounded-lg flex items-center justify-center text-emerald-400">
                       {item.icon}
                     </div>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'rgba(255,255,255,0.2)' }}>{item.step}</span>
+                    <span className="text-sm font-bold text-white/20">{item.step}</span>
                   </div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem', color: '#fff' }}>{item.title}</h3>
-                  <p style={{ color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, fontSize: '0.925rem' }}>{item.desc}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-white">{item.title}</h3>
+                  <p className="text-white/45 leading-relaxed text-[0.925rem]">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -297,25 +307,25 @@ export default function AgentVaultLanding() {
         </section>
 
         {/* FEATURES */}
-        <section style={{ padding: '6rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-              <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, color: '#fff' }}>Features</h2>
-              <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.45)', marginTop: '0.5rem' }}>Built for humans who manage autonomous agents</p>
+        <section className="py-24 px-6 border-t border-white/5">
+          <div className="max-w-[1000px] mx-auto">
+            <div className="text-center mb-14">
+              <h2 className="text-[clamp(1.75rem,4vw,2.25rem)] font-bold text-white">Features</h2>
+              <p className="text-base text-white/45 mt-2">Built for humans who manage autonomous agents</p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { icon: <Wallet className="h-6 w-6" />, title: 'Bounded Authority', desc: 'Set per-transaction, daily, and total spending limits that are enforced on-chain.' },
                 { icon: <Zap className="h-6 w-6" />, title: 'Emergency Freeze', desc: 'One-click agent shutdown when needed. Instantly revoke all capabilities.' },
                 { icon: <Eye className="h-6 w-6" />, title: 'Full Auditability', desc: 'Every action creates an immutable on-chain receipt. Compliance from day one.' },
                 { icon: <Users className="h-6 w-6" />, title: 'Multi-Agent Management', desc: 'Deploy and control multiple agents from a single dashboard with unified oversight.' },
               ].map((item, i) => (
-                <div key={i} style={{ padding: '1.5rem', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '1rem' }}>
-                  <div style={{ width: '44px', height: '44px', backgroundColor: 'rgba(96, 165, 250, 0.1)', border: '1px solid rgba(96, 165, 250, 0.15)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', color: '#60a5fa' }}>
+                <div key={i} className="p-6 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                  <div className="w-11 h-11 bg-sky-500/10 border border-sky-500/15 rounded-lg flex items-center justify-center mb-4 text-sky-400">
                     {item.icon}
                   </div>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 600, marginBottom: '0.5rem', color: '#fff' }}>{item.title}</h3>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, fontSize: '0.9rem' }}>{item.desc}</p>
+                  <h3 className="text-base font-semibold mb-2 text-white">{item.title}</h3>
+                  <p className="text-white/40 leading-relaxed text-sm">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -323,22 +333,26 @@ export default function AgentVaultLanding() {
         </section>
 
         {/* CTA */}
-        <section style={{ padding: '6rem 1.5rem', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, marginBottom: '1rem', color: '#fff' }}>
+        <section className="py-24 px-6 text-center border-t border-white/5">
+          <div className="max-w-[700px] mx-auto">
+            <h2 className="text-[clamp(1.75rem,4vw,2.25rem)] font-bold mb-4 text-white">
               Ready to deploy your first agent?
             </h2>
-            <p style={{ fontSize: '1.05rem', color: 'rgba(255,255,255,0.45)', maxWidth: '550px', margin: '0 auto 2rem', lineHeight: 1.7 }}>
+            <p className="text-base text-white/45 max-w-[550px] mx-auto mb-8 leading-relaxed">
               Mandara is live on Solana devnet. Connect your wallet, verify your identity, and start building with guardrails. Or try the Mandara Console for policy-governed AI agent wallets.
             </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+            <div className="flex flex-wrap items-center justify-center gap-4">
               <Link href="/vault">
-                <Button className="gap-2 rounded-full bg-emerald-600 px-8 py-6 text-lg font-semibold text-white hover:bg-emerald-700">
+                <Button size="lg" className="gap-2 rounded-full">
                   Launch Vault <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
-              <a href="https://github.com/humanrail-labs/human-rail" target="_blank" rel="noopener noreferrer"
-                style={{ padding: '0.875rem 2rem', backgroundColor: 'transparent', color: '#fff', fontWeight: 600, borderRadius: '9999px', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <a
+                href="https://github.com/humanrail-labs/human-rail"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-3.5 px-8 bg-transparent text-white font-semibold rounded-full no-underline border border-white/15 flex items-center gap-2 hover:bg-white/[0.03] transition-colors"
+              >
                 <Github className="h-5 w-5" /> Documentation
               </a>
             </div>
@@ -346,33 +360,26 @@ export default function AgentVaultLanding() {
         </section>
 
         {/* FOOTER */}
-        <footer style={{ padding: '2.5rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)' }}>
+        <footer className="py-10 px-6 border-t border-white/5">
+          <div className="max-w-[1200px] mx-auto flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-2 text-white/40">
               <Image
                 src="/humanrail-logo.png"
                 alt="HumanRail"
                 width={24}
                 height={24}
-                style={{ objectFit: 'contain', borderRadius: '4px' }}
+                className="object-contain rounded"
               />
-              <span style={{ fontSize: '0.875rem' }}>HumanRail Protocol · Built by HumanRail Labs</span>
+              <span className="text-sm">HumanRail Protocol · Built by HumanRail Labs</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.875rem' }}>
-              <Link href="/vault" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Vault</Link>
-              <a href="https://github.com/humanrail-labs/human-rail" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>GitHub</a>
-              <span style={{ color: 'rgba(255,255,255,0.3)' }}>Solana Devnet</span>
+            <div className="flex items-center gap-6 text-sm">
+              <Link href="/vault" className="text-white/40 no-underline hover:text-white/70 transition-colors">Vault</Link>
+              <a href="https://github.com/humanrail-labs/human-rail" target="_blank" rel="noopener noreferrer" className="text-white/40 no-underline hover:text-white/70 transition-colors">GitHub</a>
+              <span className="text-white/30">Solana Devnet</span>
             </div>
           </div>
         </footer>
       </div>
-
-      <style jsx global>{`
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-      `}</style>
     </div>
   );
 }

@@ -5,43 +5,35 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-base text-sm font-base ring-offset-white transition-all gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "text-white bg-emerald-600 border-2 border-emerald-400 shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "bg-sky-600 text-white hover:bg-sky-500",
         destructive:
-          "text-white bg-red-600 border-2 border-red-400 shadow-shadowRed hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "bg-red-600 text-white hover:bg-red-500",
         outline:
-          "bg-transparent text-white border-2 border-neutral-600 shadow-shadowNeutral hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none hover:bg-neutral-800",
+          "border border-white/10 bg-transparent text-white hover:bg-white/[0.04]",
         secondary:
-          "text-white bg-purple-600 border-2 border-purple-400 shadow-shadowPurple hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
-        ghost: 
-          "text-neutral-300 hover:bg-neutral-800 hover:text-white border-2 border-transparent",
-        link: 
-          "text-emerald-400 underline-offset-4 hover:underline",
-        blue:
-          "text-white bg-blue-600 border-2 border-blue-400 shadow-shadowBlue hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
-        noShadow: 
-          "text-white bg-emerald-600 border-2 border-emerald-400",
-        neutral:
-          "bg-neutral-800 text-white border-2 border-neutral-600 shadow-shadowNeutral hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
-        reverse:
-          "text-white bg-emerald-600 border-2 border-emerald-400 hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow",
+          "bg-white/[0.06] text-white hover:bg-white/[0.09]",
+        ghost:
+          "text-neutral-300 hover:bg-white/[0.04] hover:text-white",
+        link:
+          "text-sky-400 underline-offset-4 hover:underline hover:text-sky-300",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 px-3",
-        lg: "h-11 px-8",
-        icon: "h-10 w-10",
+        sm: "h-8 px-3 text-xs",
+        lg: "h-11 px-6 text-base",
+        icon: "h-9 w-9",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
     },
-  },
+  }
 )
 
 export interface ButtonProps
@@ -60,7 +52,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     )
-  },
+  }
 )
 Button.displayName = "Button"
 
