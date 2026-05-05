@@ -50,8 +50,6 @@ export function WalletButton() {
     publicKey,
     disconnect,
     connected,
-    select,
-    connect,
     wallets,
   } = useWallet();
   const { setVisible } = useWalletModal();
@@ -65,23 +63,18 @@ export function WalletButton() {
         return;
       }
 
-      // Try adapter path first (select + connect)
+      // Try adapter path first — connect directly through the adapter instance
+      // to bypass React state timing issues
       const adapterWallet = wallets.find(
         (w) => w.adapter.name === wallet.adapterName
       );
       if (adapterWallet) {
-        select(wallet.adapterName);
-        // Small delay so select propagates before connect
-        await new Promise((r) => setTimeout(r, 50));
-        await connect();
+        await adapterWallet.adapter.connect();
         return;
       }
 
       // Fallback: direct injected connect
-      const resp = await injected.connect();
-      if (resp?.publicKey) {
-        toast.success(`Connected to ${wallet.name}`);
-      }
+      await injected.connect();
     } catch (err: any) {
       // User rejection is normal — don't toast it
       if (
