@@ -110,7 +110,13 @@ export const SolanaProviders: FC<SolanaProvidersProps> = ({
       endpoint={endpoint}
       config={{ commitment: "confirmed", fetch: fetchWithFallback, wsEndpoint }}
     >
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider
+        wallets={wallets}
+        autoConnect={false}
+        onError={(err) => {
+          console.error("[WalletAdapter] Error:", err);
+        }}
+      >
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
