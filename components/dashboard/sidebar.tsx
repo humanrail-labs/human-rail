@@ -68,7 +68,7 @@ export const Sidebar: FC = () => {
           {!collapsed && (
             <div className="flex flex-col">
               <span className="text-[15px] font-semibold tracking-tight text-white leading-tight">
-                Mandara
+                HumanRail
               </span>
               <span className="text-[10px] text-neutral-500 leading-tight">
                 Advanced Protocol Explorer

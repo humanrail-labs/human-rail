@@ -247,11 +247,6 @@ export default function AgentVaultLanding() {
                     Launch Mandara <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/mandara/app/onboarding">
-                  <Button variant="outline" className="gap-2 rounded-full border-white/15 px-8 py-6 text-lg font-medium text-white hover:bg-white/5">
-                    Start Onboarding <ArrowRight className="h-5 w-5" />
-                  </Button>
-                </Link>
                 <Link href="/vault/dwallets">
                   <Button variant="outline" className="gap-2 rounded-full border-white/15 px-8 py-6 text-lg font-medium text-white hover:bg-white/5">
                     <FlaskConical className="h-5 w-5" /> Advanced Technical Proof
@@ -354,7 +349,13 @@ export default function AgentVaultLanding() {
         <footer style={{ padding: '2.5rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)' }}>
-              <Shield className="h-5 w-5" />
+              <Image
+                src="/humanrail-logo.png"
+                alt="HumanRail"
+                width={24}
+                height={24}
+                style={{ objectFit: 'contain', borderRadius: '4px' }}
+              />
               <span style={{ fontSize: '0.875rem' }}>HumanRail Protocol · Built by HumanRail Labs</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.875rem' }}>

@@ -42,9 +42,9 @@ export default function MandaraAppShell({
           <Image
             src="/mandara-icon.png"
             alt="Mandara"
-            width={48}
-            height={48}
-            className="h-12 w-12 rounded-lg"
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-lg"
           />
           <div>
             <p className="text-sm font-semibold text-white">Mandara</p>
@@ -94,9 +94,9 @@ export default function MandaraAppShell({
             <Image
               src="/mandara-icon.png"
               alt="Mandara"
-              width={40}
-              height={40}
-              className="h-10 w-10 rounded-lg"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-lg"
             />
             <span className="text-sm font-semibold text-white">Mandara</span>
             <span className="rounded border border-amber-500/30 px-1.5 py-0.5 text-[10px] text-amber-300">
