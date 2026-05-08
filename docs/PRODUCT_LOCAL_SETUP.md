@@ -340,10 +340,15 @@ For local product UI, run:
 ```bash
 npm run product:docker:up
 npm run product:db:push
+npm run product:webhooks:backfill
 npm run product:import-devnet-artifacts
 npm run product:api:dev
 ```
 
 `.env.product` must include `MANDARA_ENCRYPTION_PASSWORD` for webhook secret encryption. Development can use the example value, but staging/production must provide a unique secret at least 16 characters long.
+
+The local Docker Redis service uses the default password `changeme`, so `REDIS_URL` should be `redis://:changeme@localhost:6379` unless you override `REDIS_PASSWORD`.
+
+The webhook migration is intentionally non-destructive. Existing local rows may have nullable `iv`/`tag` until `npm run product:webhooks:backfill` encrypts legacy secrets. If a legacy secret cannot be recovered, the webhook is paused and marked for secret rotation. Rotate with `POST /api/webhooks/:id/rotate-secret`.
 
 Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

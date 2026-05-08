@@ -34,7 +34,7 @@
 | 2.4 | dWallet artifact is mounted as read-only volume | ✅ | Documented in deployment guide |
 | 2.5 | API error handler does not leak stack traces in production | ✅ | `apps/api/src/server.ts` |
 | 2.6 | Agent API keys are stored as SHA-256 hashes only | ✅ | Already implemented |
-| 2.7 | Webhook secrets are **plaintext** (documented as MVP-only) | ⚠️ | Must encrypt before production |
+| 2.7 | Webhook secrets are encrypted at rest | ✅ | `MANDARA_ENCRYPTION_PASSWORD`; legacy local rows require `npm run product:webhooks:backfill` |
 | 2.8 | Dev auth header (`x-mandara-dev-user`) is active | ⚠️ | Must replace or gate before open beta |
 | 2.9 | CORS origin is restricted to dashboard domain | ✅ | `MANDARA_CORS_ORIGIN` configurable |
 | 2.10 | Rate limiting is **not yet implemented** | ⚠️ | Required before open beta |

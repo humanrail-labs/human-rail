@@ -47,6 +47,7 @@
     "product:dashboard:smoke": "node scripts/product-dashboard-smoke.mjs",
     "product:agent-api:smoke": "node scripts/product-agent-api-smoke.mjs",
     "product:webhook:smoke": "node scripts/product-webhook-smoke.mjs",
+    "product:webhooks:backfill": "tsx scripts/product-backfill-webhook-secrets.ts",
     "product:frontend:smoke": "node scripts/product-frontend-smoke.mjs",
     "product:create-dev-agent-key": "node scripts/create-dev-agent-api-key.mjs",
     "product:ci": "bash scripts/product-ci-check.sh",

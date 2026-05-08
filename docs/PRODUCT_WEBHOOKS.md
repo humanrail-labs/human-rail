@@ -119,7 +119,7 @@ const isValid = verifyWebhookSignature(
 
 | Topic | Detail |
 |-------|--------|
-| Secret storage | Stored as plaintext in development. Replace with KMS encryption before production. |
+| Secret storage | AES-256-GCM encrypted with `MANDARA_ENCRYPTION_PASSWORD`. |
 | Secret display | Shown exactly once on creation/rotation. Copy immediately. |
 | HTTPS | Always use HTTPS URLs in production. |
 | Signature verification | Always verify `X-Mandara-Signature` before trusting payload. |
@@ -154,5 +154,19 @@ MANDARA_ENCRYPTION_PASSWORD="change-me-dev-only-32-byte-minimum"
 ```
 
 Staging and production must set a unique secret at least 16 characters long. If encryption is not configured, webhook creation returns a clear configuration error instead of storing plaintext or crashing unexpectedly.
+
+Legacy local databases may have webhook rows created before `iv` and `tag` existed. Those columns are nullable so local migration can run without dropping data, but new webhook creation always writes encrypted ciphertext plus `iv` and `tag`. Run the local backfill after `product:db:push`:
+
+```bash
+npm run product:webhooks:backfill
+```
+
+Rows that cannot be backfilled are paused and marked as needing secret rotation. Dashboard/API users can rotate a secret with:
+
+```http
+POST /api/webhooks/:id/rotate-secret
+```
+
+The raw rotated secret is returned once. Production must never deliver using plaintext legacy secrets.
 
 Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

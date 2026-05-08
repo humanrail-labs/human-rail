@@ -300,6 +300,7 @@ export interface Webhook {
   url: string;
   events: string[];
   status: string;
+  needsSecretRotation?: boolean;
   createdAt: string;
   updatedAt: string;
 }

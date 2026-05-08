@@ -55,19 +55,6 @@ export async function buildServer() {
   await fastify.register(authPlugin);
   await fastify.register(agentAuthPlugin);
 
-  // Routes
-  await fastify.register(healthRoutes);
-  await fastify.register(orgRoutes);
-  await fastify.register(agentRoutes);
-  await fastify.register(walletRoutes);
-  await fastify.register(policyRoutes);
-  await fastify.register(signingRequestRoutes);
-  await fastify.register(messageApprovalRoutes);
-  await fastify.register(auditEventRoutes);
-  await fastify.register(productRoutes);
-  await fastify.register(webhookRoutes);
-  await fastify.register(v1SignatureRequestRoutes);
-
   // Global error handler
   fastify.setErrorHandler((err, request, reply) => {
     fastify.log.error(err);
@@ -80,9 +67,22 @@ export async function buildServer() {
       );
     }
 
-    if (err instanceof MandaraError) {
-      return reply.status(err.statusCode).send(
-        errorResponse(err.code, err.message, err.details)
+    const mandaraLike = error as Error & {
+      code?: string;
+      details?: Record<string, unknown>;
+    };
+
+    if (
+      err instanceof MandaraError ||
+      error.name === "MandaraError" ||
+      (typeof mandaraLike.code === "string" && typeof error.statusCode === "number")
+    ) {
+      return reply.status(error.statusCode ?? 500).send(
+        errorResponse(
+          mandaraLike.code ?? "INTERNAL_ERROR",
+          error.message,
+          mandaraLike.details
+        )
       );
     }
 
@@ -98,6 +98,19 @@ export async function buildServer() {
       errorResponse("INTERNAL_ERROR", message)
     );
   });
+
+  // Routes
+  await fastify.register(healthRoutes);
+  await fastify.register(orgRoutes);
+  await fastify.register(agentRoutes);
+  await fastify.register(walletRoutes);
+  await fastify.register(policyRoutes);
+  await fastify.register(signingRequestRoutes);
+  await fastify.register(messageApprovalRoutes);
+  await fastify.register(auditEventRoutes);
+  await fastify.register(productRoutes);
+  await fastify.register(webhookRoutes);
+  await fastify.register(v1SignatureRequestRoutes);
 
   // 404 handler
   fastify.setNotFoundHandler((request, reply) => {

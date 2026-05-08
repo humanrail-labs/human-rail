@@ -354,6 +354,8 @@ MANDARA_ENCRYPTION_PASSWORD="replace-with-a-unique-secret"
 
 The example development value in `.env.product.example` is not safe for shared environments. Do not commit `.env.product`, service wallets, keypairs, `.local-ika`, `.local-keys`, `.local-worker`, or `target/deploy` keypairs.
 
+`webhooks.iv` and `webhooks.tag` are nullable only to support non-destructive migration of legacy local data. New webhooks and rotated secrets must always store encrypted ciphertext plus IV and auth tag. Run `npm run product:webhooks:backfill` for local/dev databases after schema push; production databases should be migrated with a controlled backfill before enabling delivery.
+
 Mandara product pages do not require browser wallet access. Advanced HumanRail Protocol proof pages may require a Solana wallet and should be reached through `/advanced`.
 
 Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

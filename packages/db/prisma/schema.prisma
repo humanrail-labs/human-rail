@@ -358,11 +358,12 @@ model Webhook {
   id             String            @id @default(cuid())
   organizationId String
   url            String
-  secret         String            // AES-256-GCM encrypted ciphertext (hex)
-  iv             String            // AES-256-GCM IV (hex)
-  tag            String            // AES-256-GCM auth tag (hex)
+  secret         String            // AES-256-GCM encrypted ciphertext (hex); legacy rows may contain plaintext until backfilled
+  iv             String?           // AES-256-GCM IV (hex); nullable for non-destructive legacy migration
+  tag            String?           // AES-256-GCM auth tag (hex); nullable for non-destructive legacy migration
   events         String[]
   status         WebhookStatus     @default(active)
+  metadata       Json?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 

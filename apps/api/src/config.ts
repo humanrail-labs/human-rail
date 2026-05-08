@@ -36,6 +36,9 @@ export function requireEncryptionPassword(): string {
   }
 
   if (isDev) {
+    console.warn(
+      "MANDARA_ENCRYPTION_PASSWORD is not set; using development-only webhook encryption password."
+    );
     return "change-me-dev-only-32-byte-minimum";
   }
 

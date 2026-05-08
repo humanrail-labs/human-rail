@@ -14,6 +14,7 @@ interface WebhookManagementProps {
     url: string;
     events: string[];
     status: string;
+    needsSecretRotation?: boolean;
     createdAt: string;
     updatedAt: string;
   }>>;
@@ -161,12 +162,14 @@ export default function WebhookManagement({ listWebhooks, createWebhook, deleteW
                       <Badge
                         variant="outline"
                         className={
-                          wh.status === "active"
+                          wh.needsSecretRotation
+                            ? "border-red-500/30 text-red-300 text-xs"
+                            : wh.status === "active"
                             ? "border-emerald-500/30 text-emerald-300 text-xs"
                             : "border-amber-500/30 text-amber-300 text-xs"
                         }
                       >
-                        {wh.status}
+                        {wh.needsSecretRotation ? "secret rotation required" : wh.status}
                       </Badge>
                     </div>
                     <div className="flex flex-wrap gap-1">

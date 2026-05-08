@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "@mandara/db";
+import { Prisma } from "@prisma/client";
 import { CreateWebhookSchema, UpdateWebhookSchema, generateWebhookSecret } from "@mandara/core";
 import { success, errorResponse } from "../lib/response.js";
 import { recordAuditEvent } from "../lib/audit.js";
@@ -12,6 +13,28 @@ const ListWebhooksQuery = z.object({
   orgId: z.string().cuid2().optional(),
   limit: z.string().default("50").transform(Number),
 });
+
+function webhookEncryptionConfigError() {
+  return errorResponse(
+    "WEBHOOK_ENCRYPTION_NOT_CONFIGURED",
+    "Webhook secret encryption is not configured. Set MANDARA_ENCRYPTION_PASSWORD."
+  );
+}
+
+function getWebhookMetadata(metadata: unknown): Record<string, unknown> {
+  return metadata && typeof metadata === "object" && !Array.isArray(metadata)
+    ? { ...(metadata as Record<string, unknown>) }
+    : {};
+}
+
+function needsSecretRotation(webhook: {
+  iv: string | null;
+  tag: string | null;
+  metadata?: unknown;
+}): boolean {
+  const metadata = getWebhookMetadata(webhook.metadata);
+  return !webhook.iv || !webhook.tag || metadata.needsSecretRotation === true;
+}
 
 export default async function webhookRoutes(fastify: FastifyInstance) {
   fastify.get("/api/webhooks", async (request, reply) => {
@@ -35,6 +58,9 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
         url: true,
         events: true,
         status: true,
+        iv: true,
+        tag: true,
+        metadata: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -42,7 +68,15 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
       take: limit,
     });
 
-    return success(webhooks);
+    return success(webhooks.map((webhook) => ({
+      id: webhook.id,
+      url: webhook.url,
+      events: webhook.events,
+      status: webhook.status,
+      needsSecretRotation: needsSecretRotation(webhook),
+      createdAt: webhook.createdAt,
+      updatedAt: webhook.updatedAt,
+    })));
   });
 
   fastify.post("/api/webhooks", async (request, reply) => {
@@ -70,10 +104,7 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
       encryptionPassword = requireEncryptionPassword();
     } catch {
       return reply.status(500).send(
-        errorResponse(
-          "CONFIGURATION_ERROR",
-          "Webhook secret encryption is not configured. Set MANDARA_ENCRYPTION_PASSWORD."
-        )
+        webhookEncryptionConfigError()
       );
     }
     const encrypted = encrypt(rawSecret, encryptionPassword);
@@ -86,6 +117,7 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
         secret: encrypted.value,
         iv: encrypted.iv,
         tag: encrypted.tag,
+        metadata: { encryptedAt: new Date().toISOString(), encryptionVersion: "aes-256-gcm-v1" },
         status: isActive ? "active" : "paused",
       },
     });
@@ -107,6 +139,7 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
         url: webhook.url,
         events: webhook.events,
         status: webhook.status,
+        needsSecretRotation: false,
         secret: rawSecret,
         createdAt: webhook.createdAt.toISOString(),
       })
@@ -150,6 +183,7 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
       url: webhook.url,
       events: webhook.events,
       status: webhook.status,
+      needsSecretRotation: needsSecretRotation(webhook),
       createdAt: webhook.createdAt.toISOString(),
       updatedAt: webhook.updatedAt.toISOString(),
       deliveries: webhook.deliveries,
@@ -195,16 +229,20 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
         encryptionPassword = requireEncryptionPassword();
       } catch {
         return reply.status(500).send(
-          errorResponse(
-            "CONFIGURATION_ERROR",
-            "Webhook secret encryption is not configured. Set MANDARA_ENCRYPTION_PASSWORD."
-          )
+          webhookEncryptionConfigError()
         );
       }
       const encrypted = encrypt(secret, encryptionPassword);
+      const metadata = getWebhookMetadata(webhook.metadata);
       updateData.secret = encrypted.value;
       updateData.iv = encrypted.iv;
       updateData.tag = encrypted.tag;
+      updateData.metadata = {
+        ...metadata,
+        needsSecretRotation: false,
+        rotatedAt: new Date().toISOString(),
+        encryptionVersion: "aes-256-gcm-v1",
+      } satisfies Prisma.InputJsonValue;
     }
 
     const updated = await prisma.webhook.update({
@@ -228,7 +266,71 @@ export default async function webhookRoutes(fastify: FastifyInstance) {
       url: updated.url,
       events: updated.events,
       status: updated.status,
+      needsSecretRotation: needsSecretRotation(updated),
       secret: newSecret,
+      updatedAt: updated.updatedAt.toISOString(),
+    });
+  });
+
+  fastify.post("/api/webhooks/:id/rotate-secret", async (request, reply) => {
+    const user = request.devUser;
+    if (!user) {
+      return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
+    }
+
+    const { id } = request.params as { id: string };
+
+    const webhook = await prisma.webhook.findUnique({ where: { id } });
+    if (!webhook) {
+      return reply.status(404).send(errorResponse("NOT_FOUND", "Webhook not found"));
+    }
+
+    const { organizationId } = await resolveOrganizationContext(request, webhook.organizationId);
+
+    let encryptionPassword: string;
+    try {
+      encryptionPassword = requireEncryptionPassword();
+    } catch {
+      return reply.status(500).send(webhookEncryptionConfigError());
+    }
+
+    const rawSecret = generateWebhookSecret();
+    const encrypted = encrypt(rawSecret, encryptionPassword);
+    const metadata = getWebhookMetadata(webhook.metadata);
+
+    const updated = await prisma.webhook.update({
+      where: { id },
+      data: {
+        secret: encrypted.value,
+        iv: encrypted.iv,
+        tag: encrypted.tag,
+        metadata: {
+          ...metadata,
+          needsSecretRotation: false,
+          rotatedAt: new Date().toISOString(),
+          encryptionVersion: "aes-256-gcm-v1",
+        } satisfies Prisma.InputJsonValue,
+      },
+    });
+
+    await recordAuditEvent({
+      organizationId,
+      actorType: "user",
+      actorId: user.id,
+      eventType: "webhook_updated",
+      resourceType: "webhook",
+      resourceId: id,
+      summary: `Rotated webhook secret for ${updated.url}`,
+      metadata: { url: updated.url, rotation: true },
+    });
+
+    return success({
+      id: updated.id,
+      url: updated.url,
+      events: updated.events,
+      status: updated.status,
+      needsSecretRotation: false,
+      secret: rawSecret,
       updatedAt: updated.updatedAt.toISOString(),
     });
   });

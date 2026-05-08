@@ -6,7 +6,7 @@
 
 import { prisma } from "@mandara/db";
 import { signWebhookPayload, decrypt } from "@mandara/core";
-import { requireEncryptionPassword } from "../config.js";
+import { isDev, requireEncryptionPassword } from "../config.js";
 import { logger } from "../lib/logger.js";
 import { recordAuditEvent } from "../lib/audit.js";
 
@@ -30,8 +30,10 @@ const BLOCKED_HOSTS = new Set([
 function isUrlAllowed(urlString: string): boolean {
   try {
     const url = new URL(urlString);
-    if (url.protocol !== "https:") return false;
     const hostname = url.hostname.toLowerCase();
+    if (url.protocol !== "https:") {
+      return isDev && url.protocol === "http:" && BLOCKED_HOSTS.has(hostname);
+    }
     if (BLOCKED_HOSTS.has(hostname)) return false;
     if (hostname.endsWith(".local")) return false;
     if (hostname.endsWith(".internal")) return false;
@@ -89,13 +91,22 @@ export async function processWebhookDeliveryJob(data: WebhookDeliveryJobData): P
   }
 
   // Decrypt webhook secret before signing
+  if (!delivery.webhook.iv || !delivery.webhook.tag) {
+    logger.warn("Webhook secret rotation required before delivery", { webhookId });
+    await prisma.webhookDelivery.update({
+      where: { id: deliveryId },
+      data: { status: "failed", error: "webhook_secret_rotation_required" },
+    });
+    return;
+  }
+
   let webhookSecret: string;
   try {
     webhookSecret = decrypt(
       {
         value: delivery.webhook.secret,
-        iv: (delivery.webhook as unknown as Record<string, string>).iv,
-        tag: (delivery.webhook as unknown as Record<string, string>).tag,
+        iv: delivery.webhook.iv,
+        tag: delivery.webhook.tag,
       },
       requireEncryptionPassword()
     );

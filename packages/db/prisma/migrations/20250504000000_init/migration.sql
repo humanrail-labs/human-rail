@@ -224,10 +224,11 @@ CREATE TABLE "webhooks" (
     "organizationId" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "secret" TEXT NOT NULL,
-    "iv" TEXT NOT NULL,
-    "tag" TEXT NOT NULL,
+    "iv" TEXT,
+    "tag" TEXT,
     "events" TEXT[],
     "status" "WebhookStatus" NOT NULL DEFAULT 'active',
+    "metadata" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -442,4 +443,3 @@ ALTER TABLE "webhook_deliveries" ADD CONSTRAINT "webhook_deliveries_webhookId_fk
 
 -- AddForeignKey
 ALTER TABLE "integration_secrets" ADD CONSTRAINT "integration_secrets_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-

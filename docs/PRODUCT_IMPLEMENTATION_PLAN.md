@@ -525,5 +525,6 @@ Near-term acceptance criteria:
 - SDK snippets use `new MandaraClient({ baseUrl, apiKey })`, `destinationChainId`, `previewSignatureRequest`, `requestSignature`, and `waitForSignature`.
 - API preserves MandaraError codes, uses Prisma `User.id` for membership FKs, and rejects cross-org signing wallet imports.
 - Webhook encryption is documented through `MANDARA_ENCRYPTION_PASSWORD`.
+- Webhook encryption migration is non-destructive: `iv` and `tag` are nullable for legacy rows, `npm run product:webhooks:backfill` encrypts local legacy secrets, and `POST /api/webhooks/:id/rotate-secret` returns a replacement secret once.
 
 Mandara remains devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.
