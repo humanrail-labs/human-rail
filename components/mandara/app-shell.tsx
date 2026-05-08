@@ -12,6 +12,10 @@ import {
   Radio,
   Menu,
   X,
+  Home,
+  Wallet,
+  ShieldCheck,
+  Webhook,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -21,8 +25,11 @@ const navItems = [
   { label: "Overview", href: "/mandara/app", icon: LayoutDashboard },
   { label: "Onboarding", href: "/mandara/app/onboarding", icon: Compass },
   { label: "Agents", href: "/mandara/app/agents", icon: Bot },
-  { label: "Requests", href: "/mandara/app/requests", icon: FileKey },
+  { label: "Signing Wallets", href: "/mandara/app/wallets", icon: Wallet },
+  { label: "Mandates", href: "/mandara/app/mandates", icon: ShieldCheck },
+  { label: "Signature Requests", href: "/mandara/app/requests", icon: FileKey },
   { label: "Activity", href: "/mandara/app/activity", icon: Activity },
+  { label: "Webhooks", href: "/mandara/app/webhooks", icon: Webhook },
 ];
 
 export default function MandaraAppShell({
@@ -53,6 +60,13 @@ export default function MandaraAppShell({
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">
+          <button
+            onClick={() => router.push("/mandara")}
+            className="mb-3 flex w-full items-center gap-2.5 rounded-lg border border-white/[0.06] px-3 py-2 text-sm text-neutral-300 transition-colors hover:bg-white/[0.04] hover:text-white"
+          >
+            <Home className="h-4 w-4" />
+            Mandara Home
+          </button>
           {navItems.map((item) => {
             const active = pathname === item.href;
             return (
@@ -117,6 +131,16 @@ export default function MandaraAppShell({
         {mobileOpen && (
           <div className="border-b border-white/[0.06] bg-neutral-900/90 p-3 md:hidden">
             <nav className="space-y-1">
+              <button
+                onClick={() => {
+                  router.push("/mandara");
+                  setMobileOpen(false);
+                }}
+                className="mb-2 flex w-full items-center gap-2.5 rounded-lg border border-white/[0.06] px-3 py-2 text-sm text-neutral-300 hover:bg-white/[0.04]"
+              >
+                <Home className="h-4 w-4" />
+                Mandara Home
+              </button>
               {navItems.map((item) => {
                 const active = pathname === item.href;
                 return (
@@ -157,6 +181,12 @@ export default function MandaraAppShell({
             <h1 className="text-sm font-semibold text-white">
               {navItems.find((n) => n.href === pathname)?.label ?? "Mandara"}
             </h1>
+            <button
+              onClick={() => router.push("/mandara")}
+              className="rounded border border-white/[0.06] px-2 py-1 text-xs text-neutral-300 hover:bg-white/[0.04] hover:text-white"
+            >
+              Mandara Home
+            </button>
             <span className="rounded border border-amber-500/30 px-1.5 py-0.5 text-xs text-amber-300">
               Devnet beta
             </span>

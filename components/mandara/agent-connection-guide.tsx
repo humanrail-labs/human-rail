@@ -15,27 +15,29 @@ export MANDARA_AGENT_API_KEY="YOUR_AGENT_API_KEY"`;
   const sdkSnippet = `import { MandaraClient } from "@mandara/sdk";
 
 const client = new MandaraClient({
-  apiUrl: process.env.MANDARA_API_URL,
-  apiKey: process.env.MANDARA_AGENT_API_KEY,
+  baseUrl: process.env.MANDARA_API_URL,
+  apiKey: process.env.MANDARA_AGENT_API_KEY!,
 });
 
 // Preview before sending
-const preview = await client.previewSignature({
+const preview = await client.previewSignatureRequest({
   asset: "USDC:BASE_SEPOLIA",
   recipient: "0x1111111111111111111111111111111111111111",
   amount: "1000000",
-  chainId: 84532,
+  destinationChainId: 84532,
+  message: "Payment for invoice #1234",
 });
 
-if (preview.allowed) {
+if (preview.policyDecision.allowed) {
   const result = await client.requestSignature({
     asset: "USDC:BASE_SEPOLIA",
     recipient: "0x1111111111111111111111111111111111111111",
     amount: "1000000",
-    chainId: 84532,
+    destinationChainId: 84532,
     message: "Payment for invoice #1234",
   });
-  console.log("Request ID:", result.signingRequest.id);
+  const signed = await client.waitForSignature(result.signingRequest.id);
+  console.log("Signature status:", signed.status);
 }`;
 
   const hermesSnippet = `// Hermes / OpenClaw style tool description
@@ -46,12 +48,12 @@ if (preview.allowed) {
     asset: "Asset identifier, e.g. USDC:BASE_SEPOLIA",
     recipient: "Recipient address",
     amount: "Amount in smallest unit",
-    chainId: "Target chain ID",
+    destinationChainId: "Target chain ID",
     message: "Human-readable purpose",
   },
-  handler: async ({ asset, recipient, amount, chainId, message }) => {
+  handler: async ({ asset, recipient, amount, destinationChainId, message }) => {
     const result = await mandaraClient.requestSignature({
-      asset, recipient, amount, chainId, message,
+      asset, recipient, amount, destinationChainId, message,
     });
     return result.signingRequest.status === "signed"
       ? "Signature completed"

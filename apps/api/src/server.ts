@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import { env } from "./config.js";
 import { errorResponse } from "./lib/response.js";
+import { MandaraError } from "./lib/errors.js";
 
 import prismaPlugin from "./plugins/prisma.js";
 import authPlugin from "./plugins/auth.js";
@@ -76,6 +77,12 @@ export async function buildServer() {
     if (error.validation) {
       return reply.status(400).send(
         errorResponse("VALIDATION_ERROR", error.message)
+      );
+    }
+
+    if (err instanceof MandaraError) {
+      return reply.status(err.statusCode).send(
+        errorResponse(err.code, err.message, err.details)
       );
     }
 

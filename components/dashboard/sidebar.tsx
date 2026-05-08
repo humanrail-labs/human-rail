@@ -3,7 +3,6 @@
 import { FC, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useCluster } from "@/lib/solana/cluster-context";
 import { Cluster } from "@/lib/solana/providers";
 import { cn } from "@/lib/utils";
@@ -90,7 +89,7 @@ export const Sidebar: FC = () => {
         )}
 
         {/* Mandara Console link */}
-        <div className="px-2 py-2">
+        <div className="space-y-2 px-2 py-2">
           <Link
             href="/mandara/app"
             className={cn(
@@ -100,6 +99,16 @@ export const Sidebar: FC = () => {
           >
             <Globe className="h-[18px] w-[18px] shrink-0" />
             {!collapsed && <span>Mandara Console</span>}
+          </Link>
+          <Link
+            href="/advanced"
+            className={cn(
+              "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              "text-amber-300 hover:bg-amber-500/10"
+            )}
+          >
+            <FlaskConical className="h-[18px] w-[18px] shrink-0" />
+            {!collapsed && <span>Advanced Hub</span>}
           </Link>
         </div>
 

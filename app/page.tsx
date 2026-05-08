@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import LandingPageClient from "./page-client";
+import MandaraLandingPage from "@/components/mandara/landing-page";
 
 export const metadata: Metadata = {
-  title: { absolute: "Mandara — Policy-Governed AI Agent Wallets" },
-  description: "Deploy, monitor, and control your AI agents on Solana. Set spending limits, define capabilities, and maintain full oversight — all on-chain.",
+  title: { absolute: "Mandara by HumanRail — Policy-Governed AI Agent Wallets" },
+  description:
+    "Give AI agents signing power without giving them unlimited wallet control. Mandara is a devnet beta control plane powered by HumanRail guardrails and Ika dWallet signing.",
 };
 
 export default function LandingPage() {
-  return <LandingPageClient />;
+  return <MandaraLandingPage />;
 }

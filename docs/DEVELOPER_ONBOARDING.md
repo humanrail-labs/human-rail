@@ -349,3 +349,38 @@ curl -s "http://localhost:4000/api/audit-events/export?format=csv&from=2026-05-0
 ---
 
 *Back to [`docs/README.md`](README.md)*
+## Mandara Product Onboarding
+
+Use `/mandara/app/onboarding` for the product path. It creates or selects an organization, creates an agent, imports or selects a signing wallet, creates a mandate, generates a connection key, and sends a test signature request. This flow does not require a browser wallet.
+
+Use `/advanced` for reviewer/developer access to the HumanRail Protocol proof. The advanced pages may require a Solana wallet and may expose PDA, CPI, MessageApproval, program ID, and Ika devnet details.
+
+Start the API before using the frontend:
+
+```bash
+npm run product:docker:up
+npm run product:db:push
+npm run product:import-devnet-artifacts
+npm run product:api:dev
+```
+
+Real agents connect with a Mandara connection key:
+
+```ts
+import { MandaraClient } from "@mandara/sdk";
+
+const client = new MandaraClient({
+  baseUrl: process.env.MANDARA_API_URL,
+  apiKey: process.env.MANDARA_AGENT_API_KEY!,
+});
+
+await client.requestSignature({
+  destinationChainId: 84532,
+  asset: "USDC:BASE_SEPOLIA",
+  recipient: "0x1111111111111111111111111111111111111111",
+  amount: "1000000",
+  message: "Payment for invoice #1234",
+});
+```
+
+Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

@@ -60,9 +60,8 @@ async function run() {
   }
 
   // ── Devnet demo ──
-  let demo;
   try {
-    demo = await api("/api/product/devnet-demo");
+    await api("/api/product/devnet-demo");
     ok("GET /api/product/devnet-demo");
   } catch (err) {
     fail("GET /api/product/devnet-demo", err);
@@ -75,6 +74,25 @@ async function run() {
     ok("GET /api/orgs");
   } catch (err) {
     fail("GET /api/orgs", err);
+  }
+
+  let orgId = orgs?.[0]?.id;
+  if (!orgId) {
+    try {
+      const org = await api("/api/orgs", {
+        method: "POST",
+        body: JSON.stringify({
+          name: `Frontend Smoke Org ${Date.now()}`,
+          slug: `frontend-smoke-${Date.now()}`,
+        }),
+      });
+      orgId = org.id;
+      ok("POST /api/orgs");
+    } catch (err) {
+      fail("POST /api/orgs", err);
+    }
+  } else {
+    ok("POST /api/orgs (skipped — existing org)");
   }
 
   // ── Agents ──
@@ -91,7 +109,7 @@ async function run() {
     try {
       testAgent = await api("/api/agents", {
         method: "POST",
-        body: JSON.stringify({ name: `Smoke Agent ${Date.now()}` }),
+        body: JSON.stringify({ organizationId: orgId, name: `Smoke Agent ${Date.now()}` }),
       });
       ok("POST /api/agents");
     } catch (err) {
@@ -117,8 +135,10 @@ async function run() {
         method: "POST",
         body: JSON.stringify({
           dwalletPda: "A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp",
+          organizationId: orgId,
           curve: "Secp256k1",
           name: "Smoke Wallet",
+          signingPublicKey: "02e2d5f53b1abc0451dfcbfc5a32421fa6cdfb7c6cbfbf7f84a3e6bb177cb0aa5d",
         }),
       });
       ok("POST /api/wallets/import");
@@ -146,6 +166,7 @@ async function run() {
         body: JSON.stringify({
           agentId: testAgent.id,
           ikaDwalletId: testWallet.id,
+          organizationId: orgId,
           chainId: 84532,
           asset: "USDC:BASE_SEPOLIA",
           recipient: "0x1111111111111111111111111111111111111111",
@@ -189,14 +210,14 @@ async function run() {
   }
 
   // ── Signing Requests ──
-  let previewResult;
   if (testAgent && testPolicy) {
     try {
-      previewResult = await api("/api/signing-requests/preview", {
+      await api("/api/signing-requests/preview", {
         method: "POST",
         body: JSON.stringify({
           agentId: testAgent.id,
           policyId: testPolicy.id,
+          organizationId: orgId,
           destinationChainId: 84532,
           asset: "USDC:BASE_SEPOLIA",
           recipient: "0x1111111111111111111111111111111111111111",
@@ -216,6 +237,7 @@ async function run() {
         body: JSON.stringify({
           agentId: testAgent.id,
           policyId: testPolicy.id,
+          organizationId: orgId,
           destinationChainId: 84532,
           asset: "USDC:BASE_SEPOLIA",
           recipient: "0x1111111111111111111111111111111111111111",

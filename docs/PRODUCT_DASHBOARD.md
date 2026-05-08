@@ -137,3 +137,19 @@ Select a signing request and click **Poll status** to auto-refresh execution det
 ---
 
 *Back to [`PRODUCT_IMPLEMENTATION_PLAN.md`](PRODUCT_IMPLEMENTATION_PLAN.md)*
+## Current Mandara Console Boundary
+
+The Mandara Console is the product UI at `/mandara/app`. It does not require a connected browser wallet. Users manage organizations, agents, signing wallets, mandates, signature requests, activity, and webhooks through the Mandara API.
+
+Advanced protocol and grant proof views are intentionally isolated behind `/advanced` and the `/vault/*` protocol routes. Those pages may require a Solana wallet and may show HumanRail Protocol, PDA, CPI, MessageApproval, and Ika internals. Normal product navigation should not send users directly into wallet-gated protocol pages.
+
+Local dashboard use requires the product API to be running:
+
+```bash
+npm run product:docker:up
+npm run product:db:push
+npm run product:import-devnet-artifacts
+npm run product:api:dev
+```
+
+Mandara is devnet beta only. Ika is pre-alpha with a mock signer. Do not describe the system as production custody.

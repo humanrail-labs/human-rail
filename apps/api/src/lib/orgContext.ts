@@ -43,7 +43,7 @@ export async function resolveOrganizationContext(
 
   // Look up the dev user in the DB (created during import or org creation)
   const dbUser = await prisma.user.findUnique({
-    where: { externalId: user.id },
+    where: { externalId: user.externalId ?? user.id },
     include: {
       memberships: {
         include: { organization: { select: { id: true, name: true } } },

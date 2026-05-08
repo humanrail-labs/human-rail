@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { FreezeBanner } from "@/components/vault/freeze-banner";
@@ -26,14 +27,20 @@ function WalletGate({ children }: { children: React.ReactNode }) {
           </div>
           <h2 className="mb-2 text-2xl font-bold text-white">Connect Your Wallet</h2>
           <p className="mb-8 text-sm text-neutral-500">
-            Connect a Solana wallet to access Mandara — deploy agents, set capabilities, and monitor activity on devnet.
+            Connect a Solana wallet to access the Advanced HumanRail Protocol Proof.
+            Mandara product onboarding does not require a wallet.
           </p>
-          <Button
-            onClick={() => setVisible(true)}
-            className="gap-2 bg-emerald-600 px-6 hover:bg-emerald-700"
-          >
-            <Wallet className="h-4 w-4" /> Connect Wallet
-          </Button>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button
+              onClick={() => setVisible(true)}
+              className="gap-2 bg-emerald-600 px-6 hover:bg-emerald-700"
+            >
+              <Wallet className="h-4 w-4" /> Connect Wallet
+            </Button>
+            <Link href="/mandara/app">
+              <Button variant="outline">Open Mandara Console</Button>
+            </Link>
+          </div>
         </motion.div>
       </div>
     );

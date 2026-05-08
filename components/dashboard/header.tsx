@@ -7,7 +7,7 @@ import { WalletButton } from "@/components/wallet/wallet-button";
 import { useCluster } from "@/lib/solana/cluster-context";
 import { Badge } from "@/components/ui/badge";
 import {
-  Home, Fingerprint, Bot, Shield, Zap, Receipt,
+  Home, Fingerprint, Bot, Shield, Zap, Receipt, Wallet,
 } from "lucide-react";
 
 const ROUTE_META: Record<string, { label: string; icon: FC<{ className?: string }> }> = {
@@ -17,6 +17,7 @@ const ROUTE_META: Record<string, { label: string; icon: FC<{ className?: string 
   "/vault/capabilities": { label: "Capabilities", icon: Shield },
   "/vault/payments": { label: "Payments", icon: Zap },
   "/vault/activity": { label: "Activity Log", icon: Receipt },
+  "/vault/dwallets": { label: "Advanced dWallet Proof", icon: Wallet },
   // Legacy dashboard routes (for redirects)
   "/dashboard": { label: "Overview", icon: Home },
   "/dashboard/identity": { label: "Human Identity", icon: Fingerprint },

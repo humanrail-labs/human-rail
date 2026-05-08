@@ -322,3 +322,28 @@ For hosted beta deployment, see [`PRODUCT_DEPLOYMENT.md`](PRODUCT_DEPLOYMENT.md)
 ---
 
 *Back to [`docs/README.md`](README.md)*
+## Product vs Advanced Proof
+
+Mandara product pages do not require a browser wallet:
+
+- `/mandara`
+- `/mandara/app`
+- `/mandara/app/onboarding`
+- `/mandara/app/wallets`
+- `/mandara/app/mandates`
+- `/mandara/app/webhooks`
+
+Advanced HumanRail Protocol proof pages live behind `/advanced` and `/vault/*`. Those routes may require a Solana wallet and show protocol-level PDA, CPI, MessageApproval, program ID, and Ika devnet lifecycle details.
+
+For local product UI, run:
+
+```bash
+npm run product:docker:up
+npm run product:db:push
+npm run product:import-devnet-artifacts
+npm run product:api:dev
+```
+
+`.env.product` must include `MANDARA_ENCRYPTION_PASSWORD` for webhook secret encryption. Development can use the example value, but staging/production must provide a unique secret at least 16 characters long.
+
+Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

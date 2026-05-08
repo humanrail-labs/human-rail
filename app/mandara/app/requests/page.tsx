@@ -12,8 +12,8 @@ const statusHuman: Record<string, { label: string; color: string }> = {
   queued: { label: "Queued", color: "bg-sky-500/10 text-sky-300 border-sky-500/20" },
   worker_processing: { label: "Processing", color: "bg-purple-500/10 text-purple-300 border-purple-500/20" },
   policy_rejected: { label: "Rejected by mandate", color: "bg-red-500/10 text-red-300 border-red-500/20" },
-  guard_approved: { label: "Guard approved", color: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" },
-  ika_pending: { label: "Signing pending", color: "bg-blue-500/10 text-blue-300 border-blue-500/20" },
+  guard_approved: { label: "Approved by mandate", color: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" },
+  ika_pending: { label: "Waiting for Ika signature", color: "bg-blue-500/10 text-blue-300 border-blue-500/20" },
   signed: { label: "Signed", color: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" },
   failed: { label: "Failed", color: "bg-red-500/10 text-red-300 border-red-500/20" },
 };
@@ -158,7 +158,7 @@ export default function RequestsPage() {
                     <CardContent className="space-y-3">
                       <div className="flex flex-wrap gap-2">
                         <Badge variant="outline" className={human.color}>
-                          {execution.signingRequest.status}
+                          {statusHuman[execution.signingRequest.status]?.label ?? execution.signingRequest.status}
                         </Badge>
                         {!polling ? (
                           <Button variant="outline" size="sm" onClick={handlePoll} className="text-xs">

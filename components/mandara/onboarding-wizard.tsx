@@ -23,10 +23,12 @@ import {
   RefreshCw,
   Eye,
   Play,
+  Building2,
 } from "lucide-react";
 
 type Step =
   | "welcome"
+  | "organization"
   | "agent"
   | "wallet"
   | "mandate"
@@ -36,6 +38,7 @@ type Step =
 
 const STEPS: { id: Step; label: string }[] = [
   { id: "welcome", label: "Welcome" },
+  { id: "organization", label: "Organization" },
   { id: "agent", label: "Agent" },
   { id: "wallet", label: "Wallet" },
   { id: "mandate", label: "Mandate" },
@@ -50,10 +53,13 @@ export default function OnboardingWizard() {
     agents,
     wallets,
     policies,
+    organizations,
+    devnetDemo,
     apiAvailable,
     loading,
     error,
     refresh,
+    createOrganization,
     createAgent,
     importWallet,
     createPolicy,
@@ -65,6 +71,13 @@ export default function OnboardingWizard() {
 
   const [step, setStep] = useState<Step>("welcome");
   const [stepIndex, setStepIndex] = useState(0);
+
+  // Step 1: Organization
+  const [selectedOrg, setSelectedOrg] = useState<typeof organizations[0] | null>(null);
+  const [orgName, setOrgName] = useState("Mandara Devnet Workspace");
+  const [orgSlug, setOrgSlug] = useState(`mandara-${Date.now().toString(36)}`);
+  const [orgLoading, setOrgLoading] = useState(false);
+  const [orgError, setOrgError] = useState<string | null>(null);
 
   // Step 2: Agent
   const [agentName, setAgentName] = useState("");
@@ -78,6 +91,7 @@ export default function OnboardingWizard() {
   const [walletPubkey, setWalletPubkey] = useState("");
   const [walletCurve, setWalletCurve] = useState("Secp256k1");
   const [walletAuthority, setWalletAuthority] = useState("");
+  const [showAdvancedWallet, setShowAdvancedWallet] = useState(false);
   const [createdWallet, setCreatedWallet] = useState<typeof wallets[0] | null>(null);
   const [walletLoading, setWalletLoading] = useState(false);
   const [walletError, setWalletError] = useState<string | null>(null);
@@ -112,6 +126,29 @@ export default function OnboardingWizard() {
     setStep(STEPS[idx].id);
   }, []);
 
+  const activeOrg = selectedOrg ?? organizations[0] ?? null;
+  const demoWallet = devnetDemo?.wallet ?? {
+    name: "Mandara Devnet Demo Signing Wallet",
+    onChainPda: "A6hbi4jAnjYLiHK6hGJ3U6X2H6KGWZY2FypxGrijmqWp",
+    publicKey: "02e2d5f53b1abc0451dfcbfc5a32421fa6cdfb7c6cbfbf7f84a3e6bb177cb0aa5d",
+    curve: "Secp256k1",
+    authority: undefined,
+  };
+
+  const productStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      guard_approved: "Approved by mandate",
+      ika_pending: "Waiting for Ika signature",
+      signed: "Signed",
+      policy_rejected: "Rejected by mandate",
+      failed: "Failed",
+      requested: "Requested",
+      queued: "Queued",
+      worker_processing: "Processing",
+    };
+    return labels[status] ?? status;
+  };
+
   const next = useCallback(() => {
     if (stepIndex < STEPS.length - 1) goTo(stepIndex + 1);
   }, [stepIndex, goTo]);
@@ -120,12 +157,34 @@ export default function OnboardingWizard() {
     if (stepIndex > 0) goTo(stepIndex - 1);
   }, [stepIndex, goTo]);
 
+  const handleCreateOrganization = async () => {
+    if (!orgName.trim() || !orgSlug.trim()) return;
+    setOrgLoading(true);
+    setOrgError(null);
+    try {
+      const org = await createOrganization({
+        name: orgName.trim(),
+        slug: orgSlug.trim().toLowerCase(),
+      });
+      setSelectedOrg(org);
+      next();
+    } catch (err) {
+      setOrgError(err instanceof Error ? err.message : "Failed to create organization");
+    } finally {
+      setOrgLoading(false);
+    }
+  };
+
   const handleCreateAgent = async () => {
     if (!agentName.trim()) return;
     setAgentLoading(true);
     setAgentError(null);
     try {
-      const agent = await createAgent({ name: agentName.trim(), description: agentDesc.trim() || undefined });
+      const agent = await createAgent({
+        organizationId: activeOrg?.id,
+        name: agentName.trim(),
+        description: agentDesc.trim() || undefined,
+      });
       setCreatedAgent(agent);
       next();
     } catch (err) {
@@ -141,6 +200,7 @@ export default function OnboardingWizard() {
     setWalletError(null);
     try {
       const w = await importWallet({
+        organizationId: activeOrg?.id,
         dwalletPda: walletPda.trim(),
         signingPublicKey: walletPubkey.trim() || undefined,
         curve: walletCurve,
@@ -150,6 +210,37 @@ export default function OnboardingWizard() {
       next();
     } catch (err) {
       setWalletError(err instanceof Error ? err.message : "Failed to import wallet");
+    } finally {
+      setWalletLoading(false);
+    }
+  };
+
+  const handleUseDemoWallet = async () => {
+    setWalletLoading(true);
+    setWalletError(null);
+    try {
+      const existing = wallets.find((w) => w.onChainPda === demoWallet.onChainPda);
+      if (existing) {
+        setCreatedWallet(existing);
+        setWalletPda(existing.onChainPda);
+        next();
+        return;
+      }
+
+      const w = await importWallet({
+        organizationId: activeOrg?.id,
+        name: demoWallet.name ?? "Mandara Devnet Demo Signing Wallet",
+        dwalletPda: demoWallet.onChainPda,
+        signingPublicKey: demoWallet.publicKey ?? undefined,
+        curve: demoWallet.curve ?? "Secp256k1",
+        authority: demoWallet.authority ?? undefined,
+        state: "Active",
+        metadata: { source: "mandara-devnet-demo" },
+      });
+      setCreatedWallet(w);
+      next();
+    } catch (err) {
+      setWalletError(err instanceof Error ? err.message : "Failed to use demo signing wallet");
     } finally {
       setWalletLoading(false);
     }
@@ -166,6 +257,7 @@ export default function OnboardingWizard() {
     setMandateError(null);
     try {
       const policy = await createPolicy({
+        organizationId: activeOrg?.id,
         agentId,
         ikaDwalletId: walletId,
         chainId: Number(mandateChainId),
@@ -211,6 +303,7 @@ export default function OnboardingWizard() {
     setTestError(null);
     try {
       const res = await previewSigningRequest({
+        organizationId: activeOrg?.id,
         agentId,
         policyId,
         destinationChainId: Number(mandateChainId),
@@ -238,6 +331,7 @@ export default function OnboardingWizard() {
     setTestError(null);
     try {
       const res = await createSigningRequest({
+        organizationId: activeOrg?.id,
         agentId,
         policyId,
         destinationChainId: Number(mandateChainId),
@@ -355,8 +449,9 @@ export default function OnboardingWizard() {
             <div className="space-y-2 text-sm text-neutral-400">
               <p>You will:</p>
               <ol className="list-decimal space-y-1 pl-5">
+                <li>Create or select an organization</li>
                 <li>Create an agent identity</li>
-                <li>Import a signing wallet</li>
+                <li>Use a demo signing wallet or import your own</li>
                 <li>Set a mandate (spending policy)</li>
                 <li>Create a connection key for your real AI agent</li>
                 <li>Send a test signature request</li>
@@ -370,6 +465,93 @@ export default function OnboardingWizard() {
               Start
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step: Organization */}
+      {step === "organization" && (
+        <Card className="border-white/[0.06] bg-white/[0.03]">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <Building2 className="h-5 w-5 text-sky-400" />
+              Create or Select Organization
+            </CardTitle>
+            <CardDescription className="text-neutral-500">
+              Your organization owns agents, signing wallets, mandates, requests, and webhooks.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {organizations.length > 0 && (
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+                <p className="text-xs text-neutral-500">Available organizations:</p>
+                <div className="mt-2 space-y-1">
+                  {organizations.map((org) => {
+                    const selected = activeOrg?.id === org.id;
+                    return (
+                      <button
+                        key={org.id}
+                        onClick={() => setSelectedOrg(org)}
+                        className={`block w-full rounded px-2 py-1.5 text-left text-xs ${
+                          selected
+                            ? "bg-sky-500/10 text-sky-300"
+                            : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800"
+                        }`}
+                      >
+                        {org.name} <span className="text-neutral-500">/{org.slug}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {activeOrg && (
+                  <Button variant="ghost" onClick={next} className="mt-3 text-emerald-400">
+                    Use {activeOrg.name}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-3 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+              <p className="text-xs font-medium text-neutral-300">Create a new organization</p>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-neutral-400">Organization name</Label>
+                <Input
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-neutral-400">Workspace slug</Label>
+                <Input
+                  value={orgSlug}
+                  onChange={(e) => setOrgSlug(e.target.value)}
+                  className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
+                />
+              </div>
+            </div>
+
+            {orgError && (
+              <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+                <p className="text-xs text-red-200/80">{orgError}</p>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={back}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+              <Button
+                onClick={handleCreateOrganization}
+                disabled={orgLoading || !orgName.trim() || !orgSlug.trim()}
+                className="bg-sky-600 hover:bg-sky-700"
+              >
+                {orgLoading ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Create Organization
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -485,49 +667,70 @@ export default function OnboardingWizard() {
                     </button>
                   ))}
                 </div>
-                <p className="mt-1 text-xs text-neutral-500">Click to select, or import a new one below.</p>
+                <p className="mt-1 text-xs text-neutral-500">Click to select, use the demo wallet, or import manually under Advanced.</p>
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <Label className="text-xs text-neutral-400">dWallet PDA</Label>
-              <Input
-                value={walletPda}
-                onChange={(e) => setWalletPda(e.target.value)}
-                placeholder="On-chain PDA address"
-                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-neutral-400">Signing public key (optional)</Label>
-              <Input
-                value={walletPubkey}
-                onChange={(e) => setWalletPubkey(e.target.value)}
-                placeholder="Public key bytes"
-                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-neutral-400">Curve</Label>
-              <select
-                value={walletCurve}
-                onChange={(e) => setWalletCurve(e.target.value)}
-                className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 outline-none"
+            <Button
+              onClick={handleUseDemoWallet}
+              disabled={walletLoading}
+              className="bg-sky-600 hover:bg-sky-700"
+            >
+              {walletLoading ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Use Devnet Demo Signing Wallet
+            </Button>
+
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+              <button
+                onClick={() => setShowAdvancedWallet((value) => !value)}
+                className="text-xs font-medium text-neutral-300 hover:text-white"
               >
-                <option value="Secp256k1">Secp256k1</option>
-                <option value="Secp256r1">Secp256r1</option>
-                <option value="Curve25519">Curve25519</option>
-                <option value="Ristretto">Ristretto</option>
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-neutral-400">Authority (optional)</Label>
-              <Input
-                value={walletAuthority}
-                onChange={(e) => setWalletAuthority(e.target.value)}
-                placeholder="Wallet authority address"
-                className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
-              />
+                {showAdvancedWallet ? "Hide" : "Show"} Advanced manual wallet import
+              </button>
+              {showAdvancedWallet && (
+                <div className="mt-3 space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-neutral-400">dWallet PDA</Label>
+                    <Input
+                      value={walletPda}
+                      onChange={(e) => setWalletPda(e.target.value)}
+                      placeholder="On-chain PDA address"
+                      className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-neutral-400">Signing public key (optional)</Label>
+                    <Input
+                      value={walletPubkey}
+                      onChange={(e) => setWalletPubkey(e.target.value)}
+                      placeholder="Public key bytes"
+                      className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-neutral-400">Curve</Label>
+                    <select
+                      value={walletCurve}
+                      onChange={(e) => setWalletCurve(e.target.value)}
+                      className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-neutral-300 outline-none"
+                    >
+                      <option value="Secp256k1">Secp256k1</option>
+                      <option value="Secp256r1">Secp256r1</option>
+                      <option value="Curve25519">Curve25519</option>
+                      <option value="Ristretto">Ristretto</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-neutral-400">Authority (optional)</Label>
+                    <Input
+                      value={walletAuthority}
+                      onChange={(e) => setWalletAuthority(e.target.value)}
+                      placeholder="Wallet authority address"
+                      className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             {walletError && (
               <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
@@ -540,14 +743,16 @@ export default function OnboardingWizard() {
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
-              <Button
-                onClick={handleImportWallet}
-                disabled={walletLoading || !walletPda.trim()}
-                className="bg-sky-600 hover:bg-sky-700"
-              >
-                {walletLoading ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Import Wallet
-              </Button>
+              {showAdvancedWallet && (
+                <Button
+                  onClick={handleImportWallet}
+                  disabled={walletLoading || !walletPda.trim()}
+                  className="bg-sky-600 hover:bg-sky-700"
+                >
+                  {walletLoading ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Import Wallet
+                </Button>
+              )}
               {createdWallet && (
                 <Button variant="ghost" onClick={next} className="text-emerald-400">
                   Next
@@ -574,10 +779,11 @@ export default function OnboardingWizard() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs text-neutral-400">Chain ID</Label>
+                <Label className="text-xs text-neutral-400">Chain</Label>
                 <Input
                   value={mandateChainId}
                   onChange={(e) => setMandateChainId(e.target.value)}
+                  placeholder="Base Sepolia"
                   className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
@@ -586,12 +792,13 @@ export default function OnboardingWizard() {
                 <Input
                   value={mandateAsset}
                   onChange={(e) => setMandateAsset(e.target.value)}
+                  placeholder="USDC"
                   className="border-white/[0.06] bg-white/[0.02] text-sm text-neutral-300"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-neutral-400">Recipient</Label>
+              <Label className="text-xs text-neutral-400">Recipient wallet address</Label>
               <Input
                 value={mandateRecipient}
                 onChange={(e) => setMandateRecipient(e.target.value)}
@@ -600,7 +807,7 @@ export default function OnboardingWizard() {
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs text-neutral-400">Per-tx limit</Label>
+                <Label className="text-xs text-neutral-400">Per-transaction limit</Label>
                 <Input
                   value={mandatePerTx}
                   onChange={(e) => setMandatePerTx(e.target.value)}
@@ -822,7 +1029,7 @@ export default function OnboardingWizard() {
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-emerald-200/60">Status</span>
-                  <span className="text-emerald-200/80">{createdSr.signingRequest.status}</span>
+                  <span className="text-emerald-200/80">{productStatusLabel(createdSr.signingRequest.status)}</span>
                 </div>
               </div>
             )}
@@ -874,7 +1081,7 @@ export default function OnboardingWizard() {
               {createdSr && (
                 <div className="flex items-center gap-2 text-sm text-emerald-300">
                   <CheckCircle2 className="h-4 w-4" />
-                  Test request: {createdSr.signingRequest.status}
+                  Test request: {productStatusLabel(createdSr.signingRequest.status)}
                 </div>
               )}
             </div>
@@ -908,15 +1115,16 @@ export MANDARA_AGENT_API_KEY="${createdApiKeyData.rawKey}"`)}
 {`import { MandaraClient } from "@mandara/sdk";
 
 const client = new MandaraClient({
-  apiUrl: process.env.MANDARA_API_URL,
-  apiKey: process.env.MANDARA_AGENT_API_KEY,
+  baseUrl: process.env.MANDARA_API_URL,
+  apiKey: process.env.MANDARA_AGENT_API_KEY!,
 });
 
 const result = await client.requestSignature({
   asset: "USDC:BASE_SEPOLIA",
   recipient: "0x1111...1111",
   amount: "1000000",
-  chainId: 84532,
+  destinationChainId: 84532,
+  message: "Payment for invoice #1234",
 });`}
               </pre>
             </div>

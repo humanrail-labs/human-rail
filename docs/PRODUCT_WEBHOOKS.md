@@ -143,3 +143,16 @@ const isValid = verifyWebhookSignature(
 ---
 
 *Back to [`PRODUCT_IMPLEMENTATION_PLAN.md`](PRODUCT_IMPLEMENTATION_PLAN.md)*
+## Webhook Secret Encryption
+
+Webhook secrets are encrypted at rest with `MANDARA_ENCRYPTION_PASSWORD`.
+
+Development may use the value from `.env.product.example`:
+
+```bash
+MANDARA_ENCRYPTION_PASSWORD="change-me-dev-only-32-byte-minimum"
+```
+
+Staging and production must set a unique secret at least 16 characters long. If encryption is not configured, webhook creation returns a clear configuration error instead of storing plaintext or crashing unexpectedly.
+
+Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

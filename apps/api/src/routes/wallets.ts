@@ -3,7 +3,6 @@ import { z } from "zod";
 import { prisma } from "@mandara/db";
 import { Prisma } from "@prisma/client";
 import { ImportIkaDwalletSchema } from "@mandara/core";
-import { IKA_PROGRAM_IDS } from "@mandara/core";
 import { success, errorResponse } from "../lib/response.js";
 import { recordAuditEvent } from "../lib/audit.js";
 import { resolveOrganizationContext } from "../lib/orgContext.js";
@@ -84,27 +83,43 @@ export default async function walletRoutes(fastify: FastifyInstance) {
     if (authorityTransferSignature) metadata.authorityTransferSignature = authorityTransferSignature;
     if (ikaProgramId) metadata.ikaProgramId = ikaProgramId;
 
-    const wallet = await prisma.ikaDwallet.upsert({
+    const existingWallet = await prisma.ikaDwallet.findUnique({
       where: { onChainPda: dwalletPda },
-      update: {
-        name: name ?? undefined,
-        publicKey: signingPublicKey ?? undefined,
-        curve,
-        state: state ?? "Active",
-        authority: authority ?? undefined,
-        metadata: metadata as Prisma.InputJsonValue,
-      },
-      create: {
-        organizationId,
-        name: name ?? "Imported Ika dWallet",
-        onChainPda: dwalletPda,
-        publicKey: signingPublicKey,
-        curve,
-        state: state ?? "Active",
-        authority,
-        metadata: metadata as Prisma.InputJsonValue,
-      },
     });
+
+    if (existingWallet && existingWallet.organizationId !== organizationId) {
+      return reply.status(409).send(
+        errorResponse(
+          "WALLET_ALREADY_IMPORTED_BY_ANOTHER_ORG",
+          "This signing wallet has already been imported by another organization."
+        )
+      );
+    }
+
+    const wallet = existingWallet
+      ? await prisma.ikaDwallet.update({
+        where: { id: existingWallet.id },
+        data: {
+          name: name ?? undefined,
+          publicKey: signingPublicKey ?? undefined,
+          curve,
+          state: state ?? "Active",
+          authority: authority ?? undefined,
+          metadata: metadata as Prisma.InputJsonValue,
+        },
+      })
+      : await prisma.ikaDwallet.create({
+        data: {
+          organizationId,
+          name: name ?? "Imported Ika dWallet",
+          onChainPda: dwalletPda,
+          publicKey: signingPublicKey,
+          curve,
+          state: state ?? "Active",
+          authority,
+          metadata: metadata as Prisma.InputJsonValue,
+        },
+      });
 
     await recordAuditEvent({
       organizationId,

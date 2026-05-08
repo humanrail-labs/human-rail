@@ -83,6 +83,28 @@ async function main() {
   }
   ok(orgId, "Have an organization ID");
 
+  // 5a. Brand-new dev users can create orgs because dev auth resolves a DB User id.
+  const newDevUser = { "x-mandara-dev-user": `smoke-user-${ts}@local.test` };
+  const newUserOrg = await request("/api/orgs", {
+    method: "POST",
+    headers: newDevUser,
+    body: JSON.stringify({ name: `Smoke New User Org ${ts}`, slug: `smoke-new-user-${ts}` }),
+  });
+  ok(newUserOrg.status === 201, "POST /api/orgs works for a brand-new dev user");
+  const newUserOrgs = await request("/api/orgs", { headers: newDevUser });
+  ok(newUserOrgs.status === 200, "GET /api/orgs works for brand-new dev user after org creation");
+  ok(newUserOrgs.body?.data?.some((org) => org.id === newUserOrg.body?.data?.id), "New dev user's org membership is returned");
+
+  // 5b. Org-required errors preserve the MandaraError code.
+  const noOrgUser = { "x-mandara-dev-user": `smoke-no-org-${ts}@local.test` };
+  const noOrgAgent = await request("/api/agents", {
+    method: "POST",
+    headers: noOrgUser,
+    body: JSON.stringify({ name: `No Org Agent ${ts}` }),
+  });
+  ok(noOrgAgent.status === 400, "POST /api/agents without org returns 400");
+  ok(noOrgAgent.body?.error?.code === "ORG_REQUIRED", "ORG_REQUIRED code is preserved");
+
   // 6. Create agent
   const agentRes = await request("/api/agents", {
     method: "POST",
@@ -111,6 +133,31 @@ async function main() {
   });
   ok(walletRes.status === 201, "POST /api/wallets/import imports wallet");
   const walletId = walletRes.body?.data?.id;
+
+  // 7a. The same on-chain PDA cannot be imported into a different organization.
+  const otherDevHeader = { "x-mandara-dev-user": `smoke-wallet-owner-${ts}@local.test` };
+  const otherOrg = await request("/api/orgs", {
+    method: "POST",
+    headers: otherDevHeader,
+    body: JSON.stringify({ name: `Smoke Wallet Conflict Org ${ts}`, slug: `smoke-wallet-conflict-${ts}` }),
+  });
+  ok(otherOrg.status === 201, "POST /api/orgs creates second org for wallet conflict test");
+  const walletConflict = await request("/api/wallets/import", {
+    method: "POST",
+    headers: otherDevHeader,
+    body: JSON.stringify({
+      organizationId: otherOrg.body?.data?.id,
+      name: `Smoke Wallet Conflict ${ts}`,
+      dwalletPda: walletRes.body?.data?.onChainPda,
+      curve: "Secp256k1",
+      signingPublicKey: "02".padEnd(66, "0"),
+    }),
+  });
+  ok(walletConflict.status === 409, "Cross-org wallet import returns 409");
+  ok(
+    walletConflict.body?.error?.code === "WALLET_ALREADY_IMPORTED_BY_ANOTHER_ORG",
+    "Cross-org wallet import preserves WALLET_ALREADY_IMPORTED_BY_ANOTHER_ORG"
+  );
 
   // 8. Create policy
   const policyRes = await request("/api/policies", {

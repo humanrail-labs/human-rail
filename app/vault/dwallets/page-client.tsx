@@ -494,6 +494,12 @@ export default function DwalletGuardPageClient() {
             >
               Start Onboarding
             </button>
+            <button
+              onClick={() => window.location.href = "/advanced"}
+              className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200 hover:bg-amber-500/20"
+            >
+              Advanced Hub
+            </button>
           </div>
         </div>
       </div>

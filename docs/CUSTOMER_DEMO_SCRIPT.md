@@ -207,7 +207,7 @@ curl -s "http://localhost:4000/api/signing-requests/<REQUEST_ID>/execution" \
 ### "What are current limitations?"
 
 > - Dev auth only (no real user auth yet)
-> - Webhook secrets are plaintext in DB
+> - Webhook secrets require `MANDARA_ENCRYPTION_PASSWORD` for encryption at rest
 > - No rate limiting or billing
 > - Ika mock signer, not production MPC
 > - Devnet only, no mainnet

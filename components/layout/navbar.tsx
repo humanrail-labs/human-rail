@@ -3,7 +3,6 @@
 import { FC } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletButton } from "@/components/wallet/wallet-button";
 import { useCluster } from "@/lib/solana/cluster-context";
 import { Button } from "@/components/ui/button";
@@ -31,6 +30,7 @@ const MAIN_NAV_ITEMS = [
   { href: "/mandara", label: "Mandara", icon: Zap },
   { href: "/mandara/app", label: "Console", icon: LayoutDashboard },
   { href: "/mandara/app/onboarding", label: "Onboarding", icon: Compass },
+  { href: "/advanced", label: "Advanced", icon: FlaskConical },
 ];
 
 const ADVANCED_NAV_ITEMS = [
@@ -84,7 +84,7 @@ export const Navbar: FC = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white">
                   <FlaskConical className="mr-1.5 h-4 w-4" />
-                  Advanced
+                  Protocol Proof
                   <ChevronDown className="ml-1 h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>

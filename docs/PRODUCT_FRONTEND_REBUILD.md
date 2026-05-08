@@ -178,3 +178,19 @@ Make Mandara the primary user-facing product experience and move old HumanRail p
 - `docs/DEVELOPER_ONBOARDING.md`
 - `docs/PRODUCT_IMPLEMENTATION_PLAN.md`
 - `docs/README.md`
+## Mandara Product UX Boundary
+
+Mandara product pages (`/mandara`, `/mandara/app`, and `/mandara/app/*`) are normal SaaS control-plane pages and do not require a browser wallet. Users create an organization, agent, signing wallet, mandate, connection key, and test request through the Mandara API.
+
+Advanced HumanRail Protocol proof pages (`/advanced`, `/vault/*`, `/agent/*`, `/human/*`, `/delegation`, `/receipts`, `/rails/*`) may require a Solana wallet and expose protocol terms such as PDA, CPI, MessageApproval, program IDs, and Ika devnet lifecycle. Public/product navigation should send normal users to the Mandara Console first and reviewers to `/advanced`.
+
+Before using product pages locally, start the API:
+
+```bash
+npm run product:docker:up
+npm run product:db:push
+npm run product:import-devnet-artifacts
+npm run product:api:dev
+```
+
+Mandara remains devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

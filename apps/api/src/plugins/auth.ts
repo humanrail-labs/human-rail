@@ -5,6 +5,8 @@ import { env, isDev } from "../config.js";
 
 export interface DevUser {
   email: string;
+  externalId: string;
+  dbUserId: string;
   id: string;
   organizationIds: string[];
   isAdmin: boolean;
@@ -33,11 +35,17 @@ export default fp(async function authPlugin(fastify: FastifyInstance) {
       return;
     }
 
-    const id = `dev_${Buffer.from(email).toString("base64url")}`;
+    const externalId = `dev_${Buffer.from(email).toString("base64url")}`;
 
-    // Resolve memberships so routes can enforce org scoping
-    const dbUser = await prisma.user.findUnique({
-      where: { externalId: id },
+    // Resolve or create the Prisma user so routes can use internal FK ids.
+    const dbUser = await prisma.user.upsert({
+      where: { externalId },
+      update: { email },
+      create: {
+        externalId,
+        email,
+        displayName: email.split("@")[0],
+      },
       include: {
         memberships: {
           select: { organizationId: true, role: true },
@@ -50,7 +58,9 @@ export default fp(async function authPlugin(fastify: FastifyInstance) {
 
     (request as FastifyRequest & { devUser: DevUser }).devUser = {
       email,
-      id,
+      externalId,
+      dbUserId: dbUser.id,
+      id: externalId,
       organizationIds,
       isAdmin,
     };

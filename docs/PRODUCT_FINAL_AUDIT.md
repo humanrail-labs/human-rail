@@ -83,7 +83,7 @@ Frontend (Next.js 16) → Mandara API (Fastify) → Postgres (Prisma)
 | CORS origin configurable | ✅ | `MANDARA_CORS_ORIGIN` |
 | Service wallet mounted as secret volume | ✅ | Documented in deployment guide |
 | **Dev auth only** | ⚠️ | `x-mandara-dev-user` header; must replace before external beta |
-| **Webhook secrets plaintext** | ⚠️ | Must encrypt before production |
+| **Webhook secret encryption configured** | ✅ | `MANDARA_ENCRYPTION_PASSWORD` required outside development |
 | **No rate limiting** | ⚠️ | Required before open beta |
 | **No Sentry / error monitoring** | ⚠️ | Required before open beta |
 
@@ -163,7 +163,7 @@ See [`BETA_LAUNCH_CHECKLIST.md`](BETA_LAUNCH_CHECKLIST.md) for full details.
 | Stage | Recommendation | Rationale |
 |-------|----------------|-----------|
 | **Internal devnet beta** | ✅ **GO** | All infrastructure, docs, and smoke tests pass. Team can dogfood. |
-| **External closed beta** | ⬜ **NO-GO** | Dev auth and plaintext webhook secrets are unacceptable for external users. Fix 4 blockers first. |
+| **External closed beta** | ⬜ **NO-GO** | Dev auth remains unacceptable for external users. Complete auth, rate limits, monitoring, and beta access controls first. |
 | **Open beta** | ⬜ **NO-GO** | Requires all closed-beta blockers + legal terms + billing + support. |
 | **Mainnet** | ⬜ **NO-GO** | Requires Ika mainnet + program audit + compliance review. |
 

@@ -93,8 +93,9 @@ export default function AdvancedPage() {
             <h1 className="text-2xl font-bold text-white">Advanced Technical Proof</h1>
           </div>
           <p className="mt-2 text-sm text-neutral-400">
-            These pages preserve the full HumanRail + Ika devnet grant proof. They require a
-            Solana wallet and access devnet RPC directly.
+            This area is for developers and reviewers. It contains protocol-level
+            HumanRail and Ika devnet proof. Normal Mandara users should use the
+            Mandara Console.
           </p>
         </motion.div>
 
@@ -113,6 +114,11 @@ export default function AdvancedPage() {
         </motion.div>
 
         <div className="mb-6 flex flex-wrap gap-3">
+          <Link href="/mandara">
+            <Button variant="outline">
+              Back to Mandara Home
+            </Button>
+          </Link>
           <Link href="/mandara/app">
             <Button className="bg-sky-600 hover:bg-sky-700">
               Open Mandara Console

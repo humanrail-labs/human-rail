@@ -29,3 +29,15 @@ export const isDev = env.MANDARA_ENV === "development";
 export const isDryRun = env.MANDARA_WORKER_MODE === "dry-run";
 export const isLiveDevnet = env.MANDARA_WORKER_MODE === "live-devnet";
 export const liveExecutionEnabled = env.MANDARA_ENABLE_LIVE_EXECUTION === "true";
+
+export function requireEncryptionPassword(): string {
+  if (env.MANDARA_ENCRYPTION_PASSWORD) {
+    return env.MANDARA_ENCRYPTION_PASSWORD;
+  }
+
+  if (isDev) {
+    return "change-me-dev-only-32-byte-minimum";
+  }
+
+  throw new Error("MANDARA_ENCRYPTION_PASSWORD is required outside development.");
+}

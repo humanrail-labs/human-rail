@@ -64,3 +64,19 @@
 - **Demo:** [`/vault/dwallets`](/vault/dwallets)
 - **Main README:** [`../README.md`](../README.md)
 - **Final Check:** `npm run final:check`
+## Mandara Product Entry
+
+Mandara by HumanRail is the user-facing product. Start at `/mandara` or `/mandara/app` for product onboarding and console work. These pages do not require a browser wallet.
+
+The HumanRail Protocol proof remains available under `/advanced` and protocol routes such as `/vault/*`, `/agent/*`, `/human/*`, `/delegation`, `/receipts`, and `/rails/*`. These routes may require a Solana wallet and expose PDA, CPI, MessageApproval, program ID, and Ika devnet internals.
+
+For local product UI:
+
+```bash
+npm run product:docker:up
+npm run product:db:push
+npm run product:import-devnet-artifacts
+npm run product:api:dev
+```
+
+Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

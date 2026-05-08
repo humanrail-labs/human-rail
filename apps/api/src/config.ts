@@ -29,3 +29,15 @@ export const env = EnvSchema.parse(process.env);
 
 export const isDev = env.MANDARA_ENV === "development";
 export const isProd = env.MANDARA_ENV === "production";
+
+export function requireEncryptionPassword(): string {
+  if (env.MANDARA_ENCRYPTION_PASSWORD) {
+    return env.MANDARA_ENCRYPTION_PASSWORD;
+  }
+
+  if (isDev) {
+    return "change-me-dev-only-32-byte-minimum";
+  }
+
+  throw new Error("MANDARA_ENCRYPTION_PASSWORD is required outside development.");
+}

@@ -1,9 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { z } from "zod";
 import { prisma } from "@mandara/db";
 import { CreateOrganizationSchema } from "@mandara/core";
 import { success, errorResponse } from "../lib/response.js";
-import { Errors } from "../lib/errors.js";
 import { recordAuditEvent } from "../lib/audit.js";
 
 const CreateOrgBody = CreateOrganizationSchema;
@@ -59,7 +57,7 @@ export default async function orgRoutes(fastify: FastifyInstance) {
     // Auto-create membership for the creator
     await prisma.membership.create({
       data: {
-        userId: user.id,
+        userId: user.dbUserId,
         organizationId: org.id,
         role: "admin",
       },

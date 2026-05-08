@@ -41,6 +41,9 @@ export default function MandaraLandingPage() {
               <Radio className="mr-1.5 h-3 w-3" />
               Devnet beta
             </Badge>
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-sky-300">
+              Mandara by HumanRail
+            </p>
             <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
               Give AI agents signing power{" "}
               <span className="text-sky-400">without</span> giving them unlimited
@@ -56,16 +59,24 @@ export default function MandaraLandingPage() {
                 onClick={() => router.push("/mandara/app")}
                 className="bg-sky-600 hover:bg-sky-700"
               >
-                Open Devnet Console
+                Open Mandara Console
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => router.push("/vault/dwallets")}
+                onClick={() => router.push("/mandara/app/onboarding")}
                 className="border-white/10"
               >
-                View Technical Proof
+                Start Onboarding
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => router.push("/advanced")}
+                className="text-neutral-300 hover:bg-white/[0.06] hover:text-white"
+              >
+                Advanced Technical Proof
               </Button>
             </div>
             <div className="mt-6 flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-200/80">
@@ -304,7 +315,7 @@ export default function MandaraLandingPage() {
                 onClick={() => router.push("/mandara/app/onboarding")}
                 className="bg-sky-600 hover:bg-sky-700"
               >
-                Start Devnet Onboarding
+                Start Onboarding
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button
@@ -313,7 +324,15 @@ export default function MandaraLandingPage() {
                 onClick={() => router.push("/mandara/app")}
                 className="border-white/10"
               >
-                Open Console
+                Open Mandara Console
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => router.push("/advanced")}
+                className="text-neutral-300 hover:bg-white/[0.06] hover:text-white"
+              >
+                Advanced Technical Proof
               </Button>
             </div>
             <div className="mt-6 flex items-center justify-center gap-4 text-xs text-neutral-500">

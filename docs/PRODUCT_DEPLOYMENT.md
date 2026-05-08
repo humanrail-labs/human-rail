@@ -320,7 +320,7 @@ cd packages/db && npx prisma migrate deploy
 |------------|--------|------------|
 | **Ika pre-alpha mock signer** | Not real MPC custody | Clear disclaimer in all UI, docs, and API responses |
 | **Devnet only** | No mainnet support | Hardcoded devnet RPC and program IDs |
-| **Webhook secrets plaintext** | Not encrypted at rest | Documented as MVP-only; encrypt before production |
+| **Webhook secret encryption** | Requires `MANDARA_ENCRYPTION_PASSWORD` | Set a unique secret outside development |
 | **Dev auth header** | No real user authentication | Gate dashboard access via platform-level protection |
 | **No billing / rate limits** | Unlimited API usage | Add rate limiting and metering before paid beta |
 | **Service wallet fee funding** | Worker stops if wallet runs out of SOL | Monitor balance; fund manually on devnet faucet |
@@ -344,3 +344,16 @@ Use platform-native rollback to previous deploy.
 ---
 
 *Back to [`PRODUCT_IMPLEMENTATION_PLAN.md`](PRODUCT_IMPLEMENTATION_PLAN.md)*
+## Required Secrets
+
+Set `MANDARA_ENCRYPTION_PASSWORD` for every non-development deployment. It encrypts webhook signing secrets at rest and must be unique per environment.
+
+```bash
+MANDARA_ENCRYPTION_PASSWORD="replace-with-a-unique-secret"
+```
+
+The example development value in `.env.product.example` is not safe for shared environments. Do not commit `.env.product`, service wallets, keypairs, `.local-ika`, `.local-keys`, `.local-worker`, or `target/deploy` keypairs.
+
+Mandara product pages do not require browser wallet access. Advanced HumanRail Protocol proof pages may require a Solana wallet and should be reached through `/advanced`.
+
+Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

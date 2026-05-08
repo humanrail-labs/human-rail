@@ -511,3 +511,19 @@ P0 ──► P1 ──► P2 ──► P3 ──► P4 ──► P5 ──► P6
 ---
 
 *End of document. Back to [`PRODUCT_ARCHITECTURE.md`](PRODUCT_ARCHITECTURE.md)*
+## Product Alignment Update
+
+Mandara by HumanRail is the primary product entry. The normal product flow is `/mandara` -> `/mandara/app` -> onboarding/product pages and does not require a browser wallet.
+
+HumanRail Protocol and the grant proof remain available under `/advanced` and protocol routes such as `/vault/*`, `/agent/*`, `/human/*`, `/delegation`, `/receipts`, and `/rails/*`. These advanced routes may require a Solana wallet and may show technical protocol terms.
+
+Near-term acceptance criteria:
+
+- Root page and public navigation are Mandara-first.
+- Mandara app shell includes routes for onboarding, agents, signing wallets, mandates, signature requests, activity, webhooks, and Advanced Proof.
+- Product pages show clear API-unavailable instructions.
+- SDK snippets use `new MandaraClient({ baseUrl, apiKey })`, `destinationChainId`, `previewSignatureRequest`, `requestSignature`, and `waitForSignature`.
+- API preserves MandaraError codes, uses Prisma `User.id` for membership FKs, and rejects cross-org signing wallet imports.
+- Webhook encryption is documented through `MANDARA_ENCRYPTION_PASSWORD`.
+
+Mandara remains devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

@@ -207,7 +207,8 @@ z.object({
 ```
 
 **Behavior:**
-- Upserts by `dwalletPda` (onChainPda).
+- Reuses an existing `dwalletPda` only inside the same organization.
+- Rejects cross-organization reuse with `WALLET_ALREADY_IMPORTED_BY_ANOTHER_ORG`.
 - No on-chain verification yet (P4).
 - Stores provided values and marks `metadata.source = imported`.
 - Default `ikaProgramId` and `guardCpiAuthority` use known devnet values if not provided.
@@ -726,3 +727,27 @@ A policy passed its expiry date.
 ---
 
 *Next: [`PRODUCT_IMPLEMENTATION_PLAN.md`](PRODUCT_IMPLEMENTATION_PLAN.md)*
+## Current Product Contract Notes
+
+Mandara product clients should use the API-backed console and SDK without requiring a browser wallet. Browser wallets are only part of the Advanced HumanRail Protocol proof routes.
+
+Frontend calls use `NEXT_PUBLIC_MANDARA_API_URL` and default to `http://localhost:4000` in development. The API should be started before opening the console:
+
+```bash
+npm run product:docker:up
+npm run product:db:push
+npm run product:import-devnet-artifacts
+npm run product:api:dev
+```
+
+Agent SDK clients use:
+
+```ts
+new MandaraClient({ baseUrl, apiKey });
+```
+
+The request field is `destinationChainId`, not `chainId`.
+
+Webhook secrets are encrypted at rest with `MANDARA_ENCRYPTION_PASSWORD`. Development may use the example value; staging/production must set a unique secret. MandaraError codes are part of the product contract and should be preserved in API responses.
+
+Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

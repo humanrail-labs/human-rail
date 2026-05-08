@@ -109,7 +109,7 @@ This release is a **devnet beta**.
 - **Authentication:** Dev auth only (`x-mandara-dev-user` header). No real user auth.
 - **Custody:** Ika uses a pre-alpha mock signer. Not production MPC custody.
 - **Network:** Solana devnet only. No mainnet support.
-- **Security:** Webhook secrets are plaintext in the database.
+- **Security:** Webhook secrets are encrypted at rest when `MANDARA_ENCRYPTION_PASSWORD` is configured.
 - **Rate limiting:** Not implemented.
 - **Billing:** Not implemented.
 - **Monitoring:** No Sentry or error monitoring hooked up yet.

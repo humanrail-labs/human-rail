@@ -379,3 +379,19 @@ Open source. Contributions welcome.
 ---
 
 Built with ♥ by the HumanRail Labs team.
+## Mandara by HumanRail
+
+Mandara is the product entry for policy-governed AI agent signing. Use `/mandara` and `/mandara/app` for the product console, onboarding, agents, signing wallets, mandates, signature requests, activity, and webhooks. The product UI does not require a browser wallet.
+
+Advanced HumanRail Protocol and Ika devnet proof pages remain available under `/advanced` and protocol routes such as `/vault/*`, `/agent/*`, `/human/*`, `/delegation`, `/receipts`, and `/rails/*`. These advanced routes may require a Solana wallet and show protocol internals.
+
+For local product UI, start the API first:
+
+```bash
+npm run product:docker:up
+npm run product:db:push
+npm run product:import-devnet-artifacts
+npm run product:api:dev
+```
+
+Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.
