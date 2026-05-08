@@ -51,11 +51,11 @@ export const Sidebar: FC = () => {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "sticky top-0 hidden h-screen flex-col border-r border-white/[0.06] bg-neutral-950 transition-all duration-300 md:flex",
+          "mandara-glass sticky top-0 hidden h-screen flex-col rounded-none border-y-0 border-l-0 transition-all duration-300 md:flex",
           collapsed ? "w-[72px]" : "w-[260px]"
         )}
       >
-        <div className="flex h-16 items-center gap-3 border-b border-white/[0.06] px-4">
+        <div className="flex h-16 items-center gap-3 border-b border-[#B2BDBA]/10 px-4">
           <Image
             src="/humanrail-logo.png"
             alt="HumanRail"
@@ -65,10 +65,10 @@ export const Sidebar: FC = () => {
           />
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-base font-semibold tracking-tight text-white leading-tight">
+              <span className="text-base font-semibold tracking-tight text-[#eef7f5] leading-tight">
                 HumanRail
               </span>
-              <span className="text-xs text-neutral-500 leading-tight">
+              <span className="text-xs text-[#53706A] leading-tight">
                 Protocol Explorer
               </span>
             </div>
@@ -77,12 +77,12 @@ export const Sidebar: FC = () => {
 
         {/* Advanced notice */}
         {!collapsed && (
-          <div className="mx-3 mt-3 rounded-lg border border-amber-500/15 bg-amber-500/5 px-3 py-2.5">
+          <div className="mx-3 mt-3 rounded-xl border border-[#5EBDB0]/15 bg-[#21342F]/40 px-3 py-2.5">
             <div className="flex items-center gap-1.5">
               <FlaskConical className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-xs font-medium text-amber-300">Protocol Explorer</span>
+              <span className="text-xs font-medium text-[#8de7dc]">Protocol Explorer</span>
             </div>
-            <p className="mt-1 text-[11px] text-amber-300/50 leading-snug">
+            <p className="mt-1 text-[11px] text-[#B2BDBA]/55 leading-snug">
               Wallet-required devnet pages. For product UI, use the Mandara Console.
             </p>
           </div>
@@ -94,7 +94,7 @@ export const Sidebar: FC = () => {
             href="/mandara/app"
             className={cn(
               "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              "bg-sky-500/10 text-sky-400 ring-1 ring-sky-500/15 hover:bg-sky-500/15"
+              "border border-[#5EBDB0]/18 bg-[#3E877E]/16 text-[#8de7dc] ring-1 ring-[#5EBDB0]/10 hover:bg-[#3E877E]/24"
             )}
           >
             <Globe className="h-[18px] w-[18px] shrink-0" />
@@ -104,7 +104,7 @@ export const Sidebar: FC = () => {
             href="/advanced"
             className={cn(
               "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              "text-amber-300 hover:bg-amber-500/10"
+              "text-[#B2BDBA] hover:bg-[#2A3D36]/45 hover:text-[#8de7dc]"
             )}
           >
             <FlaskConical className="h-[18px] w-[18px] shrink-0" />
@@ -122,15 +122,15 @@ export const Sidebar: FC = () => {
                 className={cn(
                   "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   active
-                    ? "bg-white/[0.05] text-white"
-                    : "text-neutral-500 hover:bg-white/[0.03] hover:text-neutral-300"
+                    ? "border border-[#5EBDB0]/16 bg-[#3E877E]/14 text-[#eef7f5]"
+                    : "text-[#B2BDBA]/58 hover:bg-[#2A3D36]/40 hover:text-[#B2BDBA]"
                 )}
                 title={collapsed ? item.label : undefined}
               >
                 <item.icon
                   className={cn(
                     "h-[18px] w-[18px] shrink-0 transition-colors",
-                    active ? "text-sky-400" : "text-neutral-600 group-hover:text-neutral-400"
+                    active ? "text-[#5EBDB0]" : "text-[#53706A] group-hover:text-[#B2BDBA]"
                   )}
                 />
                 {!collapsed && <span>{item.label}</span>}
@@ -139,7 +139,7 @@ export const Sidebar: FC = () => {
           })}
         </nav>
 
-        <div className="border-t border-white/[0.06] px-2 py-3">
+        <div className="border-t border-[#B2BDBA]/10 px-2 py-3">
           {!collapsed ? (
             <div className="space-y-1">
               {(Object.keys(CLUSTER_META) as Cluster[]).map((c) => (
@@ -149,8 +149,8 @@ export const Sidebar: FC = () => {
                   className={cn(
                     "flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
                     cluster === c
-                      ? "bg-white/[0.06] text-white"
-                      : "text-neutral-600 hover:text-neutral-400"
+                      ? "bg-[#3E877E]/16 text-[#eef7f5]"
+                      : "text-[#53706A] hover:text-[#B2BDBA]"
                   )}
                 >
                   <span className={cn("h-1.5 w-1.5 rounded-full", CLUSTER_META[c].dot)} />
@@ -165,7 +165,7 @@ export const Sidebar: FC = () => {
                   cluster === "devnet" ? "localnet" : cluster === "localnet" ? "mainnet-beta" : "devnet"
                 )
               }
-              className="mx-auto flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/[0.04]"
+              className="mx-auto flex h-8 w-8 items-center justify-center rounded-md hover:bg-[#2A3D36]/45"
               title={CLUSTER_META[cluster].label}
             >
               <span className={cn("h-2 w-2 rounded-full", CLUSTER_META[cluster].dot)} />
@@ -173,23 +173,23 @@ export const Sidebar: FC = () => {
           )}
         </div>
 
-        <div className="border-t border-white/[0.06] px-2 py-3">
+        <div className="border-t border-[#B2BDBA]/10 px-2 py-3">
           <a href="https://github.com/humanrail-labs/human-rail" target="_blank" rel="noopener noreferrer"
-            className={cn("flex items-center gap-3 rounded-md px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:text-neutral-400", collapsed && "justify-center")}>
+            className={cn("flex items-center gap-3 rounded-md px-3 py-1.5 text-xs font-medium text-[#53706A] transition-colors hover:text-[#B2BDBA]", collapsed && "justify-center")}>
             <Github className="h-4 w-4 shrink-0" />
             {!collapsed && <span>GitHub</span>}
           </a>
           <a href="https://humanrail.org" target="_blank" rel="noopener noreferrer"
-            className={cn("flex items-center gap-3 rounded-md px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:text-neutral-400", collapsed && "justify-center")}>
+            className={cn("flex items-center gap-3 rounded-md px-3 py-1.5 text-xs font-medium text-[#53706A] transition-colors hover:text-[#B2BDBA]", collapsed && "justify-center")}>
             <Globe className="h-4 w-4 shrink-0" />
             {!collapsed && <span>Website</span>}
           </a>
         </div>
 
-        <div className="border-t border-white/[0.06] p-2">
+        <div className="border-t border-[#B2BDBA]/10 p-2">
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="flex h-8 w-full items-center justify-center rounded-md text-neutral-600 transition-colors hover:bg-white/[0.04] hover:text-neutral-400"
+            className="flex h-8 w-full items-center justify-center rounded-md text-[#53706A] transition-colors hover:bg-[#2A3D36]/45 hover:text-[#B2BDBA]"
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
@@ -197,7 +197,7 @@ export const Sidebar: FC = () => {
       </aside>
 
       {/* Mobile Bottom Tab Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-white/[0.06] bg-neutral-950/95 backdrop-blur-sm md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-[#B2BDBA]/10 bg-[#132020]/92 backdrop-blur-2xl md:hidden">
         {NAV_ITEMS.slice(0, 5).map((item) => {
           const active = isActive(item);
           return (
@@ -206,7 +206,7 @@ export const Sidebar: FC = () => {
               href={item.href}
               className={cn(
                 "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors",
-                active ? "text-sky-400" : "text-neutral-500"
+                active ? "text-[#5EBDB0]" : "text-[#53706A]"
               )}
             >
               <item.icon className="h-[18px] w-[18px]" />

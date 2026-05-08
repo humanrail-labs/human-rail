@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { HelpCircle, X, ChevronRight, AlertTriangle, Users, Bot, Shield, Wallet, FileText, Receipt } from "lucide-react";
+import { HelpCircle, X, ChevronRight, AlertTriangle, Building2, Bot, Shield, Wallet, FileKey, Activity, Webhook, FlaskConical, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DOCUMENTATION_SECTIONS = [
@@ -9,102 +9,182 @@ const DOCUMENTATION_SECTIONS = [
     id: "disclaimer",
     icon: AlertTriangle,
     title: "Disclaimer",
-    content: `• Demo-grade software: Built for product demonstration. Features may change quickly.
-• Not audited / no warranties: Treat all on-chain programs as experimental.
-• Devnet only: Use Solana devnet for testing. Tokens have no real value.
-• No financial advice: Nothing here is an offer or promise of performance.
-• Identity verification is modular: "Verified" status depends on attestations from trusted issuers.`,
+    content: `Mandara is a devnet beta product.
+
+• Devnet only: current flows run against Solana devnet and local/product API environments.
+• Ika pre-alpha mock signer: current Ika proof uses pre-alpha infrastructure and a mock signer.
+• Not production custody: do not use Mandara for real assets today.
+• Not mainnet-ready: mainnet depends on Ika readiness, HumanRail audits, production auth, rate limits, monitoring, and hardened secret management.
+• Product demo: features and UI may change quickly while the product is hardened.`,
   },
   {
-    id: "what-is",
+    id: "what-is-mandara",
     icon: Shield,
-    title: "What is HumanRail?",
-    content: `HumanRail is identity + accountability infrastructure on Solana:
+    title: "What is Mandara?",
+    content: `Mandara by HumanRail is a control plane for AI agents that need signing power without unlimited wallet control.
 
-• Human identity as a profile (on-chain account) that collects attestations from issuers
-• Agent registration (AI or automation) linked to a human principal
-• Delegation: scoped capabilities with limits (time bounds, spend limits, allowlists)
-• Application rails: payments, micro-tasks, document signing, receipts/audit trails
+Mandara product layer:
 
-The goal is to answer: "Who is behind this action?" and "Was this agent authorized?"`,
+• Console and onboarding
+• Agent registration
+• Signing Wallet management
+• Mandates / policy setup
+• Signature Request preview, creation, and execution tracking
+• Connection Keys for real agent integrations
+• Webhooks and Activity Log
+• SDK / REST API for AI agent builders
+
+HumanRail provides the guardrail and audit layer. Ika provides dWallet signing infrastructure.`,
   },
   {
-    id: "human-profile",
-    icon: Users,
-    title: "Human Profile",
-    content: `Your on-chain identity anchored to your wallet:
+    id: "workspace",
+    icon: Building2,
+    title: "Workspace",
+    content: `A Mandara workspace is the product container for a team or project.
 
-• One profile per wallet (PDA derived from your pubkey)
-• Collects attestations from issuers (KYC, social proofs, credentials)
-• Required before registering agents or creating delegations
-• Profile data is minimal: display name + verification status
+It owns:
 
-Navigate to /human to create or view your profile.`,
+• Agents
+• Signing Wallets
+• Mandates
+• Signature Requests
+• Webhooks
+• Activity Log entries
+
+Start here: /mandara/app/onboarding`,
   },
   {
     id: "agents",
     icon: Bot,
-    title: "Agent Registry",
-    content: `Register AI agents or automation scripts linked to your human profile:
+    title: "Agents",
+    content: `A Mandara Agent is the product identity for a real AI agent, bot, backend service, or automation.
 
-• Each agent has a unique keypair
-• Agents are always linked to a human principal (you)
-• Agents cannot act without delegated capabilities
-• You can register multiple agents under one profile
+Mandara does not run the AI model. It governs what the external agent is allowed to request.
 
-Navigate to /agent to manage your registered agents.`,
+Agents connect through:
+
+• Connection Keys
+• Mandara REST API
+• Mandara TypeScript SDK
+
+Open: /mandara/app/agents`,
   },
   {
-    id: "delegation",
-    icon: Shield,
-    title: "Delegation & Capabilities",
-    content: `Grant scoped permissions to your agents:
-
-• Spending limits (max amount per transaction or time period)
-• Time bounds (expiration date)
-• Destination allowlists (which addresses can receive funds)
-• Action types (payments, document signing, etc.)
-
-Capabilities are enforced on-chain. Agents cannot exceed their granted permissions.`,
-  },
-  {
-    id: "payments",
+    id: "wallets",
     icon: Wallet,
-    title: "HumanPay",
-    content: `PDA-controlled escrow for agent payments:
+    title: "Signing Wallets",
+    content: `A Signing Wallet is the wallet Mandara uses after a request passes its mandate.
 
-• Agents pay invoices on your behalf within their capability limits
-• Funds are held in escrow until payment is confirmed
-• All transactions are auditable via receipts
-• Spending limits are enforced before execution
+For normal product users:
 
-Navigate to /rails/humanpay to view payment history.`,
+• No browser wallet is required.
+• Use the Devnet Demo Signing Wallet for onboarding.
+• Manual dWallet import is available for advanced reviewers.
+
+Under the hood, Signing Wallets are backed by Ika dWallet infrastructure.
+
+Open: /mandara/app/wallets`,
   },
   {
-    id: "documents",
-    icon: FileText,
-    title: "Document Signing",
-    content: `On-chain document verification and signing:
+    id: "mandates",
+    icon: Shield,
+    title: "Mandates",
+    content: `A Mandate defines what an agent is allowed to request.
 
-• Upload document hashes (not full documents)
-• Sign documents with your wallet or delegated agent
-• Verify signatures on-chain
-• Track document status and signers
+Product terms:
 
-Navigate to /rails/documents to manage documents.`,
+• Chain
+• Asset
+• Recipient wallet address
+• Per-transaction limit
+• Daily limit
+• Total limit
+
+If a request is outside the mandate, Mandara rejects it before signing.
+
+Open: /mandara/app/mandates`,
   },
   {
-    id: "receipts",
-    icon: Receipt,
-    title: "Receipts & Audit",
-    content: `Full transaction audit trail:
+    id: "requests",
+    icon: FileKey,
+    title: "Signature Requests",
+    content: `A Signature Request is an agent asking Mandara for a policy-governed signature.
 
-• Every agent action emits a receipt
-• Receipts include: who, what, when, and authorization proof
-• DataBlink integration for structured data logging
-• Query receipts by agent, human, or time range
+Typical lifecycle:
 
-Navigate to /receipts to view audit logs.`,
+• Preview request
+• Create request
+• Queue request
+• Worker processes request
+• Approved by mandate or rejected by mandate
+• Waiting for Ika signature
+• Signed or failed
+
+Open: /mandara/app/requests`,
+  },
+  {
+    id: "agent-api",
+    icon: Code,
+    title: "Agent API / SDK",
+    content: `Real agents connect to Mandara through a Connection Key.
+
+SDK shape:
+
+const client = new MandaraClient({
+  apiKey,
+  baseUrl,
+});
+
+await client.previewSignatureRequest(...);
+await client.requestSignature(...);
+await client.waitForSignature(...);
+
+Raw keys are shown once and should never be exposed in the browser or recordings.`,
+  },
+  {
+    id: "webhooks-activity",
+    icon: Webhook,
+    title: "Webhooks & Activity",
+    content: `Mandara records important product events and can notify external systems.
+
+Activity Log:
+
+• Organization created
+• Agent created
+• Signing Wallet imported
+• Mandate created
+• Signature Request created, queued, signed, rejected, or failed
+
+Webhooks:
+
+• Deliver request status changes to your backend
+• Secrets are encrypted when configured
+• Rotate secrets if needed
+
+Open: /mandara/app/activity and /mandara/app/webhooks`,
+  },
+  {
+    id: "advanced-proof",
+    icon: FlaskConical,
+    title: "Advanced Technical Proof",
+    content: `Advanced pages preserve the underlying HumanRail Protocol and Ika devnet proof.
+
+These pages are for developers and reviewers, not normal Mandara product onboarding.
+
+Advanced routes include:
+
+• /advanced
+• /vault/dwallets
+• /vault
+• /human
+• /agent
+• /delegation
+• /receipts
+• /rails/humanpay
+• /rails/datablink
+• /rails/documents
+
+Technical terms such as PDA, CPI, MessageApproval, program ID, and IDL belong in this advanced section.`,
   },
 ];
 
@@ -161,7 +241,7 @@ export function HelpButton() {
             {/* Sidebar */}
             <div className="hidden w-64 flex-shrink-0 border-r border-white/[0.06] bg-neutral-950 md:block">
               <div className="flex h-14 items-center border-b border-white/[0.06] px-4">
-                <h2 className="text-lg font-bold text-sky-400">Documentation</h2>
+                <h2 className="text-lg font-bold text-sky-400">Mandara Guide</h2>
               </div>
               <nav className="p-2">
                 {DOCUMENTATION_SECTIONS.map((section) => {
@@ -235,26 +315,26 @@ export function HelpButton() {
                 )}
 
                 {/* Quick Links */}
-                {currentSection?.id === "what-is" && (
+                {currentSection?.id === "what-is-mandara" && (
                   <div className="mt-6 grid gap-3 sm:grid-cols-2">
                     <a
-                      href="/human"
+                      href="/mandara/app"
                       className="flex items-center gap-3 rounded-lg border border-white/[0.06] bg-white/[0.03] p-4 text-white transition-colors hover:border-sky-500/30 hover:bg-white/[0.05]"
                     >
-                      <Users className="h-5 w-5 text-emerald-400" />
+                      <Shield className="h-5 w-5 text-emerald-400" />
                       <div>
-                        <div className="font-semibold">Create Profile</div>
-                        <div className="text-sm text-neutral-400">Start with your identity</div>
+                        <div className="font-semibold">Open Console</div>
+                        <div className="text-sm text-neutral-400">Manage Mandara product workflows</div>
                       </div>
                     </a>
                     <a
-                      href="/agent"
+                      href="/mandara/app/onboarding"
                       className="flex items-center gap-3 rounded-lg border border-white/[0.06] bg-white/[0.03] p-4 text-white transition-colors hover:border-sky-500/30 hover:bg-white/[0.05]"
                     >
                       <Bot className="h-5 w-5 text-purple-400" />
                       <div>
-                        <div className="font-semibold">Register Agent</div>
-                        <div className="text-sm text-neutral-400">Link AI to your profile</div>
+                        <div className="font-semibold">Start Onboarding</div>
+                        <div className="text-sm text-neutral-400">Create an agent and mandate</div>
                       </div>
                     </a>
                   </div>
@@ -264,7 +344,7 @@ export function HelpButton() {
               {/* Footer */}
               <div className="flex items-center justify-between border-t border-white/[0.06] px-4 py-3 md:px-6">
                 <div className="text-xs text-neutral-500">
-                  HumanRail Protocol • Devnet Demo
+                  Mandara by HumanRail · Devnet beta · Ika pre-alpha mock signer
                 </div>
                 <a
                   href="https://github.com/humanrail-labs/human-rail"

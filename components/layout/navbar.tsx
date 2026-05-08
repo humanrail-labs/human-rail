@@ -56,7 +56,7 @@ export const Navbar: FC = () => {
   const currentCluster = CLUSTERS.find((c) => c.value === cluster);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/[0.06] bg-neutral-950/80 backdrop-blur-sm">
+    <nav className="sticky top-0 z-50 border-b border-[#B2BDBA]/10 bg-[#132020]/78 shadow-[0_18px_60px_rgba(0,0,0,0.22)] backdrop-blur-2xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2.5">
@@ -67,13 +67,13 @@ export const Navbar: FC = () => {
               height={32}
               className="h-8 w-8 rounded-lg"
             />
-            <span className="text-lg font-semibold text-white">Mandara</span>
+            <span className="text-lg font-semibold text-[#eef7f5]">Mandara</span>
           </Link>
 
           <div className="hidden items-center gap-1 md:flex">
             {MAIN_NAV_ITEMS.map((item) => (
               <Link key={item.href} href={item.href}>
-                <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white">
+                <Button variant="ghost" size="sm" className="text-[#B2BDBA]/75 hover:text-white">
                   <item.icon className="mr-1.5 h-4 w-4" />
                   {item.label}
                 </Button>
@@ -82,16 +82,16 @@ export const Navbar: FC = () => {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white">
+                <Button variant="ghost" size="sm" className="text-[#B2BDBA]/75 hover:text-white">
                   <FlaskConical className="mr-1.5 h-4 w-4" />
                   Protocol Proof
                   <ChevronDown className="ml-1 h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-neutral-900 border-neutral-800">
+              <DropdownMenuContent align="start">
                 {ADVANCED_NAV_ITEMS.map((item) => (
                   <DropdownMenuItem key={item.href} asChild className="cursor-pointer">
-                    <Link href={item.href} className="flex items-center gap-2 text-neutral-300">
+                    <Link href={item.href} className="flex items-center gap-2 text-[#B2BDBA]">
                       <item.icon className="h-4 w-4" />
                       {item.label}
                     </Link>

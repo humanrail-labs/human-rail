@@ -5,22 +5,22 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all duration-200 gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "bg-sky-600 text-white hover:bg-sky-500",
+          "border border-[#91e3d7]/20 bg-[#5EBDB0] text-[#0d1716] shadow-[0_0_24px_rgba(94,189,176,0.18)] hover:bg-[#73d4c7] hover:shadow-[0_0_34px_rgba(94,189,176,0.24)]",
         destructive:
-          "bg-red-600 text-white hover:bg-red-500",
+          "border border-red-300/15 bg-red-500/80 text-white shadow-[0_0_24px_rgba(239,68,68,0.12)] hover:bg-red-400/90",
         outline:
-          "border border-white/10 bg-transparent text-white hover:bg-white/[0.04]",
+          "border border-[#B2BDBA]/15 bg-[#21342F]/35 text-[#eef7f5] backdrop-blur-xl hover:border-[#5EBDB0]/35 hover:bg-[#2A3D36]/55 hover:text-white",
         secondary:
-          "bg-white/[0.06] text-white hover:bg-white/[0.09]",
+          "border border-[#B2BDBA]/10 bg-[#2A3D36]/55 text-[#eef7f5] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:bg-[#3E877E]/30",
         ghost:
-          "text-neutral-300 hover:bg-white/[0.04] hover:text-white",
+          "text-[#B2BDBA] hover:bg-[#2A3D36]/45 hover:text-[#eef7f5]",
         link:
-          "text-sky-400 underline-offset-4 hover:underline hover:text-sky-300",
+          "text-[#5EBDB0] underline-offset-4 hover:underline hover:text-[#8de7dc]",
       },
       size: {
         default: "h-10 px-4 py-2",

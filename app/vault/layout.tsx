@@ -16,17 +16,17 @@ function WalletGate({ children }: { children: React.ReactNode }) {
 
   if (!connected) {
     return (
-      <div className="flex flex-1 items-center justify-center px-6 py-8">
+      <div className="mandara-page flex flex-1 items-center justify-center px-6 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex max-w-sm flex-col items-center text-center"
+          className="mandara-glass flex max-w-sm flex-col items-center rounded-3xl p-8 text-center"
         >
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
-            <Wallet className="h-8 w-8 text-emerald-500" />
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl border border-[#5EBDB0]/18 bg-[#3E877E]/16 shadow-[0_0_40px_rgba(94,189,176,0.16)]">
+            <Wallet className="h-8 w-8 text-[#5EBDB0]" />
           </div>
-          <h2 className="mb-2 text-2xl font-bold text-white">Connect Your Wallet</h2>
-          <p className="mb-8 text-sm text-neutral-500">
+          <h2 className="mb-2 text-2xl font-bold text-[#eef7f5]">Connect Your Wallet</h2>
+          <p className="mb-8 text-sm text-[#B2BDBA]/70">
             Connect a Solana wallet to access the Advanced HumanRail Protocol Proof.
             Mandara product onboarding does not require a wallet.
           </p>
@@ -51,7 +51,7 @@ function WalletGate({ children }: { children: React.ReactNode }) {
 
 export default function VaultLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-neutral-950 text-white">
+    <div className="mandara-page flex h-screen overflow-hidden text-[#eef7f5]">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader />
