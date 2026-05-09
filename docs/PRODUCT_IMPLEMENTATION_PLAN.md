@@ -32,6 +32,7 @@
 | P10 | Product launch package | Launch docs, landing copy, demo script, pricing, audit | 2 days |
 | P11A | Frontend nav cleanup | Make Mandara primary entry point, move old protocol pages to Advanced, fix broken CTAs | 1 day |
 | P11B | Frontend rebuild | Product landing page, console dashboard, onboarding wizard for non-technical users | 2 days |
+| P12 | Agent Chat MVP | Natural-language Signature Request proposals with approve/reject safety model | 2–3 days |
 | P9 | Devnet beta deploy | Hosted deployment on devnet with CI/CD | 2–3 days |
 | P10 | Launch docs | Product docs, developer guide, API reference | 2 days |
 
@@ -526,5 +527,21 @@ Near-term acceptance criteria:
 - API preserves MandaraError codes, uses Prisma `User.id` for membership FKs, and rejects cross-org signing wallet imports.
 - Webhook encryption is documented through `MANDARA_ENCRYPTION_PASSWORD`.
 - Webhook encryption migration is non-destructive: `iv` and `tag` are nullable for legacy rows, `npm run product:webhooks:backfill` encrypts local legacy secrets, and `POST /api/webhooks/:id/rotate-secret` returns a replacement secret once.
+
+## P12 — Agent Chat MVP
+
+Agent Chat adds `/mandara/app/agent-chat`, backed by `/api/agent-chat/*`, for natural-language Signature Request preparation. The assistant can extract intent, produce structured proposal fields, and preview the request against the Mandate.
+
+Acceptance criteria:
+
+- User approval is required before creating or enqueueing requests.
+- The LLM never signs and never receives secrets.
+- Policy preview is mandatory before a proposal can be approved.
+- Browser code never receives provider API keys and does not call Solana or Ika directly.
+- Scope guard rejects unrelated general-purpose LLM prompts before provider calls.
+- Subscription-ready usage tracking enforces monthly Agent Chat limits.
+- P13 will add Solana-native subscription activation; no Stripe or wallet charging in P12.
+- Devnet beta and Ika pre-alpha/mock signer limitations remain visible.
+- `npm run product:agent-chat:smoke` covers allowed approval and rejected proposal flows.
 
 Mandara remains devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.

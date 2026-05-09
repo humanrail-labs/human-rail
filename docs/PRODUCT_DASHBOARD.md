@@ -16,6 +16,7 @@
 | `/mandara/app` | Users | Console dashboard with setup progress, overview cards, recent requests, activity log |
 | `/mandara/app/onboarding` | Users | Guided 7-step wizard: agent → wallet → mandate → API key → test request |
 | `/mandara/app/agents` | Users | Agent list and status |
+| `/mandara/app/agent-chat` | Users | Natural-language Agent Chat for Signature Request proposals with approve/reject cards |
 | `/mandara/app/requests` | Users | Signature requests with human-readable status and execution detail |
 | `/mandara/app/activity` | Users | Audit activity log in plain English |
 | `/vault/dwallets` | Technical | **Preserved** — Advanced Technical Proof view with PDA derivations, Ika program details, on-chain transactions |
@@ -101,6 +102,14 @@ The **Product Dashboard** tab is the default.
 
 > **Note:** Live on-chain signing requires the worker to be running with `MANDARA_WORKER_MODE=live-devnet` and `MANDARA_ENABLE_LIVE_EXECUTION=true`.
 
+## Agent Chat Flow
+
+Agent Chat lets users ask an Agent to prepare a Signature Request in natural language. The assistant extracts structured fields, previews the request against the Mandate, and presents a proposal card.
+
+User approval is required before creating or enqueueing requests. The LLM never signs, never receives secrets, and cannot bypass policy preview. The browser never receives LLM provider keys and does not call Solana or Ika directly.
+
+Agent Chat is Mandara-scoped. Out-of-scope general LLM requests are refused before any provider call. P12 also adds `/api/subscription` for plan limits and monthly usage tracking; Solana-native subscription payments are planned for P13 and are not implemented yet.
+
 ---
 
 ## Polling
@@ -129,6 +138,8 @@ Select a signing request and click **Poll status** to auto-refresh execution det
 | `lib/mandara-api/client.ts` | Typed fetch methods |
 | `lib/mandara-api/types.ts` | TypeScript interfaces |
 | `lib/hooks/use-mandara-product.ts` | React hook for dashboard data |
+| `components/mandara/agent-chat.tsx` | Agent Chat UI |
+| `apps/api/src/routes/agentChat.ts` | Agent Chat API routes |
 | `components/vault/product-dashboard.tsx` | Dashboard UI component |
 | `app/vault/dwallets/page-client.tsx` | Page shell with tabs |
 | `apps/api/src/routes/agents.ts` | Dashboard API key management routes |

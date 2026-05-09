@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMandaraProduct } from "@/lib/hooks/use-mandara-product";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ function truncate(str: string, len = 10) {
 }
 
 export default function RequestsPage() {
+  const router = useRouter();
   const {
     signingRequests,
     loading,
@@ -94,10 +96,15 @@ export default function RequestsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Signature Requests</h2>
-        <Button variant="outline" size="sm" onClick={refresh} className="text-xs">
-          <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => router.push("/mandara/app/agent-chat")} className="text-xs">
+            Create from Agent Chat
+          </Button>
+          <Button variant="outline" size="sm" onClick={refresh} className="text-xs">
+            <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {signingRequests.length === 0 ? (

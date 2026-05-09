@@ -16,6 +16,7 @@ import {
   Wallet,
   ShieldCheck,
   Webhook,
+  MessageSquareText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -25,6 +26,7 @@ const navItems = [
   { label: "Overview", href: "/mandara/app", icon: LayoutDashboard },
   { label: "Onboarding", href: "/mandara/app/onboarding", icon: Compass },
   { label: "Agents", href: "/mandara/app/agents", icon: Bot },
+  { label: "Agent Chat", href: "/mandara/app/agent-chat", icon: MessageSquareText },
   { label: "Signing Wallets", href: "/mandara/app/wallets", icon: Wallet },
   { label: "Mandates", href: "/mandara/app/mandates", icon: ShieldCheck },
   { label: "Signature Requests", href: "/mandara/app/requests", icon: FileKey },

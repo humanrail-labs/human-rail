@@ -1130,6 +1130,15 @@ const result = await client.requestSignature({
             </div>
 
             <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  const agentId = createdAgent?.id ?? agents[0]?.id;
+                  router.push(agentId ? `/mandara/app/agent-chat?agentId=${agentId}` : "/mandara/app/agent-chat");
+                }}
+                className="bg-[#3E877E] hover:bg-[#326d66]"
+              >
+                Talk to this agent
+              </Button>
               <Button variant="outline" onClick={() => router.push("/mandara/app")}>
                 Go to Console
               </Button>

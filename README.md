@@ -381,7 +381,11 @@ Open source. Contributions welcome.
 Built with ♥ by the HumanRail Labs team.
 ## Mandara by HumanRail
 
-Mandara is the product entry for policy-governed AI agent signing. Use `/mandara` and `/mandara/app` for the product console, onboarding, agents, signing wallets, mandates, signature requests, activity, and webhooks. The product UI does not require a browser wallet.
+Mandara is the product entry for policy-governed AI agent signing. Use `/mandara` and `/mandara/app` for the product console, onboarding, agents, Agent Chat, signing wallets, mandates, signature requests, activity, and webhooks. The product UI does not require a browser wallet.
+
+Agent Chat at `/mandara/app/agent-chat` prepares Signature Request proposals from natural language. User approval is required before creating or enqueueing requests. The LLM never signs, never receives secrets, and policy preview is mandatory.
+
+Agent Chat is Mandara-scoped and refuses unrelated general-purpose LLM prompts. P12 tracks usage and plan limits; Solana-native subscription activation is planned for P13. No Stripe or wallet charging is implemented in this phase.
 
 Advanced HumanRail Protocol and Ika devnet proof pages remain available under `/advanced` and protocol routes such as `/vault/*`, `/agent/*`, `/human/*`, `/delegation`, `/receipts`, and `/rails/*`. These advanced routes may require a Solana wallet and show protocol internals.
 

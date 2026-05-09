@@ -23,6 +23,18 @@ const EnvSchema = z.object({
   MANDARA_IKA_GRPC_URL: z.string().default("https://pre-alpha-dev-1.ika.ika-network.net:443"),
   MANDARA_HUMANRAIL_GUARD_PROGRAM_ID: z.string().default("Bzxgvxp9rZt2qeY7UNnvic9jHQdVFMw7mWzXvjuwLnT2"),
   MANDARA_IKA_DWALLET_PROGRAM_ID: z.string().default("87W54kGYFQ1rgWqMeu4XTPHWXWmXSQCcjm8vCTfiq1oY"),
+  MANDARA_LLM_ENABLED: z.string().default("false"),
+  MANDARA_LLM_PROVIDER: z.string().default("deepseek"),
+  MANDARA_LLM_API_KEY: z.string().default(""),
+  MANDARA_LLM_MODEL: z.string().default("deepseek-chat"),
+  MANDARA_LLM_BASE_URL: z.string().default("https://api.deepseek.com"),
+  MANDARA_LLM_TIMEOUT_MS: z.string().default("20000").transform(Number),
+  MANDARA_LLM_MAX_INPUT_CHARS: z.string().default("4000").transform(Number),
+  MANDARA_LLM_MAX_OUTPUT_TOKENS: z.string().default("700").transform(Number),
+  MANDARA_LLM_GEMINI_API_KEY: z.string().default(""),
+  MANDARA_LLM_GEMINI_MODEL: z.string().default("gemini-2.5-flash-lite"),
+  MANDARA_LLM_GROQ_API_KEY: z.string().default(""),
+  MANDARA_LLM_GROQ_MODEL: z.string().default("llama-3.1-8b-instant"),
 });
 
 export const env = EnvSchema.parse(process.env);

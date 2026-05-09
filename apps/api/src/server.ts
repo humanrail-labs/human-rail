@@ -17,6 +17,8 @@ import messageApprovalRoutes from "./routes/messageApprovals.js";
 import auditEventRoutes from "./routes/auditEvents.js";
 import productRoutes from "./routes/product.js";
 import webhookRoutes from "./routes/webhooks.js";
+import agentChatRoutes from "./routes/agentChat.js";
+import subscriptionRoutes from "./routes/subscription.js";
 import v1SignatureRequestRoutes from "./routes/v1/signatureRequests.js";
 
 export async function buildServer() {
@@ -110,6 +112,8 @@ export async function buildServer() {
   await fastify.register(auditEventRoutes);
   await fastify.register(productRoutes);
   await fastify.register(webhookRoutes);
+  await fastify.register(subscriptionRoutes);
+  await fastify.register(agentChatRoutes);
   await fastify.register(v1SignatureRequestRoutes);
 
   // 404 handler

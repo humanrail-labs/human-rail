@@ -31,6 +31,13 @@ import type {
   ImportWalletInput,
   CreatePolicyInput,
   CreateOrganizationInput,
+  AgentChatSession,
+  CreateAgentChatSessionInput,
+  SendAgentChatMessageInput,
+  SendAgentChatMessageResult,
+  ApproveAgentProposalResult,
+  AgentActionProposal,
+  SubscriptionSummary,
 } from "./types";
 
 function getHeaders(): Record<string, string> {
@@ -162,6 +169,58 @@ export function enqueueSigningRequest(id: string): Promise<EnqueueResult> {
 
 export function getSigningRequestExecution(id: string): Promise<ExecutionResult> {
   return apiFetch<ExecutionResult>(`/api/signing-requests/${id}/execution`);
+}
+
+export function getSubscription(): Promise<SubscriptionSummary> {
+  return apiFetch<SubscriptionSummary>("/api/subscription");
+}
+
+// ── Agent Chat ──
+
+export function listAgentChatSessions(): Promise<AgentChatSession[]> {
+  return apiFetch<AgentChatSession[]>("/api/agent-chat/sessions");
+}
+
+export function createAgentChatSession(
+  input: CreateAgentChatSessionInput
+): Promise<AgentChatSession> {
+  return apiFetch<AgentChatSession>("/api/agent-chat/sessions", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getAgentChatSession(id: string): Promise<AgentChatSession> {
+  return apiFetch<AgentChatSession>(`/api/agent-chat/sessions/${id}`);
+}
+
+export function sendAgentChatMessage(
+  input: SendAgentChatMessageInput
+): Promise<SendAgentChatMessageResult> {
+  return apiFetch<SendAgentChatMessageResult>("/api/agent-chat/messages", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function approveAgentProposal(
+  proposalId: string,
+  input: { enqueue?: boolean }
+): Promise<ApproveAgentProposalResult> {
+  return apiFetch<ApproveAgentProposalResult>(`/api/agent-chat/proposals/${proposalId}/approve`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function rejectAgentProposal(
+  proposalId: string,
+  input: { reason?: string }
+): Promise<{ proposal: AgentActionProposal }> {
+  return apiFetch<{ proposal: AgentActionProposal }>(`/api/agent-chat/proposals/${proposalId}/reject`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
 // ── Message Approvals ──

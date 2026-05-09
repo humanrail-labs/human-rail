@@ -6,3 +6,5 @@ export * from "./signingRequest.js";
 export * from "./apiKey.js";
 export * from "./webhook.js";
 export * from "./auditExport.js";
+export * from "./agentChat.js";
+export * from "./subscription.js";

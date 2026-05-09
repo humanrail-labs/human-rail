@@ -265,6 +265,118 @@ export interface ExecutionResult {
   auditEvents: AuditEvent[];
 }
 
+// ── Agent Chat ──
+
+export type AgentChatMessageRole = "user" | "assistant" | "system" | "tool";
+
+export type AgentActionProposalStatus =
+  | "draft"
+  | "preview_allowed"
+  | "preview_rejected"
+  | "user_approved"
+  | "user_rejected"
+  | "request_created"
+  | "queued"
+  | "failed";
+
+export interface AgentChatMessage {
+  id: string;
+  sessionId: string;
+  role: AgentChatMessageRole;
+  content: string;
+  provider?: string | null;
+  model?: string | null;
+  scopeAllowed?: boolean | null;
+  scopeReason?: string | null;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface AgentActionProposal {
+  id: string;
+  sessionId: string;
+  organizationId: string;
+  agentId?: string | null;
+  policyId?: string | null;
+  signingRequestId?: string | null;
+  type: string;
+  status: AgentActionProposalStatus;
+  naturalLanguageIntent: string;
+  structuredInput: Record<string, unknown>;
+  policyDecision?: SigningRequestPreviewResult | Record<string, unknown> | null;
+  rejectionReason?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  agent?: Pick<Agent, "id" | "name"> | null;
+  policy?: Pick<GuardedPolicy, "id" | "name"> | null;
+  signingRequest?: Pick<SigningRequest, "id" | "requestId" | "status"> | null;
+}
+
+export interface AgentChatSession {
+  id: string;
+  organizationId: string;
+  agentId?: string | null;
+  title?: string | null;
+  status: string;
+  createdByUserId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  agent?: Pick<Agent, "id" | "name"> | null;
+  messages?: AgentChatMessage[];
+  proposals?: AgentActionProposal[];
+}
+
+export interface CreateAgentChatSessionInput {
+  organizationId?: string;
+  agentId?: string;
+  title?: string;
+}
+
+export interface SendAgentChatMessageInput {
+  sessionId?: string;
+  organizationId?: string;
+  agentId?: string;
+  message: string;
+  mode?: "assist" | "prepare_signature_request";
+}
+
+export interface SendAgentChatMessageResult {
+  session: AgentChatSession;
+  userMessage?: AgentChatMessage;
+  assistantMessage: AgentChatMessage;
+  proposal?: AgentActionProposal;
+  policyDecision?: SigningRequestPreviewResult;
+  scope?: { allowed: boolean; reason: string; category: string };
+  nextAction: "ask_user_for_missing_fields" | "user_approve_or_reject" | "informational";
+}
+
+export interface ApproveAgentProposalResult {
+  proposal: AgentActionProposal;
+  signingRequest: SigningRequest;
+  execution?: {
+    jobId?: string;
+    queue: string;
+    status: string;
+  };
+  nextStep: string;
+}
+
+export interface SubscriptionSummary {
+  plan: "dev_free" | "builder" | "team" | "enterprise";
+  status: "trial" | "active" | "past_due" | "canceled" | "expired";
+  limits: {
+    monthlyChatLimit: number;
+    monthlyRequestLimit: number;
+    monthlyWebhookLimit: number;
+  };
+  usage: {
+    agentChatMessages: number;
+    signatureRequestsCreated: number;
+    webhookDeliveries: number;
+  };
+  note: string;
+}
+
 // ── Agent API Keys ──
 
 export interface AgentApiKey {

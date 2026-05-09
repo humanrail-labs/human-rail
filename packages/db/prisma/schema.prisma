@@ -84,6 +84,18 @@ enum AuditEventType {
   ika_message_approval_created
   ika_signature_committed
   agent_api_key_used
+  agent_chat_session_created
+  agent_chat_message_created
+  agent_chat_scope_rejected
+  agent_chat_proposal_created
+  agent_chat_proposal_previewed
+  agent_chat_proposal_approved
+  agent_chat_proposal_rejected
+  agent_chat_request_created
+  agent_chat_request_enqueued
+  subscription_created
+  subscription_limit_exceeded
+  usage_recorded
   system
 }
 
@@ -97,6 +109,39 @@ enum WebhookDeliveryStatus {
   retrying
   delivered
   failed
+}
+
+enum ChatMessageRole {
+  user
+  assistant
+  system
+  tool
+}
+
+enum AgentActionProposalStatus {
+  draft
+  preview_allowed
+  preview_rejected
+  user_approved
+  user_rejected
+  request_created
+  queued
+  failed
+}
+
+enum MandaraPlanCode {
+  dev_free
+  builder
+  team
+  enterprise
+}
+
+enum SubscriptionStatus {
+  trial
+  active
+  past_due
+  canceled
+  expired
 }
 
 // ── Models ──
@@ -117,6 +162,10 @@ model Organization {
   auditEvents       AuditEvent[]
   webhooks          Webhook[]
   integrationSecrets IntegrationSecret[]
+  agentChatSessions AgentChatSession[]
+  agentActionProposals AgentActionProposal[]
+  mandaraSubscription MandaraSubscription?
+  mandaraUsageEvents MandaraUsageEvent[]
 
   @@index([slug])
   @@index([tier])
@@ -174,6 +223,8 @@ model Agent {
   apiKeys         AgentApiKey[]
   signingRequests SigningRequest[]
   guardedPolicies GuardedPolicy[]
+  agentChatSessions AgentChatSession[]
+  agentActionProposals AgentActionProposal[]
 
   @@index([organizationId, status])
   @@index([onChainAgentPda])
@@ -251,6 +302,7 @@ model GuardedPolicy {
   agent           Agent            @relation(fields: [agentId], references: [id], onDelete: Cascade)
   ikaDwallet      IkaDwallet       @relation(fields: [ikaDwalletId], references: [id], onDelete: Restrict)
   signingRequests SigningRequest[]
+  agentActionProposals AgentActionProposal[]
 
   @@index([agentId, status])
   @@index([organizationId])
@@ -295,6 +347,7 @@ model SigningRequest {
   policy           GuardedPolicy     @relation(fields: [policyId], references: [id], onDelete: Cascade)
   ikaDwallet       IkaDwallet?       @relation(fields: [ikaDwalletId], references: [id], onDelete: SetNull)
   messageApproval  MessageApproval?
+  agentActionProposals AgentActionProposal[]
 
   @@index([executionJobId])
   @@index([organizationId, createdAt])
@@ -302,6 +355,115 @@ model SigningRequest {
   @@index([requestId])
   @@index([onChainRequestPda])
   @@map("signing_requests")
+}
+
+model AgentChatSession {
+  id              String             @id @default(cuid())
+  organizationId  String
+  agentId         String?
+  title           String?
+  status          String             @default("active")
+  createdByUserId String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  agent        Agent?                @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  messages     AgentChatMessage[]
+  proposals    AgentActionProposal[]
+
+  @@index([organizationId])
+  @@index([agentId])
+  @@index([createdAt])
+  @@map("agent_chat_sessions")
+}
+
+model AgentChatMessage {
+  id        String          @id @default(cuid())
+  sessionId String
+  role      ChatMessageRole
+  content   String
+  provider  String?
+  model     String?
+  scopeAllowed Boolean?
+  scopeReason  String?
+  metadata  Json?
+  createdAt DateTime        @default(now())
+
+  session AgentChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("agent_chat_messages")
+}
+
+model AgentActionProposal {
+  id                    String                    @id @default(cuid())
+  sessionId             String
+  organizationId         String
+  agentId               String?
+  policyId              String?
+  signingRequestId      String?
+  type                  String                    @default("signature_request")
+  status                AgentActionProposalStatus  @default(draft)
+  naturalLanguageIntent String
+  structuredInput       Json
+  policyDecision        Json?
+  rejectionReason       String?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+
+  session        AgentChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  agent          Agent?           @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  policy         GuardedPolicy?   @relation(fields: [policyId], references: [id], onDelete: SetNull)
+  signingRequest SigningRequest?  @relation(fields: [signingRequestId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([agentId])
+  @@index([policyId])
+  @@index([signingRequestId])
+  @@map("agent_action_proposals")
+}
+
+model MandaraSubscription {
+  id                  String             @id @default(cuid())
+  organizationId      String             @unique
+  planCode            MandaraPlanCode    @default(dev_free)
+  status              SubscriptionStatus @default(trial)
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  monthlyChatLimit    Int                @default(100)
+  monthlyRequestLimit Int                @default(50)
+  monthlyWebhookLimit Int                @default(100)
+  metadata            Json?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  usage        MandaraUsageEvent[]
+
+  @@map("mandara_subscriptions")
+}
+
+model MandaraUsageEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  subscriptionId String?
+  type           String
+  quantity       Int      @default(1)
+  source         String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  subscription MandaraSubscription?  @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([subscriptionId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("mandara_usage_events")
 }
 
 model MessageApproval {

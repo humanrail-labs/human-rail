@@ -27,6 +27,8 @@
 | [`PRODUCT_ARTIFACT_IMPORT.md`](PRODUCT_ARTIFACT_IMPORT.md) | Import completed devnet lifecycle into product database and inspect via API |
 | [`PRODUCT_DASHBOARD.md`](PRODUCT_DASHBOARD.md) | Product dashboard UI: data, create/preview/enqueue, execution polling |
 | [`PRODUCT_AGENT_API.md`](PRODUCT_AGENT_API.md) | External agent API: API keys, Bearer auth, /v1 endpoints, security notes |
+| [`PRODUCT_AGENT_CHAT.md`](PRODUCT_AGENT_CHAT.md) | Agent Chat: natural-language proposals, mandatory policy preview, approve/reject safety model |
+| [`PRODUCT_SUBSCRIPTIONS.md`](PRODUCT_SUBSCRIPTIONS.md) | P12 usage tracking, plan limits, and P13 Solana-native subscription direction |
 | [`MANDARA_SDK.md`](MANDARA_SDK.md) | TypeScript SDK: install, quick start, API reference, error handling, examples |
 | [`PRODUCT_FRONTEND_REBUILD.md`](PRODUCT_FRONTEND_REBUILD.md) | P11 frontend rebuild: landing page, console dashboard, onboarding wizard, route map |
 | [`PRODUCT_WEBHOOKS.md`](PRODUCT_WEBHOOKS.md) | Webhooks: event types, payload format, signature verification, retry behavior |
@@ -66,7 +68,7 @@
 - **Final Check:** `npm run final:check`
 ## Mandara Product Entry
 
-Mandara by HumanRail is the user-facing product. Start at `/mandara` or `/mandara/app` for product onboarding and console work. These pages do not require a browser wallet.
+Mandara by HumanRail is the user-facing product. Start at `/mandara` or `/mandara/app` for product onboarding and console work. Agent Chat is available at `/mandara/app/agent-chat` for natural-language Signature Request proposals. These pages do not require a browser wallet.
 
 The HumanRail Protocol proof remains available under `/advanced` and protocol routes such as `/vault/*`, `/agent/*`, `/human/*`, `/delegation`, `/receipts`, and `/rails/*`. These routes may require a Solana wallet and expose PDA, CPI, MessageApproval, program ID, and Ika devnet internals.
 
@@ -80,3 +82,5 @@ npm run product:api:dev
 ```
 
 Mandara is devnet beta only. Ika is pre-alpha with a mock signer. This is not production custody.
+
+Agent Chat requires explicit user approval before creating or enqueueing requests. The LLM never signs, never receives secrets, and every proposal must pass Mandate preview.

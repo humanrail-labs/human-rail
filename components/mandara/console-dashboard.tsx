@@ -19,6 +19,7 @@ import {
   Compass,
   FlaskConical,
   Send,
+  MessageSquareText,
 } from "lucide-react";
 
 const statusHuman: Record<string, { label: string; color: string }> = {
@@ -174,6 +175,25 @@ export default function ConsoleDashboard() {
           </Card>
         ))}
       </div>
+
+      <Card className="border-[#5EBDB0]/15 bg-[#21342F]/45">
+        <CardContent className="flex flex-wrap items-center justify-between gap-4 py-4">
+          <div className="flex items-center gap-3">
+            <MessageSquareText className="h-5 w-5 text-[#8de7dc]" />
+            <div>
+              <p className="text-sm font-medium text-white">Talk to your agent</p>
+              <p className="text-xs text-neutral-500">Prepare signature requests in natural language.</p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => router.push("/mandara/app/agent-chat")}
+            className="bg-[#3E877E] text-xs hover:bg-[#326d66]"
+          >
+            Open Agent Chat
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Recent Signature Requests */}
       <Card className="border-white/[0.06] bg-white/[0.03]">
