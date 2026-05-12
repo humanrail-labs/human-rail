@@ -170,7 +170,12 @@ export default function AgentsPage() {
             const isDeleteConfirm = deleteConfirm === agent.id;
 
             return (
-              <Card key={agent.id} className="border-white/[0.06] bg-white/[0.03]">
+              <Card
+              key={agent.id}
+              className={`border-white/[0.06] bg-white/[0.03] relative transition-none ${
+                isMenuOpen || isEditing || isDeleteConfirm ? "z-20" : "z-10"
+              }`}
+            >
                 <CardContent className="py-4">
                   {isEditing ? (
                     <div className="space-y-3">
