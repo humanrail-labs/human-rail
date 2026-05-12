@@ -106,6 +106,26 @@ export function createAgent(input: CreateAgentInput): Promise<Agent> {
   });
 }
 
+export function updateAgent(id: string, input: { name?: string; description?: string }): Promise<Agent> {
+  return apiFetch<Agent>(`/api/agents/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updateAgentStatus(id: string, status: "active" | "suspended" | "revoked"): Promise<Agent> {
+  return apiFetch<Agent>(`/api/agents/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function deleteAgent(id: string): Promise<void> {
+  return apiFetch<void>(`/api/agents/${id}`, {
+    method: "DELETE",
+  });
+}
+
 // ── Wallets ──
 
 export function listWallets(): Promise<IkaDwallet[]> {

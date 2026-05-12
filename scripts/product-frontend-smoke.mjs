@@ -207,6 +207,40 @@ async function run() {
     } else {
       ok("POST /api/agents/:id/api-keys (skipped — existing key)");
     }
+
+    // ── Agent lifecycle ──
+    try {
+      const updated = await api(`/api/agents/${testAgent.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: `Smoke Agent ${Date.now()}` }),
+      });
+      ok("PATCH /api/agents/:id updates agent");
+      if (updated.name !== testAgent.name) ok("PATCH updates name correctly");
+    } catch (err) {
+      fail("PATCH /api/agents/:id", err);
+    }
+
+    try {
+      const suspended = await api(`/api/agents/${testAgent.id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "suspended" }),
+      });
+      ok("PATCH /api/agents/:id/status suspends agent");
+      if (suspended.status === "suspended") ok("Suspended status is correct");
+    } catch (err) {
+      fail("PATCH /api/agents/:id/status (suspend)", err);
+    }
+
+    try {
+      const reactivated = await api(`/api/agents/${testAgent.id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "active" }),
+      });
+      ok("PATCH /api/agents/:id/status reactivates agent");
+      if (reactivated.status === "active") ok("Reactivated status is correct");
+    } catch (err) {
+      fail("PATCH /api/agents/:id/status (reactivate)", err);
+    }
   }
 
   // ── Agent Chat ──

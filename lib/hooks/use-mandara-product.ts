@@ -7,6 +7,9 @@ import {
   createOrganization,
   listAgents,
   createAgent,
+  updateAgent,
+  updateAgentStatus,
+  deleteAgent,
   listWallets,
   importWallet,
   listPolicies,
@@ -205,6 +208,23 @@ export function useMandaraProduct() {
     return agent;
   }, [refresh]);
 
+  const updateAgentData = useCallback(async (id: string, input: { name?: string; description?: string }) => {
+    const agent = await updateAgent(id, input);
+    await refresh();
+    return agent;
+  }, [refresh]);
+
+  const updateAgentStatusData = useCallback(async (id: string, status: "active" | "suspended" | "revoked") => {
+    const agent = await updateAgentStatus(id, status);
+    await refresh();
+    return agent;
+  }, [refresh]);
+
+  const deleteAgentData = useCallback(async (id: string) => {
+    await deleteAgent(id);
+    await refresh();
+  }, [refresh]);
+
   const importNewWallet = useCallback(async (input: ImportWalletInput) => {
     const wallet = await importWallet(input);
     await refresh();
@@ -258,6 +278,9 @@ export function useMandaraProduct() {
     exportAuditEvents,
     createOrganization: createOrg,
     createAgent: createNewAgent,
+    updateAgent: updateAgentData,
+    updateAgentStatus: updateAgentStatusData,
+    deleteAgent: deleteAgentData,
     importWallet: importNewWallet,
     createPolicy: createNewPolicy,
   };

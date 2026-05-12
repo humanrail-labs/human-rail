@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "@mandara/db";
-import { CreateAgentSchema } from "@mandara/core";
+import { CreateAgentSchema, UpdateAgentSchema, UpdateAgentStatusSchema } from "@mandara/core";
 import { success, errorResponse } from "../lib/response.js";
 import { recordAuditEvent } from "../lib/audit.js";
 import { resolveOrganizationContext } from "../lib/orgContext.js";
@@ -95,6 +95,134 @@ export default async function agentRoutes(fastify: FastifyInstance) {
     });
 
     return reply.status(201).send(success(agent));
+  });
+
+  fastify.patch("/api/agents/:id", async (request, reply) => {
+    const user = request.devUser;
+    if (!user) {
+      return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
+    }
+
+    const { id } = request.params as { id: string };
+    const parse = UpdateAgentSchema.safeParse(request.body);
+    if (!parse.success) {
+      return reply.status(400).send(
+        errorResponse(
+          "VALIDATION_ERROR",
+          parse.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")
+        )
+      );
+    }
+
+    const agent = await prisma.agent.findUnique({ where: { id } });
+    if (!agent) {
+      return reply.status(404).send(errorResponse("NOT_FOUND", "Agent not found"));
+    }
+
+    const { organizationId } = await resolveOrganizationContext(request, agent.organizationId);
+
+    const updated = await prisma.agent.update({
+      where: { id },
+      data: {
+        name: parse.data.name,
+        description: parse.data.description,
+      },
+    });
+
+    await recordAuditEvent({
+      organizationId,
+      actorType: "user",
+      actorId: user.id,
+      eventType: "agent_updated",
+      resourceType: "agent",
+      resourceId: id,
+      summary: `Updated agent ${updated.name}`,
+    });
+
+    return success(updated);
+  });
+
+  fastify.patch("/api/agents/:id/status", async (request, reply) => {
+    const user = request.devUser;
+    if (!user) {
+      return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
+    }
+
+    const { id } = request.params as { id: string };
+    const parse = UpdateAgentStatusSchema.safeParse(request.body);
+    if (!parse.success) {
+      return reply.status(400).send(
+        errorResponse(
+          "VALIDATION_ERROR",
+          parse.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")
+        )
+      );
+    }
+
+    const agent = await prisma.agent.findUnique({ where: { id } });
+    if (!agent) {
+      return reply.status(404).send(errorResponse("NOT_FOUND", "Agent not found"));
+    }
+
+    const { organizationId } = await resolveOrganizationContext(request, agent.organizationId);
+
+    const newStatus = parse.data.status;
+    const updateData: Record<string, unknown> = { status: newStatus };
+    if (newStatus === "suspended") {
+      updateData.frozenAt = new Date();
+    } else if (newStatus === "active") {
+      updateData.frozenAt = null;
+    } else if (newStatus === "revoked") {
+      updateData.revokedAt = new Date();
+    }
+
+    const updated = await prisma.agent.update({
+      where: { id },
+      data: updateData,
+    });
+
+    const eventType = newStatus === "suspended" ? "agent_frozen" : newStatus === "revoked" ? "agent_revoked" : "agent_updated";
+    await recordAuditEvent({
+      organizationId,
+      actorType: "user",
+      actorId: user.id,
+      eventType,
+      resourceType: "agent",
+      resourceId: id,
+      summary: `${newStatus === "suspended" ? "Suspended" : newStatus === "revoked" ? "Revoked" : "Reactivated"} agent ${updated.name}`,
+      metadata: { previousStatus: agent.status, newStatus },
+    });
+
+    return success(updated);
+  });
+
+  fastify.delete("/api/agents/:id", async (request, reply) => {
+    const user = request.devUser;
+    if (!user) {
+      return reply.status(401).send(errorResponse("UNAUTHORIZED", "Missing dev auth"));
+    }
+
+    const { id } = request.params as { id: string };
+    const agent = await prisma.agent.findUnique({ where: { id } });
+    if (!agent) {
+      return reply.status(404).send(errorResponse("NOT_FOUND", "Agent not found"));
+    }
+
+    const { organizationId } = await resolveOrganizationContext(request, agent.organizationId);
+
+    await prisma.agent.delete({ where: { id } });
+
+    await recordAuditEvent({
+      organizationId,
+      actorType: "user",
+      actorId: user.id,
+      eventType: "agent_updated",
+      resourceType: "agent",
+      resourceId: id,
+      summary: `Deleted agent ${agent.name}`,
+    });
+
+    return reply.status(204).send();
   });
 
   // ── Agent API Key Management ──

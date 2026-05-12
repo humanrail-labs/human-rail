@@ -25,3 +25,16 @@ export const CreateAgentSchema = z.object({
 });
 
 export type CreateAgentInput = z.infer<typeof CreateAgentSchema>;
+
+export const UpdateAgentSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  description: z.string().max(500).optional(),
+});
+
+export type UpdateAgentInput = z.infer<typeof UpdateAgentSchema>;
+
+export const UpdateAgentStatusSchema = z.object({
+  status: AgentStatus,
+});
+
+export type UpdateAgentStatusInput = z.infer<typeof UpdateAgentStatusSchema>;
