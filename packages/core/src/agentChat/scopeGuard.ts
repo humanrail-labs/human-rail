@@ -40,6 +40,20 @@ const mandaraPatterns = [
   /\busdc\b/i,
   /\bbase sepolia\b/i,
   /\bdevnet\b/i,
+  /\bconnect\b/i,
+  /\bworker\b/i,
+  /\bqueue\b/i,
+  /\bsigned\b/i,
+  /\bwhy was\b/i,
+  /\bwhat does\b/i,
+  /\bprepare\b/i,
+  /\bpayout\b/i,
+  /\bpay\b/i,
+  /\bsend\b/i,
+  /\btransfer\b/i,
+  /\bamount\b/i,
+  /\brecipient\b/i,
+  /\bchain\b/i,
 ];
 
 const rejectedPatterns = [
@@ -83,7 +97,7 @@ export function classifyMandaraScope(message: string): MandaraScopeResult {
 
   return {
     allowed: false,
-    reason: "I can only help with Mandara agents, mandates, signature requests, SDK/API setup, webhooks, and audit logs.",
+    reason: "I can only help with Mandara agents, mandates, signature requests, SDK/API setup, webhooks, audit logs, and devnet beta troubleshooting.",
     category: "out_of_scope",
   };
 }

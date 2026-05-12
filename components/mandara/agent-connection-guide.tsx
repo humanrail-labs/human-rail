@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Bot, Shield, FileKey } from "lucide-react";
+import { Copy, Bot, Shield, FileKey, AlertTriangle } from "lucide-react";
 
 export default function AgentConnectionGuide() {
   const copyToClipboard = (text: string) => {
@@ -15,45 +15,51 @@ export MANDARA_AGENT_API_KEY="YOUR_AGENT_API_KEY"`;
   const sdkSnippet = `import { MandaraClient } from "@mandara/sdk";
 
 const client = new MandaraClient({
-  baseUrl: process.env.MANDARA_API_URL,
   apiKey: process.env.MANDARA_AGENT_API_KEY!,
+  baseUrl: process.env.MANDARA_API_URL || "http://localhost:4000",
 });
 
 // Preview before sending
 const preview = await client.previewSignatureRequest({
+  destinationChainId: 84532,
   asset: "USDC:BASE_SEPOLIA",
   recipient: "0x1111111111111111111111111111111111111111",
-  amount: "1000000",
-  destinationChainId: 84532,
-  message: "Payment for invoice #1234",
+  amount: "42000000",
+  message: "Prepare payout request",
 });
 
-if (preview.policyDecision.allowed) {
+if (preview.allowed) {
   const result = await client.requestSignature({
+    destinationChainId: 84532,
     asset: "USDC:BASE_SEPOLIA",
     recipient: "0x1111111111111111111111111111111111111111",
-    amount: "1000000",
-    destinationChainId: 84532,
-    message: "Payment for invoice #1234",
+    amount: "42000000",
+    message: "Prepare payout request",
   });
   const signed = await client.waitForSignature(result.signingRequest.id);
   console.log("Signature status:", signed.status);
 }`;
 
-  const hermesSnippet = `// Hermes / OpenClaw style tool description
+  const toolSnippet = `// Agent tool description
 {
   name: "request_signature",
-  description: "Request a policy-governed signature via Mandara",
+  description: "Prepare a policy-governed signature request through Mandara. The tool must preview policy first and cannot bypass mandates.",
   parameters: {
+    destinationChainId: "Target chain ID",
     asset: "Asset identifier, e.g. USDC:BASE_SEPOLIA",
     recipient: "Recipient address",
     amount: "Amount in smallest unit",
-    destinationChainId: "Target chain ID",
     message: "Human-readable purpose",
   },
-  handler: async ({ asset, recipient, amount, destinationChainId, message }) => {
+  handler: async ({ destinationChainId, asset, recipient, amount, message }) => {
+    const preview = await mandaraClient.previewSignatureRequest({
+      destinationChainId, asset, recipient, amount, message,
+    });
+    if (!preview.allowed) {
+      return "Request rejected by mandate: " + preview.reason;
+    }
     const result = await mandaraClient.requestSignature({
-      asset, recipient, amount, destinationChainId, message,
+      destinationChainId, asset, recipient, amount, message,
     });
     return result.signingRequest.status === "signed"
       ? "Signature completed"
@@ -64,9 +70,9 @@ if (preview.policyDecision.allowed) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-white">Agent Connection Guide</h2>
+        <h2 className="text-lg font-semibold text-white">Connect your real agent</h2>
         <p className="text-sm text-neutral-500">
-          How to connect your real AI agent to Mandara
+          Mandara does not run your AI agent. Your real agent can be a backend service, Hermes agent, OpenClaw agent, LangChain worker, or custom bot. It connects using the Connection Key.
         </p>
       </div>
 
@@ -134,7 +140,7 @@ if (preview.policyDecision.allowed) {
 
       <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader>
-          <CardTitle className="text-base text-white">SDK snippet</CardTitle>
+          <CardTitle className="text-base text-white">SDK example</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <pre className="overflow-x-auto rounded bg-black/30 p-3 text-xs text-neutral-300">
@@ -154,21 +160,31 @@ if (preview.policyDecision.allowed) {
 
       <Card className="border-white/[0.06] bg-white/[0.03]">
         <CardHeader>
-          <CardTitle className="text-base text-white">Hermes / OpenClaw tool</CardTitle>
+          <CardTitle className="text-base text-white">Agent tool description</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <pre className="overflow-x-auto rounded bg-black/30 p-3 text-xs text-neutral-300">
-            {hermesSnippet}
+            {toolSnippet}
           </pre>
           <Button
             variant="outline"
             size="sm"
             className="text-xs"
-            onClick={() => copyToClipboard(hermesSnippet)}
+            onClick={() => copyToClipboard(toolSnippet)}
           >
             <Copy className="mr-1.5 h-3.5 w-3.5" />
             Copy
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="border-amber-500/15 bg-amber-500/5">
+        <CardContent className="flex items-start gap-3 py-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
+          <div className="space-y-1 text-xs leading-5 text-amber-100/70">
+            <p className="font-medium text-amber-200/90">Safety note</p>
+            <p>Never put service wallet, seed phrase, private key, or webhook secret inside the agent code.</p>
+          </div>
         </CardContent>
       </Card>
     </div>

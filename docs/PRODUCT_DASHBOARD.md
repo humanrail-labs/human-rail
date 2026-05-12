@@ -108,7 +108,7 @@ Agent Chat lets users ask an Agent to prepare a Signature Request in natural lan
 
 User approval is required before creating or enqueueing requests. The LLM never signs, never receives secrets, and cannot bypass policy preview. The browser never receives LLM provider keys and does not call Solana or Ika directly.
 
-Agent Chat is Mandara-scoped. Out-of-scope general LLM requests are refused before any provider call. P12 also adds `/api/subscription` for plan limits and monthly usage tracking; Solana-native subscription payments are planned for P13 and are not implemented yet.
+Agent Chat is Mandara-scoped. Out-of-scope general LLM requests are refused before any provider call with a user-friendly message and a suggested valid prompt. P13A adds first-run explainers, example prompt chips, a safety card, model status indicators, human-readable proposal cards, and minimal follow-up context for incomplete requests. P12 also adds `/api/subscription` for plan limits and monthly usage tracking; Solana-native subscription payments are planned for P13 and are not implemented yet.
 
 ---
 

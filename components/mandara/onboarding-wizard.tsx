@@ -38,13 +38,13 @@ type Step =
 
 const STEPS: { id: Step; label: string }[] = [
   { id: "welcome", label: "Welcome" },
-  { id: "organization", label: "Organization" },
+  { id: "organization", label: "Workspace" },
   { id: "agent", label: "Agent" },
-  { id: "wallet", label: "Wallet" },
+  { id: "wallet", label: "Signing Wallet" },
   { id: "mandate", label: "Mandate" },
-  { id: "apikey", label: "API Key" },
-  { id: "test", label: "Test" },
-  { id: "done", label: "Done" },
+  { id: "apikey", label: "Connection Key" },
+  { id: "test", label: "Test Request" },
+  { id: "done", label: "Talk to Agent" },
 ];
 
 export default function OnboardingWizard() {
@@ -449,12 +449,13 @@ export default function OnboardingWizard() {
             <div className="space-y-2 text-sm text-neutral-400">
               <p>You will:</p>
               <ol className="list-decimal space-y-1 pl-5">
-                <li>Create or select an organization</li>
+                <li>Create or select a workspace</li>
                 <li>Create an agent identity</li>
                 <li>Use a demo signing wallet or import your own</li>
                 <li>Set a mandate (spending policy)</li>
                 <li>Create a connection key for your real AI agent</li>
                 <li>Send a test signature request</li>
+                <li>Talk to your agent in plain English</li>
               </ol>
             </div>
             <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-200/70">
@@ -482,6 +483,9 @@ export default function OnboardingWizard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-5 text-neutral-400">
+              <span className="font-medium text-neutral-300">What is this?</span> This is your team area. It owns agents, signing wallets, mandates, requests, and webhooks.
+            </div>
             {organizations.length > 0 && (
               <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
                 <p className="text-xs text-neutral-500">Available organizations:</p>
@@ -565,10 +569,13 @@ export default function OnboardingWizard() {
               Create Agent
             </CardTitle>
             <CardDescription className="text-neutral-500">
-              Registering an agent creates its Mandara identity. Your real AI agent connects later using an API key.
+              This is the identity your real AI agent will use when asking Mandara for signatures.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-5 text-neutral-400">
+              <span className="font-medium text-neutral-300">What is this?</span> This is the identity your real AI agent will use when asking Mandara for signatures.
+            </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-neutral-400">Agent name</Label>
               <Input
@@ -646,10 +653,13 @@ export default function OnboardingWizard() {
               Select or Import Signing Wallet
             </CardTitle>
             <CardDescription className="text-neutral-500">
-              The signing wallet is the Ika dWallet Mandara uses after policy approval.
+              This is the wallet Mandara uses after a request passes its mandate. For devnet beta, you can use the demo signing wallet.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-5 text-neutral-400">
+              <span className="font-medium text-neutral-300">What is this?</span> This is the wallet Mandara uses after a request passes its mandate. For devnet beta, you can use the demo signing wallet.
+            </div>
             {wallets.length > 0 && !createdWallet && (
               <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
                 <p className="text-xs text-neutral-500">Existing wallets:</p>
@@ -773,10 +783,13 @@ export default function OnboardingWizard() {
               Create Mandate
             </CardTitle>
             <CardDescription className="text-neutral-500">
-              A mandate defines what the agent is allowed to request.
+              This defines what the agent is allowed to request: chain, asset, recipient, and spend limits.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-5 text-neutral-400">
+              <span className="font-medium text-neutral-300">What is this?</span> This defines what the agent is allowed to request: chain, asset, recipient, and spend limits.
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs text-neutral-400">Chain</Label>
@@ -870,10 +883,13 @@ export default function OnboardingWizard() {
               Create Connection Key
             </CardTitle>
             <CardDescription className="text-neutral-500">
-              This key connects your real bot, Hermes agent, OpenClaw agent, backend, or SDK integration to this Mandara agent.
+              This connects your real bot/backend/agent to Mandara. Copy it once and store it safely.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-5 text-neutral-400">
+              <span className="font-medium text-neutral-300">What is this?</span> This connects your real bot/backend/agent to Mandara. Copy it once and store it safely.
+            </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-neutral-400">Key name</Label>
               <Input
@@ -943,10 +959,13 @@ export default function OnboardingWizard() {
               Test Request
             </CardTitle>
             <CardDescription className="text-neutral-500">
-              Send a test signature request to verify your setup.
+              This checks whether the mandate allows the request.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-5 text-neutral-400">
+              <span className="font-medium text-neutral-300">What is this?</span> This checks whether the mandate allows the request.
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs text-neutral-400">Amount</Label>
@@ -1087,9 +1106,9 @@ export default function OnboardingWizard() {
             </div>
 
             <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
-              <p className="text-xs font-medium text-neutral-400">Next step</p>
+              <p className="text-xs font-medium text-neutral-400">Environment variables</p>
               <p className="mt-1 text-sm text-neutral-300">
-                Add this API key to your real agent environment.
+                Add these to your real agent environment.
               </p>
               <pre className="mt-2 overflow-x-auto rounded bg-black/30 p-2 text-xs text-neutral-300">
 {`export MANDARA_API_URL="${process.env.NEXT_PUBLIC_MANDARA_API_URL || "http://localhost:4000"}"
@@ -1115,18 +1134,22 @@ export MANDARA_AGENT_API_KEY="${createdApiKeyData.rawKey}"`)}
 {`import { MandaraClient } from "@mandara/sdk";
 
 const client = new MandaraClient({
-  baseUrl: process.env.MANDARA_API_URL,
   apiKey: process.env.MANDARA_AGENT_API_KEY!,
+  baseUrl: process.env.MANDARA_API_URL || "http://localhost:4000",
 });
 
-const result = await client.requestSignature({
-  asset: "USDC:BASE_SEPOLIA",
-  recipient: "0x1111...1111",
-  amount: "1000000",
+await client.previewSignatureRequest({
   destinationChainId: 84532,
-  message: "Payment for invoice #1234",
+  asset: "USDC:BASE_SEPOLIA",
+  recipient: "0x1111111111111111111111111111111111111111",
+  amount: "42000000",
+  message: "Prepare payout request",
 });`}
               </pre>
+            </div>
+
+            <div className="rounded-lg border border-amber-500/15 bg-amber-500/5 p-3 text-xs leading-5 text-amber-100/70">
+              <span className="font-medium text-amber-200/90">Safety note:</span> Never put service wallet, seed phrase, private key, or webhook secret inside the agent code.
             </div>
 
             <div className="flex gap-2">

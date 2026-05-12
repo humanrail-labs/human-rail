@@ -209,6 +209,54 @@ async function run() {
     }
   }
 
+  // ── Agent Chat ──
+  let chatSession;
+  if (testAgent) {
+    try {
+      chatSession = await api("/api/agent-chat/sessions", {
+        method: "POST",
+        body: JSON.stringify({ organizationId: orgId, agentId: testAgent.id, title: "Frontend Smoke Chat" }),
+      });
+      ok("POST /api/agent-chat/sessions creates chat session");
+    } catch (err) {
+      fail("POST /api/agent-chat/sessions", err);
+    }
+
+    if (chatSession) {
+      try {
+        const chatMsg = await api("/api/agent-chat/messages", {
+          method: "POST",
+          body: JSON.stringify({
+            sessionId: chatSession.id,
+            organizationId: orgId,
+            agentId: testAgent.id,
+            message: "Prepare a 42 USDC payout to the approved Base Sepolia recipient",
+            mode: "prepare_signature_request",
+          }),
+        });
+        ok("POST /api/agent-chat/messages returns proposal");
+        if (chatMsg.proposal) {
+          const proposal = chatMsg.proposal;
+          if (proposal.status === "preview_allowed") {
+            const approved = await api(`/api/agent-chat/proposals/${proposal.id}/approve`, {
+              method: "POST",
+              body: JSON.stringify({ enqueue: false }),
+            });
+            ok("POST /api/agent-chat/proposals/:id/approve creates request");
+
+            const rejected = await api(`/api/agent-chat/proposals/${proposal.id}/reject`, {
+              method: "POST",
+              body: JSON.stringify({ reason: "Smoke test reject after approve" }),
+            });
+            ok("POST /api/agent-chat/proposals/:id/reject updates status");
+          }
+        }
+      } catch (err) {
+        fail("POST /api/agent-chat/messages", err);
+      }
+    }
+  }
+
   // ── Signing Requests ──
   if (testAgent && testPolicy) {
     try {

@@ -364,6 +364,7 @@ model AgentChatSession {
   title           String?
   status          String             @default("active")
   createdByUserId String?
+  metadata        Json?
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 

@@ -80,6 +80,8 @@ Agent Chat is available in the Mandara Console at `/mandara/app/agent-chat`. It 
 
 Agent Chat uses backend-only LLM keys. DeepSeek is supported when `MANDARA_LLM_ENABLED=true` and `MANDARA_LLM_API_KEY` is configured; otherwise deterministic parsing is used. Scope guardrails reject unrelated general-purpose prompts before any provider call. Usage is tracked by `/api/subscription`; Solana-native subscription activation is planned for P13.
 
+Agent Chat includes a first-run explainer, example prompt chips, a safety card, and human-readable proposal cards. It supports minimal follow-up context for incomplete requests.
+
 ---
 
 ## 4. Create an Organization

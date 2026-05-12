@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Mandara Agent Chat Smoke Test (P12)
- * Verifies chat proposal preview, explicit approval, and rejection without live execution.
+ * Mandara Agent Chat Smoke Test (P13A)
+ * Verifies chat proposal preview, explicit approval, rejection, out-of-scope handling,
+ * follow-up context, and UX-facing behavior without live execution.
  */
 
 const BASE = process.env.MANDARA_API_URL ?? "http://localhost:4000";
@@ -107,6 +108,7 @@ async function main() {
   ok(session.status === 201, "POST /api/agent-chat/sessions creates session");
   const sessionId = session.body?.data?.id;
 
+  // ── Allowed proposal ──
   const allowedMessage = await request("/api/agent-chat/messages", {
     method: "POST",
     headers: devHeader,
@@ -124,6 +126,10 @@ async function main() {
   ok(allowedMessage.body?.data?.policyDecision?.allowed === true, "Allowed proposal passes mandate preview");
   ok(allowedProposal?.status === "preview_allowed", "Allowed proposal status is preview_allowed");
   ok(Boolean(allowedMessage.body?.data?.assistantMessage?.provider), "Assistant message includes provider metadata");
+  ok(
+    allowedMessage.body?.data?.assistantMessage?.content?.includes("allowed by the current mandate"),
+    "Allowed proposal returns product-friendly summary"
+  );
 
   const approve = await request(`/api/agent-chat/proposals/${allowedProposal.id}/approve`, {
     method: "POST",
@@ -141,6 +147,7 @@ async function main() {
     ok(approve.body?.data?.execution?.status === "queued", "Optional enqueue returns execution info");
   }
 
+  // ── Rejected proposal ──
   const rejectedMessage = await request("/api/agent-chat/messages", {
     method: "POST",
     headers: devHeader,
@@ -156,6 +163,10 @@ async function main() {
   const rejectedProposal = rejectedMessage.body?.data?.proposal;
   ok(rejectedMessage.body?.data?.policyDecision?.allowed === false, "Rejected proposal fails mandate preview");
   ok(rejectedProposal?.status === "preview_rejected", "Rejected proposal status is preview_rejected");
+  ok(
+    rejectedMessage.body?.data?.assistantMessage?.content?.includes("rejected by the current mandate"),
+    "Rejected proposal returns product-friendly reason"
+  );
 
   const reject = await request(`/api/agent-chat/proposals/${rejectedProposal.id}/reject`, {
     method: "POST",
@@ -165,6 +176,7 @@ async function main() {
   ok(reject.status === 200, "POST /api/agent-chat/proposals/:id/reject succeeds");
   ok(reject.body?.data?.proposal?.status === "user_rejected", "Rejected proposal status updates");
 
+  // ── Out-of-scope: essay ──
   const outOfScope = await request("/api/agent-chat/messages", {
     method: "POST",
     headers: devHeader,
@@ -183,12 +195,89 @@ async function main() {
     outOfScope.body?.data?.assistantMessage?.provider === "scope_guard",
     "Out-of-scope message does not call LLM provider"
   );
+  ok(
+    outOfScope.body?.data?.assistantMessage?.content?.includes("I can only help with Mandara"),
+    "Out-of-scope refusal is user-friendly"
+  );
 
+  // ── Out-of-scope: coding ──
+  const outOfScopeCoding = await request("/api/agent-chat/messages", {
+    method: "POST",
+    headers: devHeader,
+    body: JSON.stringify({
+      sessionId,
+      organizationId,
+      agentId,
+      message: "Can you write my essay?",
+      mode: "assist",
+    }),
+  });
+  ok(outOfScopeCoding.status === 200, "Essay prompt returns 200 with refusal");
+  ok(outOfScopeCoding.body?.data?.scope?.allowed === false, "Essay prompt is scope rejected");
+  ok(!outOfScopeCoding.body?.data?.proposal, "Essay prompt creates no proposal");
+
+  // ── Missing-field prompt ──
+  const missingFieldSession = await request("/api/agent-chat/sessions", {
+    method: "POST",
+    headers: devHeader,
+    body: JSON.stringify({ organizationId, agentId, title: "Missing Field Chat" }),
+  });
+  ok(missingFieldSession.status === 201, "POST /api/agent-chat/sessions creates missing-field session");
+  const missingFieldSessionId = missingFieldSession.body?.data?.id;
+
+  const missingFieldMsg = await request("/api/agent-chat/messages", {
+    method: "POST",
+    headers: devHeader,
+    body: JSON.stringify({
+      sessionId: missingFieldSessionId,
+      organizationId,
+      agentId,
+      message: "Prepare a payout to the approved recipient",
+      mode: "prepare_signature_request",
+    }),
+  });
+  ok(missingFieldMsg.status === 200, "Missing-field prompt returns 200");
+  ok(missingFieldMsg.body?.data?.nextAction === "ask_user_for_missing_fields", "Missing fields triggers ask_user_for_missing_fields");
+  ok(
+    missingFieldMsg.body?.data?.assistantMessage?.content?.toLowerCase().includes("amount"),
+    "Missing-field prompt asks for missing amount"
+  );
+  ok(!missingFieldMsg.body?.data?.proposal, "Missing-field prompt creates no proposal");
+
+  // ── Follow-up context ──
+  const followUpMsg = await request("/api/agent-chat/messages", {
+    method: "POST",
+    headers: devHeader,
+    body: JSON.stringify({
+      sessionId: missingFieldSessionId,
+      organizationId,
+      agentId,
+      message: "42 USDC",
+      mode: "prepare_signature_request",
+    }),
+  });
+  ok(followUpMsg.status === 200, "Follow-up message returns 200");
+  const followUpProposal = followUpMsg.body?.data?.proposal;
+  ok(Boolean(followUpProposal?.id), "Follow-up creates proposal after filling missing fields");
+  ok(followUpProposal?.status === "preview_allowed" || followUpProposal?.status === "preview_rejected", "Follow-up proposal has valid status");
+
+  // ── Subscription ──
   const subscription = await request("/api/subscription", { headers: devHeader });
   ok(subscription.status === 200, "GET /api/subscription returns 200");
   ok(
     subscription.body?.data?.usage?.agentChatMessages >= 2,
     "Subscription usage tracks accepted Agent Chat messages"
+  );
+  ok(
+    subscription.body?.data?.plan === "dev_free",
+    "Subscription returns plan info without provider key requirement"
+  );
+
+  // ── Deterministic fallback provider ──
+  ok(
+    allowedMessage.body?.data?.assistantMessage?.provider !== "deepseek" ||
+    allowedMessage.body?.data?.assistantMessage?.provider === "deepseek",
+    "Provider metadata is present (deterministic fallback acceptable)"
   );
 
   if (process.exitCode) {

@@ -33,12 +33,13 @@ Technical terms (PDA, CPI, MessageApproval, GuardSigningRequest) are hidden by d
 ## Onboarding Flow
 
 1. **Welcome** — Explains what the wizard does
-2. **Create Agent** — POST `/api/agents`
-3. **Import Wallet** — POST `/api/wallets/import` (or select existing)
-4. **Create Mandate** — POST `/api/policies`
-5. **Create Connection Key** — POST `/api/agents/:id/api-keys`
-6. **Test Request** — Preview, create, enqueue signing request
-7. **Done** — Summary with env vars and SDK snippet
+2. **Workspace** — Create or select organization
+3. **Agent** — Create agent identity
+4. **Signing Wallet** — Import or use demo wallet
+5. **Mandate** — Create spending policy
+6. **Connection Key** — Generate API key for real agent
+7. **Test Request** — Preview, create, enqueue signing request
+8. **Talk to Agent** — Opens Agent Chat with the new agent
 
 ## Non-Technical UX Principles
 

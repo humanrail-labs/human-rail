@@ -117,8 +117,7 @@ export async function handleAgentChatMessage(input: {
   });
 
   if (!scope.allowed) {
-    const refusal =
-      "I can only help with Mandara agents, mandates, signature requests, SDK/API setup, webhooks, and audit logs.";
+    const refusal = buildScopeRefusal(input.message, scope.category);
     const assistantMessage = await createAssistantMessage(session.id, refusal, {
       metadata: { scope },
       scopeAllowed: false,
@@ -169,6 +168,21 @@ export async function handleAgentChatMessage(input: {
     providerName = result.provider;
     providerModel = result.model;
     fallbackUsed = true;
+  }
+
+  // Minimal follow-up context: merge with previous partial intent if present
+  const sessionMeta = (session.metadata ?? {}) as Record<string, unknown>;
+  const partialIntent = sessionMeta.partialIntent as Record<string, string | number | undefined> | undefined;
+  if (partialIntent && intent.intentType === "signature_request" && intent.signatureRequest) {
+    intent.signatureRequest = {
+      destinationChainId: intent.signatureRequest.destinationChainId ?? (typeof partialIntent.destinationChainId === "number" ? partialIntent.destinationChainId : undefined),
+      asset: intent.signatureRequest.asset ?? (typeof partialIntent.asset === "string" ? partialIntent.asset : undefined),
+      recipient: intent.signatureRequest.recipient ?? (typeof partialIntent.recipient === "string" ? partialIntent.recipient : undefined),
+      amount: intent.signatureRequest.amount ?? (typeof partialIntent.amount === "string" ? partialIntent.amount : undefined),
+      message: intent.signatureRequest.message ?? (typeof partialIntent.message === "string" ? partialIntent.message : undefined),
+      policyId: intent.signatureRequest.policyId ?? (typeof partialIntent.policyId === "string" ? partialIntent.policyId : undefined),
+
+    };
   }
 
   await recordUsage({
@@ -243,9 +257,20 @@ export async function handleAgentChatMessage(input: {
   const structuredInput = fillFromPolicy(intent.signatureRequest ?? {}, resolvedPolicy.policy, input.message);
   const missingFields = findMissingFields(structuredInput);
   if (missingFields.length > 0) {
+    // Store partial intent in session metadata for follow-up
+    await prisma.agentChatSession.update({
+      where: { id: session.id },
+      data: {
+        metadata: {
+          ...sessionMeta,
+          partialIntent: structuredInput,
+        } as Prisma.JsonObject,
+      },
+    });
+
     const assistantMessage = await createAssistantMessage(
       session.id,
-      `I need ${missingFields.join(", ")} before I can preview this signature request.`,
+      buildMissingFieldsMessage(missingFields, structuredInput),
       {
         metadata: { intent, missingFields, fallbackUsed },
         provider: providerName,
@@ -260,6 +285,19 @@ export async function handleAgentChatMessage(input: {
       assistantMessage,
       nextAction: "ask_user_for_missing_fields" as const,
     };
+  }
+
+  // Clear partial intent when complete
+  if (partialIntent) {
+    await prisma.agentChatSession.update({
+      where: { id: session.id },
+      data: {
+        metadata: {
+          ...sessionMeta,
+          partialIntent: undefined,
+        } as Prisma.JsonObject,
+      },
+    });
   }
 
   const policyDecision = evaluatePolicy(resolvedPolicy.policy, structuredInput as CompleteStructuredInput);
@@ -304,9 +342,7 @@ export async function handleAgentChatMessage(input: {
 
   const assistantMessage = await createAssistantMessage(
     session.id,
-    policyDecision.allowed
-      ? "I prepared a signature request proposal and the mandate preview allows it. Review the card before approving."
-      : `I prepared a signature request proposal, but the mandate rejected it: ${policyDecision.reason}`,
+    buildProposalMessage(policyDecision.allowed, policyDecision.reason),
     {
       metadata: { intent, proposalId: proposal.id, policyDecision, fallbackUsed },
       provider: providerName,
@@ -557,7 +593,7 @@ export async function rejectAgentActionProposal(input: {
       rejectionReason: input.reason ?? "Rejected by user",
     },
   });
-  await createToolMessage(proposal.sessionId, "Signature request proposal rejected.", {
+  await createToolMessage(proposal.sessionId, "Signature request proposal rejected. No signature request was created.", {
     proposalId: proposal.id,
     reason: input.reason,
   });
@@ -673,11 +709,81 @@ async function resolvePolicy(organizationId: string, agentId: string, policyId?:
   return { kind: "ok" as const, policy: policies[0] };
 }
 
+function buildScopeRefusal(_message: string, category: string): string {
+  const base = "I can only help with Mandara agents, mandates, signature requests, SDK/API setup, webhooks, audit logs, and devnet beta troubleshooting.";
+  if (category === "unrelated_school_work") {
+    return `${base}\n\nI cannot write essays or do homework. Try: "Explain this agent's mandate."`;
+  }
+  if (category === "unrelated_coding") {
+    return `${base}\n\nI cannot debug code or build apps. Try: "How do I connect a real agent using the SDK?"`;
+  }
+  if (category === "trading_advice") {
+    return `${base}\n\nI cannot provide trading or investment advice. Try: "Can this agent request 150 USDC?"`;
+  }
+  if (category === "professional_advice") {
+    return `${base}\n\nI cannot provide legal, medical, or financial advice. Try: "Prepare a 42 USDC payout to the approved Base Sepolia recipient."`;
+  }
+  if (category === "jailbreak") {
+    return `${base}\n\nPrompt injection attempts are not allowed.`;
+  }
+  if (category === "secret_or_bypass_request") {
+    return `${base}\n\nRequests involving secrets, private keys, service wallets, or bypassing mandates are not allowed.`;
+  }
+  return `${base}\n\nTry: "Prepare a 42 USDC payout to the approved Base Sepolia recipient."`;
+}
+
 function buildInformationalAnswer(message: string, intent: AgentIntentExtractionResult) {
-  if (message.toLowerCase().includes("mandate")) {
+  const lower = message.toLowerCase();
+  if (lower.includes("mandate")) {
     return "A Mandate defines what a Mandara Agent may request: allowed chain, asset, recipient, and spend limits. I can prepare a signature request proposal and preview it against the Mandate, but only you can approve or reject it.";
   }
+  if (lower.includes("devnet") || lower.includes("beta") || lower.includes("pre-alpha")) {
+    return "Devnet beta means this is a test environment on Solana devnet. Ika is pre-alpha with a mock signer. This is not for real assets and not production custody.";
+  }
+  if (lower.includes("reject") || lower.includes("rejected") || lower.includes("why")) {
+    return "A request is rejected when it does not match the current mandate. Common reasons: amount too high, wrong asset or recipient, mandate frozen or expired, or daily/total limits exceeded. You can update the mandate or change the request.";
+  }
+  if (lower.includes("connect") || lower.includes("sdk") || lower.includes("api")) {
+    return "Your real AI agent connects to Mandara using the Connection Key and the @mandara/sdk. The SDK lets your agent preview requests against mandates and create signature requests. See the Agent Connection Guide for details.";
+  }
+  if (lower.includes("status")) {
+    return "You can view the latest signature request status on the Requests page. Statuses include: Waiting, Queued, Processing, Approved by mandate, Waiting for Ika signature, Signed, Rejected by mandate, and Failed.";
+  }
   return intent.explanation || "I can help prepare signature request proposals and explain mandate results.";
+}
+
+function buildMissingFieldsMessage(missingFields: string[], structuredInput: Record<string, unknown>): string {
+  const fieldLabels: Record<string, string> = {
+    destinationChainId: "the chain",
+    asset: "the asset",
+    recipient: "the recipient",
+    amount: "the amount",
+    message: "a message",
+  };
+  const labels = missingFields.map((f) => fieldLabels[f] ?? f).join(", ");
+
+  // If amount is the only missing field, be more conversational
+  if (missingFields.length === 1 && missingFields[0] === "amount") {
+    return `What amount should I use? (e.g., 42 USDC)`;
+  }
+  if (missingFields.length === 1 && missingFields[0] === "recipient") {
+    return `Which recipient should I use? You can say "the approved recipient" if your mandate has one.`;
+  }
+  if (missingFields.length === 1 && missingFields[0] === "asset") {
+    return `What asset should I use? (e.g., USDC:BASE_SEPOLIA)`;
+  }
+  if (missingFields.length === 1 && missingFields[0] === "destinationChainId") {
+    return `Which chain should I use? (e.g., Base Sepolia)`;
+  }
+
+  return `I need ${labels} before I can preview this signature request.`;
+}
+
+function buildProposalMessage(allowed: boolean, reason: string): string {
+  if (allowed) {
+    return "This request is allowed by the current mandate. You still need to approve before Mandara creates the request. Review the card and choose Approve & Create Request, or Approve, Create & Enqueue if you want the worker to process it immediately.";
+  }
+  return `This request is rejected by the current mandate: ${reason}. You can reject the proposal, update the mandate, or change the request.`;
 }
 
 async function createAssistantMessage(
