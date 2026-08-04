@@ -32,7 +32,7 @@ const CSP_DIRECTIVES = [
   `connect-src 'self' https://*.helius-rpc.com https://*.solana.com https://api.devnet.solana.com https://api.mainnet-beta.solana.com wss://*.solana.com https://api.humanrail.org ${KYC_SERVICE_HOST} ${MANDARA_API_ORIGINS.join(" ")}`,
   "img-src 'self' data: blob:",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "frame-ancestors 'none'",
+  "frame-ancestors 'self' https://gbsoftwares.com https://www.gbsoftwares.com https://gbsoftwares.vercel.app",
   "base-uri 'self'",
   "form-action 'self'",
 ].join("; ");
@@ -42,7 +42,6 @@ export function middleware(request: NextRequest) {
 
   response.headers.set("Content-Security-Policy", CSP_DIRECTIVES);
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
